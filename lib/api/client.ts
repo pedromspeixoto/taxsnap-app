@@ -168,7 +168,7 @@ export class ApiClient {
   }
 
   async register(data: RegisterRequest): Promise<ClientUser> {
-    const user: ClientUser = await this.request('/users/register', {
+    const user: ClientUser = await this.request('/users', {
       method: 'POST',
       body: JSON.stringify(data),
     });
