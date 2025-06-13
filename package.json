@@ -10,6 +10,7 @@
     "lint": "next lint",
 
     "db:seed": "tsx lib/utils/seed.ts",
+    "db:studio": "npx prisma studio",
 
     "docker:dev": "docker-compose up --build",
     "docker:dev:detach": "docker-compose up -d --build",
