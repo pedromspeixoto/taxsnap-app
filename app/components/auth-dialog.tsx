@@ -98,11 +98,6 @@ export function AuthDialog({ mode, children }: AuthDialogProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                {mode === "login" && (
-                  <p className="text-xs text-muted-foreground">
-                    Tip: Use &quot;verified@example.com&quot; to simulate a verified account
-                  </p>
-                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
