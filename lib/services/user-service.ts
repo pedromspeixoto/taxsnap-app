@@ -1,0 +1,281 @@
+import { EmailServiceImpl } from './email-service';
+import { userRepository } from '../repositories/user-repository';
+import { 
+  RegisterUserRequest, 
+  UserResponse, 
+  MessageResponse,
+  SetPasswordRequest,
+  ChangePasswordRequest,
+  UpdateUserRequest,
+  AuthResponse 
+} from '../types/user';
+import { jwtService } from '../utils/jwt';
+import {
+  UserAlreadyExistsError,
+  UserNotFoundError,
+  UserNotVerifiedError,
+  UserAlreadyVerifiedError,
+  InvalidVerificationTokenError,
+  InvalidPasswordError,
+  PasswordNotSetError
+} from '@/lib/api/errors';
+import { generateSecureToken, hashPassword, verifyPassword } from '../utils/utils';
+
+export interface UserService {
+  // Registration and verification
+  registerUser(request: RegisterUserRequest): Promise<UserResponse>;
+  verifyUser(token: string): Promise<AuthResponse>;
+  resendVerification(email: string): Promise<MessageResponse>;
+
+  // Password management
+  setPassword(userId: string, request: SetPasswordRequest): Promise<MessageResponse>;
+  changePassword(userId: string, request: ChangePasswordRequest): Promise<MessageResponse>;
+
+  // User management
+  getUser(userId: string): Promise<UserResponse>;
+  getUserByEmail(email: string): Promise<UserResponse>;
+  updateUser(userId: string, request: UpdateUserRequest): Promise<UserResponse>;
+  deleteUser(userId: string): Promise<MessageResponse>;
+}
+
+export class UserServiceImpl implements UserService {
+  constructor(
+    private emailService = new EmailServiceImpl(),
+    private baseUrl: string = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  ) {}
+
+  async registerUser(request: RegisterUserRequest): Promise<UserResponse> {
+    console.log('userService.registerUser', { email: request.email });
+
+    // Check if user already exists
+    const existingUser = await userRepository.getByEmail(request.email);
+    if (existingUser) {
+      throw new UserAlreadyExistsError(request.email);
+    }
+
+    // Generate verification token
+    const verificationToken = await generateSecureToken();
+
+    // Create verification URL
+    const verificationUrl = `${this.baseUrl}/verify?token=${verificationToken}`;
+
+    // Create new user
+    const user = await userRepository.create({
+      email: request.email,
+      password: await hashPassword(request.password),
+      verificationToken,
+      verificationUrl,
+    });
+
+    await this.emailService.sendVerificationEmail(user.email, verificationUrl);
+
+    console.log('user registered successfully', { userId: user.id, email: user.email });
+
+    return {
+      id: user.id,
+      email: user.email,
+      verified: user.verified,
+      createdAt: new Date(user.createdAt),
+      updatedAt: new Date(user.updatedAt),
+    };
+  }
+
+  async verifyUser(token: string): Promise<AuthResponse> {
+    console.log('userService.verifyUser', { token });
+
+    // Find user by verification token
+    const user = await userRepository.getByVerificationToken(token);
+    if (!user) {
+      throw new InvalidVerificationTokenError();
+    }
+
+    if (user.verified) {
+      throw new UserAlreadyVerifiedError();
+    }
+
+    // Verify the user
+    await userRepository.verifyUser(user.id);
+
+    // Get updated user
+    const updatedUser = await userRepository.getById(user.id);
+    if (!updatedUser) {
+      throw new UserNotFoundError(user.id);
+    }
+
+    console.log('user verified successfully', { userId: user.id, email: user.email });
+
+    const userResponse = {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      verified: updatedUser.verified,
+      createdAt: new Date(updatedUser.createdAt),
+      updatedAt: new Date(updatedUser.updatedAt),
+    };
+
+    // Generate JWT tokens
+    const tokens = await jwtService.generateTokens({
+      userId: updatedUser.id,
+      email: updatedUser.email,
+      verified: updatedUser.verified,
+    });
+
+    return {
+      user: userResponse,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async resendVerification(email: string): Promise<MessageResponse> {
+    console.log('userService.resendVerification', { email });
+
+    // Find user by email
+    const user = await userRepository.getByEmail(email);
+    if (!user) {
+      throw new UserNotFoundError(email);
+    }
+
+    if (user.verified) {
+      throw new UserAlreadyVerifiedError();
+    }
+
+    // Generate new verification token
+    const verificationToken = await generateSecureToken();
+    const verificationUrl = `${this.baseUrl}/verify?token=${verificationToken}`;
+
+    // Update user with new token
+    await userRepository.updateVerificationToken(user.id, verificationToken, verificationUrl);
+
+    // TODO: Send verification email here
+    // await this.sendVerificationEmail(user.email, verificationUrl);
+
+    return { message: 'Verification email sent successfully' };
+  }
+
+  async setPassword(userId: string, request: SetPasswordRequest): Promise<MessageResponse> {
+    console.log('userService.setPassword', { userId });
+
+    // Check if user exists
+    const user = await userRepository.getById(userId);
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
+
+    if (!user.verified) {
+      throw new UserNotVerifiedError();
+    }
+
+    // Hash the password
+    const hashedPassword = await hashPassword(request.password);
+
+    // Update user password
+    await userRepository.setPassword(userId, hashedPassword);
+
+    return { message: 'Password set successfully' };
+  }
+
+  async changePassword(userId: string, request: ChangePasswordRequest): Promise<MessageResponse> {
+    console.log('userService.changePassword', { userId });
+
+    // Check if user exists
+    const user = await userRepository.getById(userId);
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
+
+    if (!user.verified) {
+      throw new UserNotVerifiedError();
+    }
+
+    if (!user.password) {
+      throw new PasswordNotSetError();
+    }
+
+    // Verify current password
+    const isValidPassword = await verifyPassword(request.currentPassword, user.password);
+    if (!isValidPassword) {
+      throw new InvalidPasswordError();
+    }
+
+    // Hash the new password
+    const hashedPassword = await hashPassword(request.newPassword);
+
+    // Update user password
+    await userRepository.setPassword(userId, hashedPassword);
+
+    return { message: 'Password changed successfully' };
+  }
+
+  async getUser(userId: string): Promise<UserResponse> {
+    console.log('userService.getUser', { userId });
+
+    const user = await userRepository.getById(userId);
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      verified: user.verified,
+      createdAt: new Date(user.createdAt),
+      updatedAt: new Date(user.updatedAt),
+    };
+  }
+
+  async getUserByEmail(email: string): Promise<UserResponse> {
+    console.log('userService.getUserByEmail', { email });
+
+    const user = await userRepository.getByEmail(email);
+    if (!user) {
+      throw new UserNotFoundError(email);
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      verified: user.verified,
+      createdAt: new Date(user.createdAt),
+      updatedAt: new Date(user.updatedAt),
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updateUser(userId: string, request: UpdateUserRequest): Promise<UserResponse> {
+    console.log('userService.updateUser', { userId });
+
+    // Check if user exists
+    const user = await userRepository.getById(userId);
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
+
+    // For now, UpdateUserRequest is empty, but you can add fields as needed
+    // When you expand UpdateUserRequest, you can use the request parameter here:
+    // await this.userRepo.update(userId, { /* updates based on request */ });
+
+    // Return updated user (for now, just return the existing user)
+    return {
+      id: user.id,
+      email: user.email,
+      verified: user.verified,
+      createdAt: new Date(user.createdAt),
+      updatedAt: new Date(user.updatedAt),
+    };
+  }
+
+  async deleteUser(userId: string): Promise<MessageResponse> {
+    console.log('userService.deleteUser', { userId });
+
+    // Check if user exists
+    const user = await userRepository.getById(userId);
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
+
+    // Soft delete the user
+    await userRepository.delete(userId);
+
+    return { message: 'User deleted successfully' };
+  }
+} 
