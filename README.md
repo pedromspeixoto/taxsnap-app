@@ -206,6 +206,62 @@ graph TD
     style K fill:#ffebee
 ```
 
+### Authentication Architecture
+
+Clean separation of concerns for authentication state management:
+
+```mermaid
+graph TB
+    subgraph "React Components/Pages"
+        Login["🔐 Login Page<br/>- Makes API calls<br/>- Handles user input<br/>- Uses setAuthData()"]
+        Dashboard["📊 Dashboard<br/>- Makes API calls<br/>- Uses withAuth() for protected calls<br/>- Uses clearAuth()"]
+        Verify["✅ Verify Page<br/>- Makes API calls<br/>- Uses setAuthData()"]
+    end
+    
+    subgraph "Pure State Management"
+        AuthContext["⚛️ AuthContext<br/>✅ Token storage/retrieval<br/>✅ User state management<br/>✅ NO API calls<br/>✅ withAuth() helper"]
+    end
+    
+    subgraph "Pure HTTP Client"
+        ApiClient["🌐 ApiClient<br/>✅ HTTP requests only<br/>✅ No authentication logic<br/>✅ Stateless"]
+    end
+    
+    subgraph "Storage"
+        LocalStorage["💾 LocalStorage<br/>- Access tokens<br/>- Refresh tokens<br/>- User data"]
+    end
+    
+    subgraph "Server"  
+        API["🚀 API Routes<br/>- Authentication endpoints<br/>- Protected resources"]
+    end
+    
+    Login --> |"apiClient.login()"| ApiClient
+    Login --> |"setAuthData(authResponse)"| AuthContext
+    
+    Dashboard --> |"withAuth(token => apiClient.call())"| AuthContext
+    Dashboard --> |"clearAuth()"| AuthContext
+    
+    Verify --> |"apiClient.verify()"| ApiClient  
+    Verify --> |"setAuthData(authResponse)"| AuthContext
+    
+    AuthContext --> |"Manages tokens"| LocalStorage
+    AuthContext -.->|"Auto refresh"| ApiClient
+    
+    ApiClient --> |"Pure HTTP"| API
+    
+    style Login fill:#e8f5e8
+    style Dashboard fill:#e8f5e8
+    style Verify fill:#e8f5e8
+    style AuthContext fill:#e3f2fd
+    style ApiClient fill:#fff3e0
+    style LocalStorage fill:#f3e5f5
+```
+
+**Key Principles:**
+- **Components** handle business logic and make API calls directly
+- **AuthContext** provides pure state management (no API calls)
+- **ApiClient** is a stateless HTTP client with no authentication logic
+- **Clear separation** of concerns for better maintainability and testing
+
 ### Project Structure
 ```
 taxsnap/frontend/
@@ -382,10 +438,22 @@ npm run postinstall  # Generate Prisma client (runs automatically)
 
 ### Environment Variables for Production
 Make sure to set these environment variables in your production environment:
+
+**Database**
 - `DATABASE_URL` - Your production database connection string
+
+**JWT Configuration**
 - `JWT_ACCESS_SECRET` - Strong secret for access tokens
 - `JWT_REFRESH_SECRET` - Strong secret for refresh tokens
+
+**App Configuration**
 - `NEXT_PUBLIC_BASE_URL` - Your production domain
+
+**SMTP Configuration (Email Service)**
+- `SMTP_HOST` - SMTP server hostname (e.g., smtp.gmail.com)
+- `SMTP_PORT` - SMTP server port (e.g., 465 for SSL)
+- `SMTP_USER` - SMTP authentication username
+- `SMTP_PASS` - SMTP authentication password
 
 ### Build Commands
 ```bash

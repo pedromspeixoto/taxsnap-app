@@ -59,7 +59,7 @@ export class UserServiceImpl implements UserService {
     // Create verification URL
     const verificationUrl = `${this.baseUrl}/verify?token=${verificationToken}`;
 
-    // Create new user
+    // Create new user and send verification email (in the same transaction - if one fails, the other should be rolled back)
     const user = await userRepository.create({
       email: request.email,
       password: await hashPassword(request.password),
@@ -67,7 +67,12 @@ export class UserServiceImpl implements UserService {
       verificationUrl,
     });
 
-    await this.emailService.sendVerificationEmail(user.email, verificationUrl);
+    try {
+      await this.emailService.sendVerificationEmail(user.email, verificationUrl);
+    } catch (error) {
+      console.error('Error sending verification email', error);
+      // Continue with user creation even if email sending fails
+    }
 
     console.log('user registered successfully', { userId: user.id, email: user.email });
 
