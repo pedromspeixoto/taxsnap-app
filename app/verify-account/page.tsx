@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/contexts/auth-context"
 function VerifyAccountContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, isAuthenticated, logout, isLoading } = useAuth()
+  const { user, isAuthenticated, clearAuth, isLoading } = useAuth()
   const [isResending, setIsResending] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [userEmail, setUserEmail] = useState("")
@@ -58,7 +58,7 @@ function VerifyAccountContent() {
   }
 
   const handleLogout = () => {
-    logout()
+          clearAuth()
     router.push("/")
   }
 

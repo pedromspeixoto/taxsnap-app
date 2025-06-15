@@ -18,7 +18,7 @@ interface Submission {
 }
 
 export default function Dashboard() {
-  const { logout } = useAuth()
+  const { clearAuth } = useAuth()
   const [submissions] = useState<Submission[]>([
     {
       id: "1",
@@ -38,23 +38,8 @@ export default function Dashboard() {
     },
   ])
 
-  // Temporarily removed client-side auth check - middleware handles authentication
-  // The middleware already protects dashboard routes
-  /*
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/")
-      return
-    }
-    if (user && !user.verified) {
-      router.push("/verify-account")
-      return
-    }
-  }, [isAuthenticated, user, router])
-  */
-
   const handleLogout = () => {
-    logout()
+    clearAuth()
   }
 
   const getStatusColor = (status: string) => {

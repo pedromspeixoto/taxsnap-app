@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useAuth } from "@/lib/contexts/auth-context"
+import { apiClient } from "@/lib/api/client"
 import { Button } from "@/app/components/ui/button"
 import { toast } from "@/lib/hooks/use-toast"
 import {
@@ -30,7 +31,7 @@ export function AuthDialog({ mode, children }: AuthDialogProps) {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { login, register } = useAuth()
+  const { setAuthData } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,11 +39,14 @@ export function AuthDialog({ mode, children }: AuthDialogProps) {
 
     try {
       if (mode === "register") {
-        await register(email, password)
+        // Make API call directly - no state management here
+        await apiClient.register({ email, password })
         toast.success("Registration successful!", "Please check your email to confirm your account.")
         router.push(`/verify-account?email=${encodeURIComponent(email)}`)
       } else {
-        const user = await login(email, password)
+        // Make API call directly - then use AuthContext for state management
+        const authResponse = await apiClient.login({ email, password })
+        const user = setAuthData(authResponse)
         
         toast.success("Login successful!", `Welcome back, ${user.email}!`)
         
