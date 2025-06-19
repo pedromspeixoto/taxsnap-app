@@ -10,6 +10,7 @@
     "lint": "next lint",
     "db:seed": "npx prisma db push && tsx lib/utils/seed.ts",
     "db:studio": "npx prisma studio",
+    "docker:infra": "docker-compose -f docker-compose.yml up -d postgres adminer",
     "docker:dev": "docker-compose up --build",
     "docker:dev:detach": "docker-compose up -d --build",
     "docker:prod": "docker-compose -f docker-compose.prod.yml up --build",
