@@ -113,20 +113,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [getRefreshToken, clearTokens]);
 
+  // Validate token expiration without making API calls
+  const isTokenExpired = useCallback((token: string): boolean => {
+    try {
+      // Decode JWT to check expiration (without verification)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      const decoded = JSON.parse(jsonPayload);
+      const currentTime = Math.floor(Date.now() / 1000);
+      
+      return decoded.exp < currentTime;
+    } catch {
+      // If we can't decode the token, consider it invalid
+      return true;
+    }
+  }, []);
+
   // Check authentication status from tokens
   const checkAuthStatus = useCallback((): boolean => {
     const currentUser = getStoredUser();
     const accessToken = getAccessToken();
     
-    // Sync state with storage
-    if (accessToken && currentUser) {
-      setUser(currentUser);
-      return true;
-    } else {
+    // If no tokens or user data, definitely not authenticated
+    if (!accessToken || !currentUser) {
       setUser(null);
       return false;
     }
-  }, [getStoredUser, getAccessToken]);
+
+    // Check if access token is expired
+    if (isTokenExpired(accessToken)) {
+      // Access token is expired, clear auth state
+      clearTokens();
+      setUser(null);
+      return false;
+    }
+
+    // Tokens exist and are not expired, user is authenticated
+    setUser(currentUser);
+    return true;
+  }, [getStoredUser, getAccessToken, isTokenExpired, clearTokens]);
 
   const refreshUser = useCallback(() => {
     checkAuthStatus();

@@ -38,10 +38,20 @@ export default function LandingPage() {
     )
   }
 
-  // Don't render the landing page if user is authenticated (redirect is happening)
+  // Show loading state if user is authenticated (redirect is happening)
   if (isAuthenticated && user) {
-    return null
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
+            <span className="text-primary-foreground font-bold text-lg">T</span>
+          </div>
+          <p className="text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    )
   }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
