@@ -18,23 +18,28 @@ export interface EmailService {
 
 export class EmailServiceImpl implements EmailService {
     private transporter: Transporter;
-    private readonly sender: string;
 
     constructor() {
         this.transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT),
-            secure: true,
+            port: parseInt(process.env.SMTP_PORT || '587'),
+            secure: process.env.SMTP_SECURE === 'true',
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
         });
-
-        this.sender = 'suporte@meuirs.pt';
     }
 
     async sendVerificationEmail(email: string, verificationUrl: string): Promise<void> {
+        // Validate the URL before sending
+        try {
+            new URL(verificationUrl);
+        } catch {
+            console.error('Invalid verification URL provided:', verificationUrl);
+            throw new Error('Invalid verification URL');
+        }
+
         const personalization: Personalization = {
             email: email,
             data: {
@@ -50,6 +55,14 @@ export class EmailServiceImpl implements EmailService {
         htmlTemplate = htmlTemplate.replace(/{{ email }}/g, email);
         htmlTemplate = htmlTemplate.replace(/{{ verifyUrl }}/g, verificationUrl);
 
+        // Log the final HTML for debugging (remove in production)
+        console.log('Email template after replacement:', {
+            email,
+            verificationUrl,
+            containsVerifyUrl: htmlTemplate.includes(verificationUrl),
+            containsPlaceholder: htmlTemplate.includes('{{ verifyUrl }}')
+        });
+
         await this.sendSingleEmail(email, 'MeuIRS - Email Verification', TEMPLATE_VERIFICATION_ID, personalization, htmlTemplate);
     }
 
@@ -61,7 +74,7 @@ export class EmailServiceImpl implements EmailService {
         try {
             console.log(`Sending email to ${email} with template ${template}`);
             const info = await this.transporter.sendMail({
-                from: this.sender,
+                from: 'suporte@meuirs.pt',
                 to: personalization.email,                               
                 subject: subject,
                 html: htmlContent,                  

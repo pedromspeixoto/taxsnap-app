@@ -39,10 +39,44 @@ export interface UserService {
 }
 
 export class UserServiceImpl implements UserService {
+  private baseUrl: string;
+
   constructor(
     private emailService = new EmailServiceImpl(),
-    private baseUrl: string = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-  ) {}
+    baseUrl?: string
+  ) {
+    // Ensure baseUrl has proper protocol and format
+    const rawBaseUrl = baseUrl || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    this.baseUrl = this.normalizeBaseUrl(rawBaseUrl);
+  }
+
+  private normalizeBaseUrl(url: string): string {
+    // Add protocol if missing
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      // Default to https for production, http for localhost
+      const protocol = url.includes('localhost') ? 'http://' : 'https://';
+      url = protocol + url;
+    }
+    
+    // Remove trailing slash
+    return url.replace(/\/$/, '');
+  }
+
+  private createVerificationUrl(token: string): string {
+    const url = `${this.baseUrl}/verify?token=${token}`;
+    
+    // Log the URL for debugging (remove in production)
+    console.log('Generated verification URL:', url);
+    
+    // Basic URL validation
+    try {
+      new URL(url);
+      return url;
+    } catch (error) {
+      console.error('Invalid verification URL generated:', url, error);
+      throw new Error('Failed to generate valid verification URL');
+    }
+  }
 
   async registerUser(request: RegisterUserRequest): Promise<UserResponse> {
     console.log('userService.registerUser', { email: request.email });
@@ -57,7 +91,7 @@ export class UserServiceImpl implements UserService {
     const verificationToken = await generateSecureToken();
 
     // Create verification URL
-    const verificationUrl = `${this.baseUrl}/verify?token=${verificationToken}`;
+    const verificationUrl = this.createVerificationUrl(verificationToken);
 
     // Create new user and send verification email (in the same transaction - if one fails, the other should be rolled back)
     const user = await userRepository.create({
@@ -146,13 +180,18 @@ export class UserServiceImpl implements UserService {
 
     // Generate new verification token
     const verificationToken = await generateSecureToken();
-    const verificationUrl = `${this.baseUrl}/verify?token=${verificationToken}`;
+    const verificationUrl = this.createVerificationUrl(verificationToken);
 
     // Update user with new token
     await userRepository.updateVerificationToken(user.id, verificationToken, verificationUrl);
 
-    // TODO: Send verification email here
-    // await this.sendVerificationEmail(user.email, verificationUrl);
+    // Send verification email
+    try {
+      await this.emailService.sendVerificationEmail(user.email, verificationUrl);
+    } catch (error) {
+      console.error('Error sending verification email', error);
+      // Continue anyway - the token has been updated
+    }
 
     return { message: 'Verification email sent successfully' };
   }
