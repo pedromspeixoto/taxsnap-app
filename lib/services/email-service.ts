@@ -18,17 +18,20 @@ export interface EmailService {
 
 export class EmailServiceImpl implements EmailService {
     private transporter: Transporter;
+    private readonly sender: string;
 
     constructor() {
         this.transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT || '587'),
-            secure: process.env.SMTP_SECURE === 'true',
+            port: Number(process.env.SMTP_PORT),
+            secure: true,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
         });
+
+        this.sender = 'suporte@meuirs.pt';
     }
 
     async sendVerificationEmail(email: string, verificationUrl: string): Promise<void> {
@@ -74,7 +77,7 @@ export class EmailServiceImpl implements EmailService {
         try {
             console.log(`Sending email to ${email} with template ${template}`);
             const info = await this.transporter.sendMail({
-                from: 'suporte@meuirs.pt',
+                from: this.sender,
                 to: personalization.email,                               
                 subject: subject,
                 html: htmlContent,                  
