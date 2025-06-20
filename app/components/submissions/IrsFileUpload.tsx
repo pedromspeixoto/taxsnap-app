@@ -1,6 +1,6 @@
 import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
-import { Upload, FileText, X } from "lucide-react"
+import { Upload, FileText } from "lucide-react"
 import FileList from "./FileList"
 import { UploadedFile } from "@/lib/types"
 
