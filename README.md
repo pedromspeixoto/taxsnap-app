@@ -63,6 +63,14 @@ JWT_REFRESH_EXPIRY="7d"
 
 # App Configuration
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+
+# SMTP Configuration
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT=465
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-password"
+SMTP_SECURE=true
+SMTP_SENDER="your-email@gmail.com"
 ```
 
 **⚠️ Important**: Change the JWT secrets to strong, unique values in production!

@@ -8,6 +8,7 @@ import { Badge } from "@/app/components/ui/badge"
 import { Input } from "@/app/components/ui/input"
 import { ArrowLeft, Edit2, Save, X } from "lucide-react"
 import Link from "next/link"
+import Logo from "@/app/components/ui/logo"
 
 interface Transaction {
   id: string
@@ -122,12 +123,7 @@ export default function SubmissionPreview() {
                 Back
               </Button>
             </Link>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">T</span>
-              </div>
-              <span className="text-xl font-bold">Taxsnap</span>
-            </div>
+            <Logo />
           </div>
           <Button>Save Submission</Button>
         </div>

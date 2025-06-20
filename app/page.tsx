@@ -8,6 +8,7 @@ import { Badge } from "@/app/components/ui/badge"
 import { CheckCircle, TrendingUp, Shield, Clock, Users, FileText } from "lucide-react"
 import { AuthDialog } from "@/app/components/auth-dialog"
 import { useAuth } from "@/lib/contexts/auth-context"
+import Logo from "@/app/components/ui/logo"
 
 export default function LandingPage() {
   const router = useRouter()
@@ -29,9 +30,7 @@ export default function LandingPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
-            <span className="text-primary-foreground font-bold text-lg">T</span>
-          </div>
+          <Logo size="lg" showText={false} className="justify-center" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -43,9 +42,7 @@ export default function LandingPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
-            <span className="text-primary-foreground font-bold text-lg">T</span>
-          </div>
+          <Logo size="lg" showText={false} className="justify-center" />
           <p className="text-muted-foreground">Redirecting...</p>
         </div>
       </div>
@@ -57,12 +54,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">T</span>
-            </div>
-            <span className="text-xl font-bold">Taxsnap</span>
-          </div>
+          <Logo />
           <div className="flex items-center space-x-4">
             <AuthDialog mode="login" />
             <AuthDialog mode="register" />

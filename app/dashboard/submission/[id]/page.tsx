@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/app/components/ui/badge"
 import { ArrowLeft, Download, FileText, Calendar, TrendingUp } from "lucide-react"
 import Link from "next/link"
+import Logo from "@/app/components/ui/logo"
 
 export default function SubmissionDetail() {
   const submission = {
@@ -38,12 +39,7 @@ export default function SubmissionDetail() {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">T</span>
-              </div>
-              <span className="text-xl font-bold">Taxsnap</span>
-            </div>
+            <Logo />
             <Link href="/dashboard">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />

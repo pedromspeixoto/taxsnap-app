@@ -1,0 +1,6 @@
+export { default as SubmissionHeader } from './SubmissionHeader'
+export { default as ProgressIndicator } from './ProgressIndicator'
+export { default as IrsFileUpload } from './IrsFileUpload'
+export { default as BrokerPlatforms } from './BrokerPlatforms'
+export { default as ManualTransactions } from './ManualTransactions'
+export { default as FileList } from './FileList' 

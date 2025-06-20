@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app
 import { Badge } from "@/app/components/ui/badge"
 import { Mail, CheckCircle, Clock, RefreshCw, LogOut } from "lucide-react"
 import { useAuth } from "@/lib/contexts/auth-context"
+import Logo from "@/app/components/ui/logo"
 
 function VerifyAccountContent() {
   const router = useRouter()
@@ -72,12 +73,7 @@ function VerifyAccountContent() {
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">T</span>
-            </div>
-            <span className="text-xl font-bold">Taxsnap</span>
-          </div>
+          <Logo />
           <Button variant="outline" size="sm" onClick={handleLogout}>
             <LogOut className="w-4 h-4 mr-2" />
             Logout
@@ -185,9 +181,7 @@ export default function VerifyAccount() {
     <Suspense fallback={
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto">
-            <span className="text-primary-foreground font-bold text-lg">T</span>
-          </div>
+          <Logo size="lg" showText={false} className="justify-center" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
