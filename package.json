@@ -8,6 +8,7 @@
     "postinstall": "prisma generate",
     "start": "node .next/standalone/server.js",
     "lint": "next lint",
+    "db:start": "docker-compose up -d postgres adminer && npx prisma generate && npx prisma db push && tsx lib/utils/seed.ts",
     "db:seed": "npx prisma db push && tsx lib/utils/seed.ts",
     "db:studio": "npx prisma studio",
     "docker:infra": "docker-compose -f docker-compose.yml up -d postgres adminer",
