@@ -264,7 +264,7 @@ export default function Dashboard() {
                   }
                 </p>
                 {!searchQuery && statusFilter === "all" && (
-                  <Link href="/dashboard/new-submission">
+                  <Link href="/dashboard/new-submission/new">
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />
                       Create First Submission
