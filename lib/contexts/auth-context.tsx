@@ -13,12 +13,13 @@ interface AuthContextType {
   user: ClientUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isHydrated: boolean;
   // Pure state management methods
   setAuthData: (authResponse: AuthResponse) => ClientUser;
   setUser: (user: ClientUser) => void;
   clearAuth: () => void;
   refreshUser: () => void;
-  checkAuthStatus: () => boolean;
+  checkAuthStatus: () => Promise<boolean>;
   // Helper method for authenticated API calls
   withAuth: <T>(apiCall: (accessToken: string) => Promise<T>) => Promise<T>;
 }
@@ -28,6 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<ClientUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Token management methods
   const setTokens = useCallback((accessToken: string, refreshToken: string): void => {
@@ -48,12 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, []);
 
-  const getRefreshToken = useCallback((): string | null => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem(REFRESH_TOKEN_KEY);
-    }
-    return null;
-  }, []);
+
 
   const clearTokens = useCallback((): void => {
     if (typeof window !== 'undefined') {
@@ -88,30 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, []);
 
-  // Token refresh logic
-  const refreshAccessToken = useCallback(async (): Promise<string | null> => {
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) {
-      return null;
-    }
 
-    try {
-      const data = await apiClient.refreshToken(refreshToken);
-      const newAccessToken = data.accessToken;
-      
-      // Update access token in storage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-        document.cookie = `${ACCESS_TOKEN_KEY}=${newAccessToken}; path=/; max-age=${60 * 15}`;
-      }
-
-      return newAccessToken;
-    } catch {
-      clearTokens();
-      setUser(null);
-      return null;
-    }
-  }, [getRefreshToken, clearTokens]);
 
   // Validate token expiration without making API calls
   const isTokenExpired = useCallback((token: string): boolean => {
@@ -134,7 +108,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Check authentication status from tokens
-  const checkAuthStatus = useCallback((): boolean => {
+  const checkAuthStatus = useCallback(async (): Promise<boolean> => {
+    // Don't check auth status on server-side
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
     const currentUser = getStoredUser();
     const accessToken = getAccessToken();
     
@@ -146,10 +125,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check if access token is expired
     if (isTokenExpired(accessToken)) {
-      // Access token is expired, clear auth state
-      clearTokens();
-      setUser(null);
-      return false;
+      // Try to refresh the token before clearing auth state
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+      if (refreshToken) {
+        try {
+          const data = await apiClient.refreshToken(refreshToken);
+          const newAccessToken = data.accessToken;
+          
+          // Update access token in storage
+          localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+          document.cookie = `${ACCESS_TOKEN_KEY}=${newAccessToken}; path=/; max-age=${60 * 15}`;
+          
+          // Token refreshed successfully, user remains authenticated
+          setUser(currentUser);
+          return true;
+        } catch {
+          // Refresh failed, clear auth state
+          clearTokens();
+          setUser(null);
+          setTimeout(() => {
+            if (window.location.pathname !== '/') {
+              window.location.href = '/';
+            }
+          }, 100);
+          return false;
+        }
+      } else {
+        // No refresh token, clear auth state
+        clearTokens();
+        setUser(null);
+        setTimeout(() => {
+          if (window.location.pathname !== '/') {
+            window.location.href = '/';
+          }
+        }, 100);
+        return false;
+      }
     }
 
     // Tokens exist and are not expired, user is authenticated
@@ -157,21 +168,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, [getStoredUser, getAccessToken, isTokenExpired, clearTokens]);
 
-  const refreshUser = useCallback(() => {
-    checkAuthStatus();
+  const refreshUser = useCallback(async () => {
+    await checkAuthStatus();
   }, [checkAuthStatus]);
 
-  // Initialize auth state on mount
+  // Initialize auth state on mount - client-side only
   useEffect(() => {
-    checkAuthStatus();
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      // Mark as hydrated
+      setIsHydrated(true);
+      
+      // Check auth status after hydration
+      await checkAuthStatus();
+      setIsLoading(false);
+    };
+    
+    initializeAuth();
   }, [checkAuthStatus]);
 
   // Listen for storage changes (logout from another tab)
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
+    if (typeof window === 'undefined') return;
+
+    const handleStorageChange = async (e: StorageEvent) => {
       if (e.key === ACCESS_TOKEN_KEY || e.key === USER_KEY) {
-        checkAuthStatus();
+        await checkAuthStatus();
       }
     };
 
@@ -215,9 +236,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Helper method for authenticated API calls with automatic token refresh
   const withAuth = useCallback(
     async function<T>(apiCall: (accessToken: string) => Promise<T>): Promise<T> {
-      const accessToken = getAccessToken();
+      // Get tokens directly from localStorage to avoid dependency on callback functions
+      const accessToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
       
       if (!accessToken) {
+        clearTokens();
+        setUser(null);
+        // This is to ensure that we are not stuck in a Redirecting page
+        setTimeout(() => {
+          if (window.location.pathname !== '/') {
+            window.location.href = '/';
+          }
+        }, 100);
         throw new Error('No access token available');
       }
 
@@ -225,22 +255,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return await apiCall(accessToken);
       } catch (error: unknown) {
         // If unauthorized, try to refresh token
-        if (error instanceof Error && (error.message.includes('401') || error.message.includes('Unauthorized'))) {
-          const newToken = await refreshAccessToken();
-          if (newToken) {
-            return await apiCall(newToken);
+        if (error instanceof Error && (
+          error.message.includes('401') || 
+          error.message.includes('Unauthorized') ||
+          error.message.includes('Invalid or expired token')
+        )) {
+          const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
+          if (!refreshToken) {
+            clearTokens();
+            setUser(null);
+            // This is to ensure that we are not stuck in a Redirecting page
+            setTimeout(() => {
+              if (window.location.pathname !== '/') {
+                window.location.href = '/';
+              }
+            }, 100);
+            throw error;
+          }
+
+          try {
+            const data = await apiClient.refreshToken(refreshToken);
+            const newAccessToken = data.accessToken;
+            
+            // Update access token in storage
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+              document.cookie = `${ACCESS_TOKEN_KEY}=${newAccessToken}; path=/; max-age=${60 * 15}`;
+            }
+
+            return await apiCall(newAccessToken);
+          } catch {
+            clearTokens();
+            setUser(null);
+
+            // This is to ensure that we are not stuck in a Redirecting page
+            setTimeout(() => {
+              if (window.location.pathname !== '/') {
+                window.location.href = '/';
+              }
+            }, 100);
+            throw error;
           }
         }
         throw error;
       }
     },
-    [getAccessToken, refreshAccessToken]
+    [clearTokens] // Only depend on clearTokens which is stable
   );
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user && !!getAccessToken(),
+    // Only report authenticated after hydration to prevent server/client mismatch
+    isAuthenticated: isHydrated && !!user && !!getAccessToken(),
     isLoading,
+    isHydrated,
     setAuthData,
     setUser: setUserData,
     clearAuth,

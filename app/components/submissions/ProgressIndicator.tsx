@@ -24,7 +24,7 @@ export default function ProgressIndicator({ currentStep }: ProgressIndicatorProp
                 ? "text-primary" 
                 : "text-gray-500"
             }`}>
-              Base IRS Files
+              Submission Name
             </span>
           </div>
           <div className={`w-16 h-px ${currentStep > 1 ? "bg-green-500" : "bg-gray-300"}`}></div>
@@ -45,7 +45,7 @@ export default function ProgressIndicator({ currentStep }: ProgressIndicatorProp
                 ? "text-primary" 
                 : "text-gray-500"
             }`}>
-              Broker Details
+              Broker Files & IRS
             </span>
           </div>
           <div className={`w-16 h-px ${currentStep > 2 ? "bg-green-500" : "bg-gray-300"}`}></div>
@@ -62,7 +62,7 @@ export default function ProgressIndicator({ currentStep }: ProgressIndicatorProp
                 ? "text-primary" 
                 : "text-gray-500"
             }`}>
-              Manual Transactions
+              Review & Submit
             </span>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { Button } from "@/app/components/ui/button"
 import { FileText, X } from "lucide-react"
-import { UploadedFile } from "@/lib/types"
+import { UploadedFile } from "@/lib/types/submission"
 
 interface FileListProps {
   files: UploadedFile[]

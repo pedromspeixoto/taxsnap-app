@@ -47,9 +47,9 @@ export function AuthDialog({ mode, children }: AuthDialogProps) {
         // Make API call directly - then use AuthContext for state management
         const authResponse = await apiClient.login({ email, password })
         const user = setAuthData(authResponse)
-        
+
         toast.success("Login successful!", `Welcome back, ${user.email}!`)
-        
+
         // Redirect based on user verification status
         if (user.verified) {
           router.push("/dashboard")
@@ -57,7 +57,7 @@ export function AuthDialog({ mode, children }: AuthDialogProps) {
           router.push("/verify-account")
         }
       }
-      
+
       setIsOpen(false)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Authentication failed"

@@ -1,5 +1,5 @@
-"use client";
-
+import { BrokerResponse, CalculateTaxesResponse } from '../types/broker';
+import { SubmissionResponse } from '../types/submission';
 import { 
   RegisterUserRequest, 
   UserResponse, 
@@ -36,9 +36,13 @@ export class ApiClient {
     const url = `${API_BASE_URL}/api${endpoint}`;
     
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       ...options.headers as Record<string, string>,
     };
+
+    // Only set Content-Type if not using FormData (let browser set it for FormData with boundary)
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     if (accessToken) {
       headers.Authorization = `Bearer ${accessToken}`;
@@ -141,13 +145,92 @@ export class ApiClient {
     }, accessToken);
   }
 
-  // Generic authenticated request helper
-  async authenticatedRequest<T>(
-    endpoint: string, 
-    accessToken: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    return this.request<T>(endpoint, options, accessToken);
+  // Broker methods
+  async getBrokers(accessToken: string): Promise<BrokerResponse> {
+    return this.request('/brokers', {
+      method: 'GET',
+    }, accessToken);
+  }
+
+  async uploadBrokerFiles(submissionId: string, brokerId: string, files: File[], accessToken: string): Promise<void> {
+    const formData = new FormData();
+    formData.append('user_id', submissionId);
+    formData.append('broker_id', brokerId);
+    
+    files.forEach((file, index) => {
+      formData.append(`files[${index}]`, file, file.name);
+    });
+
+    return this.request(`/brokers/upload`, {
+      method: 'POST',
+      body: formData,
+      // Remove Content-Type header to let browser set it with boundary for FormData
+      headers: {},
+    }, accessToken);
+  }
+
+  async deleteSubmissionFile(fileId: string, accessToken: string): Promise<void> {
+    return this.request(`/submissions/files/${fileId}`, {
+      method: 'DELETE',
+    }, accessToken);
+  }
+
+  // Submission methods
+  async createSubmission(title: string, accessToken: string): Promise<SubmissionResponse> {
+    return this.request('/submissions', {
+      method: 'POST',
+      body: JSON.stringify({ title }),
+    }, accessToken);
+  }
+
+  async getSubmissions(accessToken: string): Promise<SubmissionResponse[]> {
+    return this.request('/submissions', {
+      method: 'GET',
+    }, accessToken);
+  }
+
+  async getSubmission(id: string, accessToken: string): Promise<SubmissionResponse> {
+    return this.request(`/submissions/${id}`, {
+      method: 'GET',
+    }, accessToken);
+  }
+
+  async updateSubmission(id: string, data: { title?: string }, accessToken: string): Promise<SubmissionResponse> {
+    return this.request(`/submissions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }, accessToken);
+  }
+
+  async updateSubmissionStatus(id: string, status: string, accessToken: string): Promise<void> {
+    return this.request(`/submissions/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }, accessToken);
+  }
+
+  async storeSubmissionResults(id: string, results: Record<string, unknown>, accessToken: string): Promise<void> {
+    return this.request(`/submissions/${id}/results`, {
+      method: 'POST',
+      body: JSON.stringify({ results }),
+    }, accessToken);
+  }
+
+  async getSubmissionResults(id: string, accessToken: string): Promise<Record<string, unknown> | null> {
+    return this.request(`/submissions/${id}/results`, {
+      method: 'GET',
+    }, accessToken);
+  }
+
+  async calculateTaxes(
+    submissionId: string, 
+    data: { nif?: string; p_l_analysis_year: number; p_l_calculation_type: "pl_average_weighted" | "pl_detailed" }, 
+    accessToken: string
+  ): Promise<CalculateTaxesResponse> {
+    return this.request(`/submissions/${submissionId}/calculate-taxes`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, accessToken);
   }
 }
 

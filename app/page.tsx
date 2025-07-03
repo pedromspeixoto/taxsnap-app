@@ -12,21 +12,46 @@ import Logo from "@/app/components/ui/logo"
 
 export default function LandingPage() {
   const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useAuth()
+  const { user, isAuthenticated, isLoading, isHydrated } = useAuth()
 
   useEffect(() => {
-    // Only redirect if not loading and user is authenticated
-    if (!isLoading && isAuthenticated && user) {
-      if (user.verified) {
-        router.push("/dashboard")
-      } else {
-        router.push("/verify-account")
+    // Only redirect if hydrated, not loading, and user is authenticated
+    if (isHydrated && !isLoading && isAuthenticated && user) {
+      const timer = setTimeout(() => {
+        try {
+          if (user.verified) {
+            router.push("/dashboard")
+          } else {
+            router.push("/verify-account")
+          }
+        } catch {
+          // Fallback to window.location
+          if (user.verified) {
+            window.location.href = "/dashboard"
+          } else {
+            window.location.href = "/verify-account"
+          }
+        }
+      }, 100) // Small delay to ensure router is ready
+      
+      // Add a failsafe timeout
+      const failsafeTimer = setTimeout(() => {
+        if (user.verified) {
+          window.location.href = "/dashboard"
+        } else {
+          window.location.href = "/verify-account"
+        }
+      }, 2000) // 2 second failsafe
+      
+      return () => {
+        clearTimeout(timer)
+        clearTimeout(failsafeTimer)
       }
     }
-  }, [isAuthenticated, user, isLoading, router])
+  }, [isHydrated, isAuthenticated, user, isLoading, router])
 
-  // Show loading state while checking authentication
-  if (isLoading) {
+  // Show loading state while checking authentication or during hydration
+  if (isLoading || !isHydrated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">

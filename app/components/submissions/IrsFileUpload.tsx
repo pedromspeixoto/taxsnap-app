@@ -2,7 +2,7 @@ import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Upload, FileText } from "lucide-react"
 import FileList from "./FileList"
-import { UploadedFile } from "@/lib/types"
+import { UploadedFile } from "@/lib/types/submission"
 
 interface IrsFileUploadProps {
   files: UploadedFile[]
@@ -10,6 +10,8 @@ interface IrsFileUploadProps {
   onFileRemove: (fileId: string) => void
   variant?: "card" | "inline"
   size?: "default" | "large"
+  singleFile?: boolean
+  optional?: boolean
 }
 
 export default function IrsFileUpload({ 
@@ -17,16 +19,26 @@ export default function IrsFileUpload({
   onFileUpload, 
   onFileRemove,
   variant = "card",
-  size = "default"
+  size = "default",
+  singleFile = false,
+  optional = false
 }: IrsFileUploadProps) {
   const handleUpload = () => {
     const input = document.createElement("input")
     input.type = "file"
     input.accept = ".pdf,.csv,.xlsx,.xls"
-    input.multiple = true
+    input.multiple = !singleFile
     input.onchange = (e) => {
       const uploadedFiles = Array.from((e.target as HTMLInputElement).files || [])
-      uploadedFiles.forEach((file) => onFileUpload(file))
+      if (singleFile && uploadedFiles.length > 0) {
+        // If single file mode and we already have a file, remove it first
+        if (files.length > 0) {
+          onFileRemove(files[0].id)
+        }
+        onFileUpload(uploadedFiles[0])
+      } else {
+        uploadedFiles.forEach((file) => onFileUpload(file))
+      }
     }
     input.click()
   }
@@ -36,9 +48,9 @@ export default function IrsFileUpload({
       <FileList 
         files={files}
         onRemove={onFileRemove}
-        title="Uploaded IRS Files"
+        title={singleFile ? "Uploaded IRS File" : "Uploaded IRS Files"}
         maxHeight={size === "large" ? "max-h-60" : "max-h-40"}
-        showCount={true}
+        showCount={!singleFile}
       />
 
       <Button
@@ -51,13 +63,17 @@ export default function IrsFileUpload({
         <Upload className={`mr-2 group-hover/upload:scale-110 transition-transform ${
           size === "large" ? "w-5 h-5 mr-3" : "w-4 h-4"
         }`} />
-        {files.length > 0 ? "Add More IRS Files" : "Upload IRS Files"}
+        {singleFile 
+          ? (files.length > 0 ? "Replace IRS File" : "Upload IRS File")
+          : (files.length > 0 ? "Add More IRS Files" : "Upload IRS Files")
+        }
       </Button>
       
       <p className={`text-muted-foreground text-center ${
         size === "large" ? "text-sm" : "text-xs"
       }`}>
         Supports PDF, CSV, XLSX, and XLS files{size === "large" && ". These will be validated automatically."}
+        {singleFile && " (Only one file allowed)"}
       </p>
     </div>
   )
@@ -67,14 +83,17 @@ export default function IrsFileUpload({
   }
 
   return (
-    <Card className="shadow-sm border-l-4 border-l-red-500">
+    <Card className={`shadow-sm border-l-4 ${optional ? "border-l-blue-500" : "border-l-red-500"}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5 text-red-600" />
-          Base IRS Files (Required)
+          <FileText className={`w-5 h-5 ${optional ? "text-blue-600" : "text-red-600"}`} />
+          Base IRS File{optional ? " (Optional)" : " (Required)"}
         </CardTitle>
         <CardDescription>
-          Upload your base IRS tax documents (Form 1099-B, etc.). These files will be validated automatically.
+          {optional 
+            ? "Optionally upload your base IRS tax document (Form 1099-B, etc.). This step can be skipped if not available."
+            : "Upload your base IRS tax documents (Form 1099-B, etc.). These files will be validated automatically."
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>

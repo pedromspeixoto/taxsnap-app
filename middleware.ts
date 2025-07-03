@@ -143,7 +143,6 @@ export const config = {
     '/dashboard/:path*', 
     '/login', 
     '/register',
-    '/api/users/:path*',  // Protect user API routes
-    // Add other protected API routes here
+    '/api/:path*',  // Protect all API routes (public routes are handled in middleware logic)
   ]
 }; 

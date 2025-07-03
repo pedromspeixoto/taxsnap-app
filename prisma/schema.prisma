@@ -25,5 +25,58 @@ model User {
   updatedAt         DateTime  @updatedAt @map("updated_at")
   deletedAt         DateTime? @map("deleted_at")
 
+  // Relations
+  submissions       Submission[]
+
   @@map("users")
+}
+
+enum SubmissionStatus {
+  DRAFT
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+model Submission {
+  id              String           @id @default(uuid())
+  userId          String           @map("user_id")
+  status          SubmissionStatus @default(DRAFT)
+  title           String
+  baseIrsPath     String?          @map("base_irs_path")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files           SubmissionFile[]
+  results         SubmissionResult[]
+
+  @@map("submissions")
+}
+
+model SubmissionFile {
+  id            String @id @default(uuid())
+  submissionId  String @map("submission_id")
+  brokerName    String @map("broker_name")
+  fileType      String @map("file_type")
+  filePath      String @map("file_path")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("submission_files")
+}
+
+model SubmissionResult {
+  id            String @id @default(uuid())
+  submissionId  String @map("submission_id")
+  results       Json
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("submission_results")
 }

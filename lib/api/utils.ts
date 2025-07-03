@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { UserServiceImpl } from '../services/user-service';
 import { AuthServiceImpl } from '../services/auth-service';
+import { SubmissionServiceImpl } from '../services/submission-service';
 import {
   ServiceError,
   UserAlreadyExistsError,
@@ -17,6 +18,7 @@ import { NextRequest } from 'next/server';
 // Services initialization
 export const userService = new UserServiceImpl();
 export const authService = new AuthServiceImpl();
+export const submissionService = new SubmissionServiceImpl();
 
 // Auth utilities
 export function getAuthenticatedUser(request: NextRequest) {
@@ -63,12 +65,23 @@ export function badRequest(message: string) {
   return NextResponse.json({ message }, { status: 400 });
 }
 
+export function unauthorized(message: string = 'Unauthorized') {
+  return NextResponse.json({ message }, { status: 401 });
+}
+
 export function ok<T>(data: T) {
   return NextResponse.json(data);
 }
 
 export function created<T>(data: T) {
   return NextResponse.json(data, { status: 201 });
+}
+
+export function notFound(message = 'Not found'): NextResponse {
+  return NextResponse.json(
+    { message, error: 'Not Found' },
+    { status: 404 }
+  );
 }
 
 // Error handling

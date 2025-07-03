@@ -1,39 +1,43 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Badge } from "@/app/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
 import { Label } from "@/app/components/ui/label"
-import { Upload, Plus, X, FileText } from "lucide-react"
-import { Platform } from "@/lib/types"
+import { Upload, Plus, X, FileText, Loader2, AlertCircle } from "lucide-react"
+import { Platform } from "@/lib/types/submission"
+import { Broker } from "@/lib/types/broker"
 import FileList from "./FileList"
+import { apiClient } from "@/lib/api/client"
+import { useAuth } from "@/lib/contexts/auth-context"
 
 interface BrokerPlatformsProps {
   platforms: Platform[]
   onPlatformAdd: (platform: Platform) => void
   onPlatformRemove: (platformId: string) => void
-  onFileUpload: (platformId: string, file: File) => void
+  onFileUpload: (platformId: string, files: File[]) => void
   onFileRemove: (platformId: string, fileId: string) => void
   showTitle?: boolean
+  uploadingFiles?: Record<string, boolean>
 }
 
-const AVAILABLE_BROKERS = [
-  { name: "DEGIRO", color: "bg-emerald-200" },
-  { name: "Interactive Brokers", color: "bg-purple-200" },
-  { name: "Trading 212", color: "bg-blue-200" },
-  { name: "Revolut", color: "bg-pink-200" },
-  { name: "TradeRepublic", color: "bg-yellow-200" },
-  { name: "eToro", color: "bg-indigo-200" },
-  { name: "Saxo Bank", color: "bg-green-200" },
-  { name: "Charles Schwab", color: "bg-rose-200" },
-  { name: "Fidelity", color: "bg-cyan-200" },
-  { name: "TD Ameritrade", color: "bg-violet-200" },
-  { name: "E*TRADE", color: "bg-lime-200" },
-  { name: "Robinhood", color: "bg-orange-200" },
-  { name: "Webull", color: "bg-teal-200" },
-  { name: "Questrade", color: "bg-amber-200" },
-  { name: "XTB", color: "bg-slate-200" },
+interface BrokerWithColor extends Broker {
+  color: string
+}
+
+// Color palette for brokers
+const BROKER_COLORS = [
+  "bg-emerald-200", "bg-purple-200", "bg-blue-200", "bg-pink-200",
+  "bg-yellow-200", "bg-indigo-200", "bg-green-200", "bg-rose-200",
+  "bg-cyan-200", "bg-violet-200", "bg-lime-200", "bg-orange-200",
+  "bg-teal-200", "bg-amber-200", "bg-slate-200"
 ]
+
+// Assign random colors to brokers
+const assignBrokerColor = (): string => {
+  const randomIndex = Math.floor(Math.random() * BROKER_COLORS.length)
+  return BROKER_COLORS[randomIndex]
+}
 
 export default function BrokerPlatforms({
   platforms,
@@ -41,17 +45,56 @@ export default function BrokerPlatforms({
   onPlatformRemove,
   onFileUpload,
   onFileRemove,
-  showTitle = true
+  showTitle = true,
+  uploadingFiles = {}
 }: BrokerPlatformsProps) {
   const [selectedBroker, setSelectedBroker] = useState("")
   const [showAddForm, setShowAddForm] = useState(false)
+  const [availableBrokers, setAvailableBrokers] = useState<BrokerWithColor[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { withAuth } = useAuth()
+
+  // Fetch brokers from API
+  useEffect(() => {
+    const fetchBrokers = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const response = await withAuth((accessToken) => apiClient.getBrokers(accessToken))
+
+        // Map brokers with colors
+        const brokersWithColors: BrokerWithColor[] = response.brokers.map((broker: Broker) => ({
+          ...broker,
+          color: assignBrokerColor()
+        }))
+
+        setAvailableBrokers(brokersWithColors)
+      } catch (err) {
+        console.error('Error fetching brokers:', err)
+        setError(err instanceof Error ? err.message : 'Failed to fetch brokers')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchBrokers()
+  }, [withAuth])
 
   const addPlatform = () => {
     if (selectedBroker) {
-      const brokerInfo = AVAILABLE_BROKERS.find((b) => b.name === selectedBroker)
+      const brokerInfo = availableBrokers.find((b) => b.name === selectedBroker)
       if (brokerInfo && !platforms.find((p) => p.name === selectedBroker)) {
+        // Map broker name to code for use as ID
+        const brokerNameToCode: Record<string, string> = {
+          'DEGIRO': 'degiro',
+          'Trading 212': 't212',
+          'Manual Log': 'manual_log'
+        }
+        
         const newPlatform: Platform = {
-          id: Date.now().toString(),
+          id: brokerNameToCode[selectedBroker] || selectedBroker.toLowerCase().replace(' ', '_'),
           name: selectedBroker,
           color: brokerInfo.color,
           files: [],
@@ -63,13 +106,71 @@ export default function BrokerPlatforms({
     }
   }
 
-  const handleFileUpload = (platformId: string, file: File) => {
-    onFileUpload(platformId, file)
+  const handleFilesUpload = (platformId: string, files: File[]) => {
+    onFileUpload(platformId, files)
   }
 
   const getAvailableBrokers = () => {
     const usedBrokers = platforms.map((p) => p.name)
-    return AVAILABLE_BROKERS.filter((broker) => !usedBrokers.includes(broker.name))
+    return availableBrokers.filter((broker) => !usedBrokers.includes(broker.name))
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="mb-8">
+        {showTitle && (
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">Investment Platforms</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Upload trade files from your investment platforms
+              </p>
+            </div>
+          </div>
+        )}
+        <Card className="p-8">
+          <div className="flex items-center justify-center space-x-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span className="text-muted-foreground">Loading available brokers...</span>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="mb-8">
+        {showTitle && (
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-semibold text-foreground">Investment Platforms</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Upload trade files from your investment platforms
+              </p>
+            </div>
+          </div>
+        )}
+        <Card className="p-8 border-red-200 bg-red-50">
+          <div className="flex items-center justify-center space-x-2 text-red-600">
+            <AlertCircle className="w-5 h-5" />
+            <span>Error loading brokers: {error}</span>
+          </div>
+          <div className="mt-4 text-center">
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => window.location.reload()}
+              className="border-red-200 text-red-600 hover:bg-red-100"
+            >
+              Retry
+            </Button>
+          </div>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -91,14 +192,15 @@ export default function BrokerPlatforms({
             <CardHeader className={`${platform.color} text-gray-900 relative p-4 m-0 rounded-t-lg`}>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold truncate pr-2">{platform.name}</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 opacity-60 hover:opacity-100 hover:bg-white/30 transition-all duration-200 shrink-0"
-                  onClick={() => onPlatformRemove(platform.id)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 opacity-60 hover:opacity-100 hover:bg-white/30 transition-all duration-200 shrink-0"
+                onClick={() => onPlatformRemove(platform.id)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
               </div>
               {platform.files.length > 0 && (
                 <Badge variant="secondary" className="absolute -bottom-2 right-3 bg-primary text-primary-foreground shadow-sm">
@@ -117,8 +219,10 @@ export default function BrokerPlatforms({
               />
 
               <Button
+                type="button"
                 className="w-full h-12 group/upload transition-all duration-200 hover:shadow-md"
                 variant={platform.files.length > 0 ? "outline" : "default"}
+                disabled={uploadingFiles[platform.id]}
                 onClick={() => {
                   const input = document.createElement("input")
                   input.type = "file"
@@ -126,13 +230,22 @@ export default function BrokerPlatforms({
                   input.multiple = true
                   input.onchange = (e) => {
                     const files = Array.from((e.target as HTMLInputElement).files || [])
-                    files.forEach((file) => handleFileUpload(platform.id, file))
+                    handleFilesUpload(platform.id, files)
                   }
                   input.click()
                 }}
               >
-                <Upload className="w-4 h-4 mr-2 group-hover/upload:scale-110 transition-transform" />
-                {platform.files.length > 0 ? "Add More Files" : "Upload Trade Files"}
+                {uploadingFiles[platform.id] ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2 group-hover/upload:scale-110 transition-transform" />
+                    {platform.files.length > 0 ? "Add More Files" : "Upload Trade Files"}
+                  </>
+                )}
               </Button>
               
               <p className="text-xs text-muted-foreground text-center">
@@ -185,7 +298,7 @@ export default function BrokerPlatforms({
                 </SelectTrigger>
                 <SelectContent>
                   {getAvailableBrokers().map((broker) => (
-                    <SelectItem key={broker.name} value={broker.name} className="py-3">
+                    <SelectItem key={broker.id} value={broker.name} className="py-3">
                       <div className="flex items-center gap-3">
                         <div className={`w-4 h-4 rounded-full ${broker.color}`}></div>
                         {broker.name}
@@ -197,6 +310,7 @@ export default function BrokerPlatforms({
             </div>
             <div className="flex gap-3 pt-2">
               <Button 
+                type="button"
                 onClick={addPlatform} 
                 disabled={!selectedBroker}
                 className="flex-1 h-11 font-medium"
@@ -205,6 +319,7 @@ export default function BrokerPlatforms({
                 Add Platform
               </Button>
               <Button 
+                type="button"
                 variant="outline" 
                 onClick={() => setShowAddForm(false)}
                 className="h-11 px-6"

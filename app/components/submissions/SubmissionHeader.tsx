@@ -3,15 +3,7 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/app/components/ui/logo"
 
-interface SubmissionHeaderProps {
-  showOverviewToggle?: boolean
-  isOverviewMode?: boolean
-}
-
-export default function SubmissionHeader({ 
-  showOverviewToggle = true, 
-  isOverviewMode = false 
-}: SubmissionHeaderProps) {
+export default function SubmissionHeader() {
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -24,13 +16,6 @@ export default function SubmissionHeader({
             </Button>
           </Link>
         </div>
-        {showOverviewToggle && (
-          <Link href={isOverviewMode ? "/dashboard/new-submission" : "/dashboard/new-submission/overview"}>
-            <Button variant="outline" size="sm">
-              {isOverviewMode ? "Wizard Mode" : "Overview Mode"}
-            </Button>
-          </Link>
-        )}
       </div>
     </header>
   )

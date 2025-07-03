@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
@@ -10,96 +10,132 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, FileText, LogOut, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/app/components/ui/logo"
+import { SubmissionResponse, SubmissionStatus } from "@/lib/types/submission"
+import { formatDate } from "@/lib/utils/date"
+import { apiClient } from "@/lib/api/client"
+import { toast } from "@/lib/hooks/use-toast"
 
-interface Submission {
-  id: string
-  name: string
-  status: "draft" | "processing" | "completed"
-  createdAt: string
-  platforms: number
-  transactions: number
+interface DashboardState {
+  submissions: SubmissionResponse[]
+  isLoading: boolean
+  error: string | null
 }
 
 export default function Dashboard() {
-  const { clearAuth } = useAuth()
+  const { clearAuth, withAuth, isAuthenticated, isLoading: authLoading } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 5
 
-  // Mock data - in real app this would come from API
-  const [allSubmissions] = useState<Submission[]>([
-    {
-      id: "1",
-      name: "2023 Tax Year",
-      status: "completed",
-      createdAt: "2024-01-15",
-      platforms: 3,
-      transactions: 156,
-    },
-    {
-      id: "2", 
-      name: "Q4 2023 Amendment",
-      status: "processing",
-      createdAt: "2024-02-10",
-      platforms: 2,
-      transactions: 45,
-    },
-    {
-      id: "3",
-      name: "2022 Tax Year Final",
-      status: "completed", 
-      createdAt: "2024-01-05",
-      platforms: 4,
-      transactions: 234,
-    },
-    {
-      id: "4",
-      name: "Q1 2024 Trades",
-      status: "processing",
-      createdAt: "2024-03-01",
-      platforms: 2,
-      transactions: 78,
-    },
-    {
-      id: "5", 
-      name: "Crypto Trading 2023",
-      status: "completed",
-      createdAt: "2024-01-20",
-      platforms: 1,
-      transactions: 89,
-    },
-    {
-      id: "6",
-      name: "Stock Portfolio Rebalance",
-      status: "draft",
-      createdAt: "2024-03-15",
-      platforms: 3,
-      transactions: 12,
-    },
-  ])
+  const [state, setState] = useState<DashboardState>({
+    submissions: [],
+    isLoading: true,
+    error: null
+  })
+
+  const fetchSubmissions = useCallback(async () => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true, error: null }))
+
+      const submissions = await withAuth((accessToken) => 
+        apiClient.getSubmissions(accessToken)
+      )
+
+      setState(prev => ({
+        ...prev,
+        submissions,
+        isLoading: false
+      }))
+    } catch (error) {
+      console.error('Error fetching submissions:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load submissions'
+      
+      setState(prev => ({ 
+        ...prev, 
+        error: errorMessage, 
+        isLoading: false,
+        submissions: [] 
+      }))
+      
+      toast.error("Error loading submissions", errorMessage)
+    }
+  }, [withAuth])
+
+  // Effects
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      fetchSubmissions()
+    }
+  }, [authLoading, isAuthenticated, fetchSubmissions])
 
   const handleLogout = () => {
     clearAuth()
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: SubmissionStatus) => {
     switch (status) {
-      case "completed":
+      case SubmissionStatus.COMPLETE:
         return "bg-green-500"
-      case "processing":
+      case SubmissionStatus.PROCESSING:
         return "bg-yellow-500"
-      case "draft":
-        return "bg-gray-500"
+      case SubmissionStatus.DRAFT:
+        return "bg-blue-400"
+      case SubmissionStatus.FAILED:
+        return "bg-red-500"
       default:
         return "bg-gray-500"
     }
   }
 
+  const getStatusBadgeClass = (status: SubmissionStatus) => {
+    switch (status) {
+      case SubmissionStatus.COMPLETE:
+        return "bg-green-100 text-green-800 border-green-200" 
+      case SubmissionStatus.PROCESSING:
+        return "bg-yellow-100 text-yellow-800 border-yellow-200"  
+      case SubmissionStatus.DRAFT:
+        return "bg-blue-100 text-blue-800 border-blue-200"
+      case SubmissionStatus.FAILED:
+        return "bg-red-100 text-red-800 border-red-200"
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200"
+    }
+  }
+
+  const getDetailsUrl = (submission: SubmissionResponse) => {
+    switch (submission.status) {
+      case SubmissionStatus.DRAFT:
+        // Take user to wizard to continue editing
+        return `/dashboard/new-submission/${submission.id}`
+      case SubmissionStatus.COMPLETE:
+      case SubmissionStatus.PROCESSING:
+      case SubmissionStatus.FAILED:
+        // Take user to submission details/results page
+        return `/dashboard/submission/${submission.id}`
+      default:
+        return `/dashboard/submission/${submission.id}`
+    }
+  }
+
+  const getDetailsButtonText = (status: SubmissionStatus) => {
+    switch (status) {
+      case SubmissionStatus.DRAFT:
+        return "Continue Editing"
+      case SubmissionStatus.COMPLETE:
+        return "View Results"
+      case SubmissionStatus.PROCESSING:
+        return "View Details"
+      case SubmissionStatus.FAILED:
+        return "View Details"
+      default:
+        return "View Details"
+    }
+  }
+
   // Filter and search submissions
-  const filteredSubmissions = allSubmissions.filter(submission => {
-    const matchesSearch = submission.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         submission.transactions.toString().includes(searchQuery)
+  const filteredSubmissions = state.submissions.filter((submission: SubmissionResponse) => {
+    const matchesSearch = submission.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === "all" || submission.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -143,7 +179,7 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground">Manage your tax submissions and track progress</p>
           </div>
-          <Link href="/dashboard/new-submission">
+          <Link href="/dashboard/new-submission/new">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               New Submission
@@ -170,16 +206,15 @@ export default function Dashboard() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value={SubmissionStatus.COMPLETE}>Completed</SelectItem>
+                  <SelectItem value={SubmissionStatus.PROCESSING}>Processing</SelectItem>
+                  <SelectItem value={SubmissionStatus.DRAFT}>Draft</SelectItem>
+                  <SelectItem value={SubmissionStatus.FAILED}>Failed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </CardContent>
         </Card>
-
-
 
         {/* Submissions List */}
         <Card className="shadow-sm">
@@ -188,7 +223,10 @@ export default function Dashboard() {
               <div>
                 <CardTitle>Tax Submissions</CardTitle>
                 <CardDescription>
-                  {filteredSubmissions.length} submission{filteredSubmissions.length !== 1 ? 's' : ''} found
+                  {state.isLoading 
+                    ? "Loading submissions..." 
+                    : `${filteredSubmissions.length} submission${filteredSubmissions.length !== 1 ? 's' : ''} found`
+                  }
                 </CardDescription>
               </div>
               {filteredSubmissions.length > itemsPerPage && (
@@ -199,7 +237,21 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            {paginatedSubmissions.length === 0 ? (
+            {state.isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading submissions...</p>
+              </div>
+            ) : state.error ? (
+              <div className="text-center py-8">
+                <FileText className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2 text-red-600">Error Loading Submissions</h3>
+                <p className="text-muted-foreground mb-4">{state.error}</p>
+                <Button onClick={fetchSubmissions} variant="outline">
+                  Try Again
+                </Button>
+              </div>
+            ) : paginatedSubmissions.length === 0 ? (
               <div className="text-center py-8">
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">
@@ -229,24 +281,19 @@ export default function Dashboard() {
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center space-x-4">
-                        <div className={`w-3 h-3 rounded-full ${getStatusColor(submission.status)}`} />
-                        <div>
-                          <h3 className="font-semibold">{submission.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {submission.platforms} platform{submission.platforms !== 1 ? 's' : ''} • {submission.transactions} transaction{submission.transactions !== 1 ? 's' : ''}
-                          </p>
-                        </div>
+                        <div className={`w-3 h-3 rounded-full ${getStatusColor(submission.status)}`}></div>
+                        <h3 className="font-semibold">{submission.title}</h3>
+                        <Badge className={`${getStatusBadgeClass(submission.status)} border`}>
+                          {submission.status.toLowerCase()}
+                        </Badge>
                       </div>
                       <div className="flex items-center space-x-4">
-                        <Badge variant={submission.status === "completed" ? "default" : "secondary"}>
-                          {submission.status}
-                        </Badge>
                         <span className="text-sm text-muted-foreground">
-                          {new Date(submission.createdAt).toLocaleDateString()}
+                          {formatDate(submission.createdAt)}
                         </span>
-                        <Link href={`/dashboard/submission/${submission.id}`}>
+                        <Link href={getDetailsUrl(submission)}>
                           <Button variant="outline" size="sm">
-                            View Details
+                            {getDetailsButtonText(submission.status)}
                           </Button>
                         </Link>
                       </div>

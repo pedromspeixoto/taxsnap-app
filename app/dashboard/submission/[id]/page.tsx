@@ -1,179 +1,504 @@
 "use client"
 
+import { useState, useEffect, useCallback } from "react"
+import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table"
 import { Badge } from "@/app/components/ui/badge"
-import { ArrowLeft, Download, FileText, Calendar, TrendingUp } from "lucide-react"
-import Link from "next/link"
-import Logo from "@/app/components/ui/logo"
+import { FileText, Building2, Upload, CheckCircle, AlertCircle, Download, ExternalLink } from "lucide-react"
+import SubmissionHeader from "@/app/components/submissions/SubmissionHeader"
+import { Platform, UploadedFile, SubmissionResponse, SubmissionStatus } from "@/lib/types/submission"
+import { toast } from "@/lib/hooks/use-toast"
+import { apiClient } from "@/lib/api/client"
+import { useAuth } from "@/lib/contexts/auth-context"
 
-export default function SubmissionDetail() {
-  const submission = {
-    id: "1",
-    name: "2023 Tax Year",
-    status: "completed",
-    createdAt: "2024-01-15",
-    platforms: ["DEGIRO", "Trading 212", "Interactive Brokers"],
-    totalTransactions: 156,
-    totalPL: 1450,
-    totalDividends: 320,
+interface SubmissionResults {
+  status: string
+  error_message: string
+  stock_pl_trades: unknown[]
+  year_dividends_by_country: unknown[]
+  total_stocks_pl: number
+  total_stocks_aquisition_amount: number
+  total_stocks_realized_amount: number
+  total_stocks_trade_expenses_amount: number
+  total_dividends_gross_amount: number
+  total_dividends_taxes_amount: number
+  stocks_pl_file_details_url: string
+  dividends_file_details_url: string
+  irs_tax_report_annex_j_url: string
+  irs_tax_report_full_report_url: string
+}
+
+interface ComponentState {
+  submission: SubmissionResponse | null
+  results: SubmissionResults | null
+  isLoading: boolean
+  error: string | null
+}
+
+export default function SubmissionDetails() {
+  const router = useRouter()
+  const { id } = useParams()
+  const { withAuth, isAuthenticated, isLoading: authLoading } = useAuth()
+
+  const [state, setState] = useState<ComponentState>({
+    submission: null,
+    results: null,
+    isLoading: true,
+    error: null
+  })
+
+  const fetchSubmissionDetails = useCallback(async () => {
+    if (!id || typeof id !== 'string') {
+      setState(prev => ({ 
+        ...prev, 
+        error: "Invalid submission ID", 
+        isLoading: false 
+      }))
+      return
+    }
+
+    try {
+      setState(prev => ({ ...prev, isLoading: true, error: null }))
+
+      const submission = await withAuth((accessToken) => 
+        apiClient.getSubmission(id, accessToken)
+      )
+
+      if (!submission) {
+        setState(prev => ({ 
+          ...prev, 
+          error: "Submission not found", 
+          isLoading: false 
+        }))
+        return
+      }
+
+      // Fetch results if submission is complete
+      let results: SubmissionResults | null = null
+      if (submission.status === SubmissionStatus.COMPLETE) {
+        try {
+          const storedResults = await withAuth((accessToken) => 
+            apiClient.getSubmissionResults(id, accessToken)
+          )
+          results = storedResults as unknown as SubmissionResults
+        } catch (error) {
+          console.error('Error fetching submission results:', error)
+          // Use fallback mock data for completed submissions if results fetch fails
+          results = {
+            status: "success",
+            error_message: "",
+            stock_pl_trades: [],
+            year_dividends_by_country: [],
+            total_stocks_pl: 0,
+            total_stocks_aquisition_amount: 0,
+            total_stocks_realized_amount: 0,
+            total_stocks_trade_expenses_amount: 0,
+            total_dividends_gross_amount: 0,
+            total_dividends_taxes_amount: 0,
+            stocks_pl_file_details_url: "",
+            dividends_file_details_url: "",
+            irs_tax_report_annex_j_url: "",
+            irs_tax_report_full_report_url: ""
+          }
+        }
+      }
+
+      setState(prev => ({
+        ...prev,
+        submission,
+        results,
+        isLoading: false
+      }))
+    } catch (error) {
+      console.error('Error fetching submission details:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load submission details'
+      
+      setState(prev => ({ 
+        ...prev, 
+        error: errorMessage, 
+        isLoading: false 
+      }))
+      
+      toast.error("Error loading submission", errorMessage)
+    }
+  }, [id, withAuth])
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      fetchSubmissionDetails()
+    } else if (!authLoading && !isAuthenticated) {
+      router.push('/')
+    }
+  }, [authLoading, isAuthenticated, fetchSubmissionDetails, router])
+
+  const getStatusColor = (status: SubmissionStatus) => {
+    switch (status) {
+      case SubmissionStatus.COMPLETE:
+        return "bg-green-500"
+      case SubmissionStatus.PROCESSING:
+        return "bg-yellow-500"
+      case SubmissionStatus.DRAFT:
+        return "bg-blue-400"
+      case SubmissionStatus.FAILED:
+        return "bg-red-500"
+      default:
+        return "bg-gray-500"
+    }
   }
 
-  const transactions = [
-    { symbol: "AAPL", buys: 10, sells: 8, pl: 320 },
-    { symbol: "TSLA", buys: 5, sells: 5, pl: -50 },
-    { symbol: "MSFT", buys: 12, sells: 6, pl: 1120 },
-    { symbol: "GOOGL", buys: 3, sells: 2, pl: 60 },
-  ]
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount)
+  }
 
-  const dividends = [
-    { country: "USA", amount: 210 },
-    { country: "Germany", amount: 80 },
-    { country: "Portugal", amount: 30 },
-  ]
+  const totalFiles = state.submission?.platforms?.reduce((sum: number, platform: Platform) => sum + platform.files.length, 0) || 0
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Logo />
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
-          <Button>
-            <Download className="w-4 h-4 mr-2" />
-            Export Report
-          </Button>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{submission.name}</h1>
-            <div className="flex items-center space-x-4 text-muted-foreground">
-              <span className="flex items-center">
-                <Calendar className="w-4 h-4 mr-1" />
-                Created {new Date(submission.createdAt).toLocaleDateString()}
-              </span>
-              <Badge variant="default">{submission.status}</Badge>
+  // Loading state
+  if (authLoading || state.isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SubmissionHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span>Loading submission details...</span>
             </div>
           </div>
         </div>
+      </div>
+    )
+  }
 
-        {/* Summary Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <Card className="taxsnap-card-hover">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Platforms</CardTitle>
-              <FileText className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{submission.platforms.length}</div>
-              <p className="text-xs text-muted-foreground">{submission.platforms.join(", ")}</p>
-            </CardContent>
-          </Card>
-          <Card className="taxsnap-card-hover">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Transactions</CardTitle>
-              <TrendingUp className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{submission.totalTransactions}</div>
-              <p className="text-xs text-muted-foreground">Total processed</p>
-            </CardContent>
-          </Card>
-          <Card className="taxsnap-card-hover">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Realized P&L</CardTitle>
-              <TrendingUp className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${submission.totalPL >= 0 ? "text-green-600" : "text-red-600"}`}>
-                €{submission.totalPL > 0 ? "+" : ""}
-                {submission.totalPL}
-              </div>
-              <p className="text-xs text-muted-foreground">Capital gains/losses</p>
-            </CardContent>
-          </Card>
-          <Card className="taxsnap-card-hover">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Dividends</CardTitle>
-              <TrendingUp className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">€{submission.totalDividends}</div>
-              <p className="text-xs text-muted-foreground">Total received</p>
-            </CardContent>
-          </Card>
+  // Error state
+  if (state.error || !state.submission) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SubmissionHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">
+            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
+            <p className="text-muted-foreground mb-4">{state.error || "Submission not found"}</p>
+            <div className="space-x-2">
+              <Button onClick={fetchSubmissionDetails} variant="outline">
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <SubmissionHeader />
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-2">
+            <div className={`w-4 h-4 rounded-full ${getStatusColor(state.submission.status)}`}></div>
+            <h1 className="text-3xl font-bold">{state.submission.title}</h1>
+          </div>
+          
+          <p className="text-muted-foreground">
+            {state.submission.status === SubmissionStatus.COMPLETE && "Tax calculation completed successfully"}
+            {state.submission.status === SubmissionStatus.PROCESSING && "Tax calculation in progress"}
+            {state.submission.status === SubmissionStatus.DRAFT && "Submission in draft mode"}
+            {state.submission.status === SubmissionStatus.FAILED && "Tax calculation failed - under manual review"}
+          </p>
         </div>
 
-        {/* Stock Summary */}
-        <Card className="mb-8 shadow-sm">
-          <CardHeader>
-            <CardTitle>Stock Summary</CardTitle>
-            <CardDescription>Overview of stock transactions and P&L</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Stock Symbol</TableHead>
-                  <TableHead>Total Buys</TableHead>
-                  <TableHead>Total Sells</TableHead>
-                  <TableHead>Realized P&L</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((stock) => (
-                  <TableRow key={stock.symbol}>
-                    <TableCell className="font-medium">{stock.symbol}</TableCell>
-                    <TableCell>{stock.buys}</TableCell>
-                    <TableCell>{stock.sells}</TableCell>
-                    <TableCell className={stock.pl >= 0 ? "text-green-600" : "text-red-600"}>
-                      €{stock.pl > 0 ? "+" : ""}
-                      {stock.pl}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Submission Summary */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                Submission Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-2xl font-bold text-primary">{state.submission.platforms?.length || 0}</div>
+                  <p className="text-sm text-muted-foreground">Platforms</p>
+                </div>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-2xl font-bold text-primary">{totalFiles}</div>
+                  <p className="text-sm text-muted-foreground">Trade Files</p>
+                </div>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <div className="text-2xl font-bold text-primary">{state.submission.baseIrsPath ? '1' : '0'}</div>
+                  <p className="text-sm text-muted-foreground">IRS Files</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Dividends */}
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle>Dividends by Country</CardTitle>
-            <CardDescription>Total dividends received by country</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Country</TableHead>
-                  <TableHead>Total Dividends (€)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dividends.map((dividend) => (
-                  <TableRow key={dividend.country}>
-                    <TableCell className="font-medium">{dividend.country}</TableCell>
-                    <TableCell>€{dividend.amount}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+          {/* Platform Files */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-green-600" />
+                Investment Platforms ({state.submission.platforms?.length || 0})
+              </CardTitle>
+              <CardDescription>
+                Trade files from your broker platforms
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!state.submission.platforms || state.submission.platforms.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No broker files uploaded</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {state.submission.platforms.map((platform: Platform) => (
+                    <div key={platform.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-3 h-3 rounded-full ${platform.color}`}></div>
+                          <span className="font-medium">{platform.name}</span>
+                        </div>
+                        <Badge variant="outline">{platform.files.length} files</Badge>
+                      </div>
+                      <div className="space-y-2">
+                        {platform.files.map((file: UploadedFile) => (
+                          <div key={file.id} className="flex items-center justify-between text-sm bg-muted/50 rounded p-2">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-muted-foreground" />
+                              <span className="font-medium">{file.name}</span>
+                            </div>
+                            <span className="text-muted-foreground">{file.uploadedAt}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Base IRS File */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-blue-600" />
+                Base IRS File
+              </CardTitle>
+              <CardDescription>
+                Optional base IRS tax document
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {state.submission.baseIrsPath ? (
+                <div className="flex items-center justify-between text-sm bg-green-50 border border-green-200 rounded p-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="font-medium">{state.submission.baseIrsPath.split('/').pop()}</span>
+                  </div>
+                  <span className="text-muted-foreground">Uploaded</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-muted-foreground text-sm bg-muted/50 rounded p-3">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>No base IRS file uploaded</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Results Section - Only show for completed submissions */}
+          {state.submission.status === SubmissionStatus.COMPLETE && state.results && (
+            <>
+              {/* Tax Summary */}
+                             <Card className="shadow-sm border-green-200 bg-green-50/50">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2 text-black">
+                     <CheckCircle className="w-5 h-5" />
+                        Tax Calculation Results
+                     </CardTitle>
+                   <CardDescription className="text-black">
+                     Summary of your tax calculations
+                   </CardDescription>
+                 </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="text-xl font-bold text-green-600">
+                        {formatCurrency(state.results.total_stocks_pl)}
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">Total Stocks P&L</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="text-xl font-bold text-gray-900">
+                        {formatCurrency(state.results.total_dividends_gross_amount)}
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">Total Dividends (Gross)</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="text-xl font-bold text-red-600">
+                        {formatCurrency(state.results.total_dividends_taxes_amount)}
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">Dividend Taxes</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="text-xl font-bold text-gray-900">
+                        {formatCurrency(state.results.total_stocks_aquisition_amount)}
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">Total Acquisition</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="text-xl font-bold text-gray-900">
+                        {formatCurrency(state.results.total_stocks_realized_amount)}
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">Total Realized</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="text-xl font-bold text-gray-900">
+                        {formatCurrency(state.results.total_stocks_trade_expenses_amount)}
+                      </div>
+                      <p className="text-sm font-medium text-gray-700">Trade Expenses</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Download Reports */}
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Download className="w-5 h-5 text-blue-600" />
+                    Download Reports
+                  </CardTitle>
+                  <CardDescription>
+                    Generated tax reports and documents
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {state.results.irs_tax_report_annex_j_url && (
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium">IRS Tax Report (Annex J)</span>
+                        </div>
+                        <a 
+                          href={state.results.irs_tax_report_annex_j_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="outline" size="sm">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Download
+                          </Button>
+                        </a>
+                      </div>
+                    )}
+                    {state.results.irs_tax_report_full_report_url && (
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium">Full Tax Report</span>
+                        </div>
+                        <a 
+                          href={state.results.irs_tax_report_full_report_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="outline" size="sm">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Download
+                          </Button>
+                        </a>
+                      </div>
+                    )}
+                    {state.results.stocks_pl_file_details_url && (
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-green-600" />
+                          <span className="font-medium">Stocks P&L Details</span>
+                        </div>
+                        <a 
+                          href={state.results.stocks_pl_file_details_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="outline" size="sm">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Download
+                          </Button>
+                        </a>
+                      </div>
+                    )}
+                    {state.results.dividends_file_details_url && (
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-purple-600" />
+                          <span className="font-medium">Dividends Details</span>
+                        </div>
+                        <a 
+                          href={state.results.dividends_file_details_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="outline" size="sm">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Download
+                          </Button>
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* Processing Status */}
+          {state.submission.status === SubmissionStatus.PROCESSING && (
+            <Card className="shadow-sm border-yellow-200 bg-yellow-50/50">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+                  <h3 className="text-lg font-semibold mb-2 text-yellow-700">Processing Your Submission</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Your tax calculation is currently being processed. This may take a few minutes.
+                  </p>
+                  <Button onClick={fetchSubmissionDetails} variant="outline">
+                    Refresh Status
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Failed Status */}
+          {state.submission.status === SubmissionStatus.FAILED && (
+            <Card className="shadow-sm border-red-200 bg-red-50/50">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2 text-red-700">Processing Failed</h3>
+                  <p className="text-muted-foreground mb-4">
+                    There was an issue processing your submission. Our team has been notified and will review it manually.
+                  </p>
+                  <Button onClick={fetchSubmissionDetails} variant="outline">
+                    Check for Updates
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   )

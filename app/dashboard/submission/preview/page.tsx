@@ -1,12 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table"
 import { Badge } from "@/app/components/ui/badge"
-import { Input } from "@/app/components/ui/input"
-import { ArrowLeft, Edit2, Save, X } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/app/components/ui/logo"
 
@@ -18,7 +16,6 @@ interface Transaction {
   price: number
   date: string
   platform: string
-  editable?: boolean
 }
 
 interface Dividend {
@@ -26,11 +23,11 @@ interface Dividend {
   country: string
   amount: number
   currency: string
-  editable?: boolean
 }
 
 export default function SubmissionPreview() {
-  const [transactions, setTransactions] = useState<Transaction[]>([
+  // Mock data - in a real app, this would come from props or an API
+  const transactions: Transaction[] = [
     { id: "1", symbol: "AAPL", type: "buy", quantity: 10, price: 150.0, date: "2024-01-15", platform: "DEGIRO" },
     { id: "2", symbol: "AAPL", type: "sell", quantity: 8, price: 165.0, date: "2024-02-20", platform: "DEGIRO" },
     { id: "3", symbol: "TSLA", type: "buy", quantity: 5, price: 200.0, date: "2024-01-10", platform: "Trading 212" },
@@ -53,40 +50,13 @@ export default function SubmissionPreview() {
       date: "2024-03-10",
       platform: "Interactive Brokers",
     },
-  ])
+  ]
 
-  const [dividends, setDividends] = useState<Dividend[]>([
+  const dividends: Dividend[] = [
     { id: "1", country: "USA", amount: 210, currency: "EUR" },
     { id: "2", country: "Germany", amount: 80, currency: "EUR" },
     { id: "3", country: "Portugal", amount: 30, currency: "EUR" },
-  ])
-
-  const [editingTransaction, setEditingTransaction] = useState<string | null>(null)
-  const [editingDividend, setEditingDividend] = useState<string | null>(null)
-
-  const handleEditTransaction = (id: string) => {
-    setEditingTransaction(id)
-  }
-
-  const handleSaveTransaction = () => {
-    setEditingTransaction(null)
-  }
-
-  const handleEditDividend = (id: string) => {
-    setEditingDividend(id)
-  }
-
-  const handleSaveDividend = () => {
-    setEditingDividend(null)
-  }
-
-  const updateTransaction = (id: string, field: keyof Transaction, value: string | number) => {
-    setTransactions((prev) => prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)))
-  }
-
-  const updateDividend = (id: string, field: keyof Dividend, value: string | number) => {
-    setDividends((prev) => prev.map((d) => (d.id === id ? { ...d, [field]: value } : d)))
-  }
+  ]
 
   // Calculate summary data
   const stockSummary = transactions.reduce(
@@ -125,7 +95,11 @@ export default function SubmissionPreview() {
             </Link>
             <Logo />
           </div>
-          <Button>Save Submission</Button>
+          <Link href="/dashboard">
+            <Button variant="outline" size="sm">
+              Back to Dashboard
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -133,7 +107,7 @@ export default function SubmissionPreview() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Transaction Overview</h1>
-          <p className="text-muted-foreground">Review and edit your processed transactions</p>
+          <p className="text-muted-foreground">Review your processed transactions</p>
         </div>
 
         {/* Stock Summary */}
@@ -181,41 +155,13 @@ export default function SubmissionPreview() {
                 <TableRow>
                   <TableHead>Country</TableHead>
                   <TableHead>Total Dividends (€)</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {dividends.map((dividend) => (
                   <TableRow key={dividend.id}>
                     <TableCell className="font-medium">{dividend.country}</TableCell>
-                    <TableCell>
-                      {editingDividend === dividend.id ? (
-                        <Input
-                          type="number"
-                          value={dividend.amount}
-                          onChange={(e) => updateDividend(dividend.id, "amount", Number(e.target.value))}
-                          className="w-24"
-                        />
-                      ) : (
-                        `€${dividend.amount}`
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingDividend === dividend.id ? (
-                        <div className="flex space-x-2">
-                          <Button size="sm" onClick={() => handleSaveDividend()}>
-                            <Save className="w-3 h-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => setEditingDividend(null)}>
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button size="sm" variant="outline" onClick={() => handleEditDividend(dividend.id)}>
-                          <Edit2 className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </TableCell>
+                    <TableCell>€{dividend.amount}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -239,7 +185,6 @@ export default function SubmissionPreview() {
                   <TableHead>Price</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Platform</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -251,49 +196,10 @@ export default function SubmissionPreview() {
                         {transaction.type.toUpperCase()}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {editingTransaction === transaction.id ? (
-                        <Input
-                          type="number"
-                          value={transaction.quantity}
-                          onChange={(e) => updateTransaction(transaction.id, "quantity", Number(e.target.value))}
-                          className="w-20"
-                        />
-                      ) : (
-                        transaction.quantity
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {editingTransaction === transaction.id ? (
-                        <Input
-                          type="number"
-                          step="0.01"
-                          value={transaction.price}
-                          onChange={(e) => updateTransaction(transaction.id, "price", Number(e.target.value))}
-                          className="w-24"
-                        />
-                      ) : (
-                        `$${transaction.price.toFixed(2)}`
-                      )}
-                    </TableCell>
+                    <TableCell>{transaction.quantity}</TableCell>
+                    <TableCell>${transaction.price.toFixed(2)}</TableCell>
                     <TableCell>{transaction.date}</TableCell>
                     <TableCell>{transaction.platform}</TableCell>
-                    <TableCell>
-                      {editingTransaction === transaction.id ? (
-                        <div className="flex space-x-2">
-                          <Button size="sm" onClick={() => handleSaveTransaction()}>
-                            <Save className="w-3 h-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => setEditingTransaction(null)}>
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button size="sm" variant="outline" onClick={() => handleEditTransaction(transaction.id)}>
-                          <Edit2 className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
