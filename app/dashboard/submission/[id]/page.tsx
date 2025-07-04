@@ -5,9 +5,9 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Badge } from "@/app/components/ui/badge"
-import { FileText, Building2, Upload, CheckCircle, AlertCircle, Download, ExternalLink } from "lucide-react"
+import { FileText, Building2, Upload, CheckCircle, AlertCircle, Download, ExternalLink, ChevronDown, ChevronRight } from "lucide-react"
 import SubmissionHeader from "@/app/components/submissions/SubmissionHeader"
-import { Platform, UploadedFile, SubmissionResponse, SubmissionStatus, SubmissionResults, StockTrade, StockSummary } from "@/lib/types/submission"
+import { Platform, UploadedFile, SubmissionResponse, SubmissionStatus, SubmissionResults, StockTrade } from "@/lib/types/submission"
 import { toast } from "@/lib/hooks/use-toast"
 import { apiClient } from "@/lib/api/client"
 import { useAuth } from "@/lib/contexts/auth-context"
@@ -22,6 +22,13 @@ interface ComponentState {
   error: string | null
 }
 
+interface GroupedStockTrades {
+  ticker: string
+  trades: StockTrade[]
+  totalTrades: number
+  totalPL: number
+}
+
 export default function SubmissionDetails() {
   const router = useRouter()
   const { id } = useParams()
@@ -33,6 +40,8 @@ export default function SubmissionDetails() {
     isLoading: true,
     error: null
   })
+
+  const [expandedTickers, setExpandedTickers] = useState<Set<string>>(new Set())
 
   const fetchSubmissionDetails = useCallback(async () => {
     if (!id || typeof id !== 'string') {
@@ -59,6 +68,7 @@ export default function SubmissionDetails() {
         }))
         return
       }
+
 
       // Fetch results if submission is complete
       let results: SubmissionResults | null = null
@@ -140,30 +150,53 @@ export default function SubmissionDetails() {
     }).format(amount)
   }
 
-
-
-    const processStockSummary = (trades: StockTrade[]): StockSummary[] => {
-    const stockMap = new Map<string, StockSummary>()
-    
-    trades.forEach(trade => {
-      const existing = stockMap.get(trade.ticker)
-      const pl = trade.realized_amount - trade.buy_amount - trade.trade_expenses
-      
-      if (existing) {
-        existing.totalBuys += 1
-        existing.totalSells += 1
-        existing.realizedPL += pl
-      } else {
-        stockMap.set(trade.ticker, {
-          ticker: trade.ticker,
-          totalBuys: 1,
-          totalSells: 1,
-          realizedPL: pl
-        })
+  const groupTradesByTicker = (trades: StockTrade[]): GroupedStockTrades[] => {
+    const grouped = trades.reduce((acc, trade) => {
+      if (!acc[trade.ticker]) {
+        acc[trade.ticker] = []
       }
+      acc[trade.ticker].push(trade)
+      return acc
+    }, {} as Record<string, StockTrade[]>)
+
+    return Object.entries(grouped).map(([ticker, trades]) => {
+      const totalPL = trades.reduce((sum, trade) => 
+        sum + (trade.realized_amount - trade.buy_amount - trade.trade_expenses), 0
+      )
+      
+      return {
+        ticker,
+        trades: trades.sort((a, b) => {
+          // Sort by realized date (most recent first)
+          const dateA = new Date(a.realized_year, a.realized_month - 1, a.realized_day)
+          const dateB = new Date(b.realized_year, b.realized_month - 1, b.realized_day)
+          return dateB.getTime() - dateA.getTime()
+        }),
+        totalTrades: trades.length,
+        totalPL
+      }
+    }).sort((a, b) => b.totalPL - a.totalPL) // Sort by total P&L descending
+  }
+
+  const formatDate = (day: number, month: number, year: number): string => {
+    const date = new Date(year, month - 1, day)
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric', 
+      year: 'numeric'
     })
-    
-    return Array.from(stockMap.values()).sort((a, b) => b.realizedPL - a.realizedPL)
+  }
+
+  const toggleTicker = (ticker: string) => {
+    setExpandedTickers(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(ticker)) {
+        newSet.delete(ticker)
+      } else {
+        newSet.add(ticker)
+      }
+      return newSet
+    })
   }
 
   const totalFiles = state.submission?.platforms?.reduce((sum: number, platform: Platform) => sum + platform.files.length, 0) || 0
@@ -405,29 +438,97 @@ export default function SubmissionDetails() {
                 </CardHeader>
                 <CardContent>
                   {state.results.stock_pl_trades && state.results.stock_pl_trades.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left p-3 font-medium text-gray-300">Stock Symbol</th>
-                            <th className="text-right p-3 font-medium text-gray-300">Total Buys</th>
-                            <th className="text-right p-3 font-medium text-gray-300">Total Sells</th>
-                            <th className="text-right p-3 font-medium text-gray-300">Realized P&L</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {processStockSummary(state.results.stock_pl_trades).map((stock, index) => (
-                            <tr key={stock.ticker} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                              <td className="p-3 font-medium text-gray-900">{stock.ticker}</td>
-                              <td className="p-3 text-right text-gray-900">{stock.totalBuys}</td>
-                              <td className="p-3 text-right text-gray-900">{stock.totalSells}</td>
-                              <td className={`p-3 text-right font-medium ${stock.realizedPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {formatCurrency(stock.realizedPL)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="space-y-2">
+                      {groupTradesByTicker(state.results.stock_pl_trades).map((stockGroup) => {
+                        const isExpanded = expandedTickers.has(stockGroup.ticker)
+                        
+                        return (
+                          <div key={stockGroup.ticker} className="border border-gray-200 rounded-lg overflow-hidden">
+                            {/* Ticker Header Row */}
+                            <div 
+                              className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                              onClick={() => toggleTicker(stockGroup.ticker)}
+                            >
+                              <div className="flex items-center gap-3">
+                                {isExpanded ? (
+                                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                                ) : (
+                                  <ChevronRight className="w-4 h-4 text-gray-500" />
+                                )}
+                                <span className="font-bold text-lg text-gray-900">{stockGroup.ticker}</span>
+                                <Badge variant="secondary">{stockGroup.totalTrades} trades</Badge>
+                              </div>
+                              <div className="text-right">
+                                <div className={`text-lg font-bold ${stockGroup.totalPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {formatCurrency(stockGroup.totalPL)}
+                                </div>
+                                <div className="text-sm text-gray-500">Total P&L</div>
+                              </div>
+                            </div>
+
+                            {/* Expanded Trade Details */}
+                            {isExpanded && (
+                              <div className="bg-white">
+                                <div className="overflow-x-auto">
+                                  <table className="w-full">
+                                    <thead className="bg-gray-50 border-t">
+                                      <tr>
+                                        <th className="text-left p-3 text-sm font-medium text-gray-700">Buy Date</th>
+                                        <th className="text-right p-3 text-sm font-medium text-gray-700">Buy Amount</th>
+                                        <th className="text-left p-3 text-sm font-medium text-gray-700">Sell Date</th>
+                                        <th className="text-right p-3 text-sm font-medium text-gray-700">Sell Amount</th>
+                                        <th className="text-right p-3 text-sm font-medium text-gray-700">Expenses</th>
+                                        <th className="text-right p-3 text-sm font-medium text-gray-700">P&L</th>
+                                        <th className="text-center p-3 text-sm font-medium text-gray-700">Country</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {stockGroup.trades.map((trade, tradeIndex) => {
+                                        const tradePL = trade.realized_amount - trade.buy_amount - trade.trade_expenses
+                                        
+                                        return (
+                                          <tr key={tradeIndex} className={tradeIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                            <td className="p-3 text-sm text-gray-900">
+                                              {formatDate(trade.buy_day, trade.buy_month, trade.buy_year)}
+                                            </td>
+                                            <td className="p-3 text-sm text-right text-gray-900">
+                                              {formatCurrency(trade.buy_amount)}
+                                            </td>
+                                            <td className="p-3 text-sm text-gray-900">
+                                              {formatDate(trade.realized_day, trade.realized_month, trade.realized_year)}
+                                            </td>
+                                            <td className="p-3 text-sm text-right text-gray-900">
+                                              {formatCurrency(trade.realized_amount)}
+                                            </td>
+                                            <td className="p-3 text-sm text-right text-gray-900">
+                                              {formatCurrency(trade.trade_expenses)}
+                                            </td>
+                                            <td className={`p-3 text-sm text-right font-medium ${tradePL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                              {formatCurrency(tradePL)}
+                                            </td>
+                                            <td className="p-3 text-sm text-center">
+                                              <Image 
+                                                src={getCountryFlag(trade.country_id)} 
+                                                alt={`${getCountryName(trade.country_id)} flag`}
+                                                className="w-5 h-3 mx-auto rounded"
+                                                width={20}
+                                                height={16}
+                                                onError={(e) => {
+                                                  e.currentTarget.style.display = 'none';
+                                                }}
+                                              />
+                                            </td>
+                                          </tr>
+                                        )
+                                      })}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
