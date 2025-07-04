@@ -379,7 +379,7 @@ export default function SubmissionDetails() {
                      <CheckCircle className="w-5 h-5 text-green-600" />
                         Tax Calculation Results
                      </CardTitle>
-                   <CardDescription className="text-gray-300">
+                   <CardDescription>
                      Summary of your tax calculations
                    </CardDescription>
                  </CardHeader>
