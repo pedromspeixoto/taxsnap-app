@@ -73,3 +73,48 @@ export interface GetSubmissionsQuery {
   limit?: number
   offset?: number
 }
+
+export interface StockTrade {
+  ticker: string
+  buy_day: number
+  buy_year: number
+  buy_month: number
+  buy_amount: number
+  country_id: string
+  realized_day: number
+  realized_year: number
+  realized_month: number
+  trade_expenses: number
+  realized_amount: number
+}
+
+export interface DividendsByCountry {
+  total_tax_paid: number
+  total_dividends: number
+  dividend_country_code: string
+  dividend_tax_revenue_code: string
+}
+
+export interface StockSummary {
+  ticker: string
+  totalBuys: number
+  totalSells: number
+  realizedPL: number
+}
+
+export interface SubmissionResults {
+  status: string
+  error_message: string
+  stock_pl_trades: StockTrade[]
+  year_dividends_by_country: DividendsByCountry[]
+  total_stocks_pl: number
+  total_stocks_aquisition_amount: number
+  total_stocks_realized_amount: number
+  total_stocks_trade_expenses_amount: number
+  total_dividends_gross_amount: number
+  total_dividends_taxes_amount: number
+  stocks_pl_file_details_url: string
+  dividends_file_details_url: string
+  irs_tax_report_annex_j_url: string
+  irs_tax_report_full_report_url: string
+}
