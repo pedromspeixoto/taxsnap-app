@@ -26,6 +26,32 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to check if current path is a protected route
+const isOnProtectedRoute = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const protectedRoutes = ['/dashboard'];
+  return protectedRoutes.some(route => window.location.pathname.startsWith(route));
+};
+
+// Helper function to redirect to home if on protected route
+const redirectIfOnProtectedRoute = (): void => {
+  if (typeof window !== 'undefined' && isOnProtectedRoute()) {
+    window.location.href = '/';
+  }
+};
+
+// Generic function to handle authentication failure - clears tokens, user state, and redirects
+const handleAuthFailure = (
+  clearTokens: () => void,
+  setUser: (user: ClientUser | null) => void,
+  setIsTokenValid: (valid: boolean) => void
+): void => {
+  clearTokens();
+  setUser(null);
+  setIsTokenValid(false);
+  redirectIfOnProtectedRoute();
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<ClientUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,8 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // If no tokens or user data, definitely not authenticated
     if (!accessToken || !currentUser) {
-      setUser(null);
-      setIsTokenValid(false);
+      handleAuthFailure(clearTokens, setUser, setIsTokenValid);
       return false;
     }
 
@@ -154,17 +179,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {
           // Refresh failed, now clear auth state
           console.log('Token refresh failed, clearing auth state');
-          clearTokens();
-          setUser(null);
-          setIsTokenValid(false);
+          handleAuthFailure(clearTokens, setUser, setIsTokenValid);
           return false;
         }
       } else {
         // No refresh token, clear auth state
         console.log('No refresh token available, clearing auth state');
-        clearTokens();
-        setUser(null);
-        setIsTokenValid(false);
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
         return false;
       }
     }
@@ -188,16 +209,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return true;
         } catch {
           // Refresh failed, clear auth state
-          clearTokens();
-          setUser(null);
-          setIsTokenValid(false);
+          handleAuthFailure(clearTokens, setUser, setIsTokenValid);
           return false;
         }
       } else {
         // No refresh token, clear auth state
-        clearTokens();
-        setUser(null);
-        setIsTokenValid(false);
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
         return false;
       }
     }
@@ -269,6 +286,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearTokens();
     setUser(null);
     setIsTokenValid(false);
+    // Redirect to home when explicitly logging out
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   }, [clearTokens]);
 
   // Helper method for authenticated API calls with automatic token refresh
@@ -278,9 +299,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const accessToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
       
       if (!accessToken) {
-        clearTokens();
-        setUser(null);
-        setIsTokenValid(false);
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
         throw new Error('No access token available');
       }
 
@@ -295,9 +314,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         )) {
           const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
           if (!refreshToken) {
-            clearTokens();
-            setUser(null);
-            setIsTokenValid(false);
+            handleAuthFailure(clearTokens, setUser, setIsTokenValid);
             throw error;
           }
 
@@ -313,9 +330,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             return await apiCall(newAccessToken);
           } catch {
-            clearTokens();
-            setUser(null);
-            setIsTokenValid(false);
+            handleAuthFailure(clearTokens, setUser, setIsTokenValid);
             throw error;
           }
         }
