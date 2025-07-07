@@ -7,6 +7,7 @@ import { prisma } from '../repositories/prisma';
 export interface SubmissionService {
   // Broker management
   getBrokers(): Promise<BrokerResponse>;
+  getManualLogTemplate(): Promise<{ message: string; template_path: string }>;
   // File management
   uploadBrokerFiles(submissionId: string, broker: string, files: File[]): Promise<void>;
   deleteSubmissionFile(fileId: string): Promise<void>;
@@ -42,7 +43,17 @@ export class SubmissionServiceImpl implements SubmissionService {
 
       return { brokers };
     } catch (error) {
-      console.error('Error fetching brokers', error);
+      console.error('[SERVICE] submissionService.getBrokers', error);
+      throw error;
+    }
+  }
+
+  async getManualLogTemplate(): Promise<{ message: string; template_path: string }> {
+    try {
+      const response = await this.client.getManualLogTemplate();
+      return response;
+    } catch (error) {
+      console.error('[SERVICE] submissionService.getManualLogTemplate', error);
       throw error;
     }
   }
@@ -69,7 +80,7 @@ export class SubmissionServiceImpl implements SubmissionService {
       });
 
     } catch (error) {
-      console.error('Error uploading broker files', error);
+      console.error('[SERVICE] submissionService.uploadBrokerFiles', error);
       throw error;
     }
   }
@@ -80,7 +91,7 @@ export class SubmissionServiceImpl implements SubmissionService {
         where: { id: fileId }
       });
     } catch (error) {
-      console.error('Error deleting submission file', error);
+      console.error('[SERVICE] submissionService.deleteSubmissionFile', error);
       throw error;
     }
   }
@@ -152,7 +163,7 @@ export class SubmissionServiceImpl implements SubmissionService {
         },
       });
     } catch (error) {
-      console.error('Error storing submission results', error);
+      console.error('[SERVICE] submissionService.storeSubmissionResults', error);
       throw error;
     }
   }
@@ -166,7 +177,7 @@ export class SubmissionServiceImpl implements SubmissionService {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return result?.results as any || null;
     } catch (error) {
-      console.error('Error fetching submission results', error);
+      console.error('[SERVICE] submissionService.getSubmissionResults', error);
       throw error;
     }
   }

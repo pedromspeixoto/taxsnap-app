@@ -57,6 +57,12 @@ export class ProcessorClient {
     });
   }
 
+  async getManualLogTemplate(): Promise<{ message: string; template_path: string }> {
+    return this.request(`/download_manual_trades_upoad_template`, {
+      method: 'GET',
+    });
+  }
+
   async uploadBrokerFiles(request: UploadBrokerFilesRequest): Promise<void> {
     const formData = new FormData();
     

@@ -99,7 +99,7 @@ export default function Step3Preview() {
   }
 
   const handleBack = () => {
-    router.push(`/dashboard/new-submission/${id}/base-irs-file`)
+    router.push(`/dashboard/new-submission/${id}/brokers`)
   }
 
   // Effects

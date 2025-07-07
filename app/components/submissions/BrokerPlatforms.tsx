@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app
 import { Badge } from "@/app/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
 import { Label } from "@/app/components/ui/label"
-import { Upload, Plus, X, FileText, Loader2, AlertCircle } from "lucide-react"
+import { Upload, Plus, X, FileText, Loader2, AlertCircle, Download } from "lucide-react"
 import { Platform } from "@/lib/types/submission"
 import { Broker } from "@/lib/types/broker"
 import FileList from "./FileList"
@@ -16,7 +16,8 @@ interface BrokerPlatformsProps {
   onPlatformAdd: (platform: Platform) => void
   onPlatformRemove: (platformId: string) => void
   onFileUpload: (platformId: string, files: File[]) => void
-  onFileRemove: (platformId: string, fileId: string) => void
+  onFileRemove: (fileId: string) => void
+  onTemplateDownload?: (platformId: string) => void
   showTitle?: boolean
   uploadingFiles?: Record<string, boolean>
 }
@@ -45,6 +46,7 @@ export default function BrokerPlatforms({
   onPlatformRemove,
   onFileUpload,
   onFileRemove,
+  onTemplateDownload,
   showTitle = true,
   uploadingFiles = {}
 }: BrokerPlatformsProps) {
@@ -213,7 +215,7 @@ export default function BrokerPlatforms({
             <CardContent className="p-4 space-y-4">
               <FileList 
                 files={platform.files}
-                onRemove={(fileId) => onFileRemove(platform.id, fileId)}
+                onRemove={(fileId) => onFileRemove(fileId)}
                 title="Uploaded Files"
                 maxHeight="max-h-40"
               />
@@ -247,6 +249,19 @@ export default function BrokerPlatforms({
                   </>
                 )}
               </Button>
+              
+              {/* Template Download Button for Manual Log */}
+              {platform.id === 'manual_log' && onTemplateDownload && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 group/download transition-all duration-200 hover:shadow-md"
+                  onClick={() => onTemplateDownload(platform.id)}
+                >
+                  <Download className="w-4 h-4 mr-2 group-hover/download:scale-110 transition-transform" />
+                  Download Template
+                </Button>
+              )}
               
               <p className="text-xs text-muted-foreground text-center">
                 Supports CSV, XLSX, and XLS files

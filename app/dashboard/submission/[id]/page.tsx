@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/contexts/auth-context"
 import { getCountryFlag, getCountryName } from "@/lib/utils/country"
 import Image from "next/image"
 import { SubmissionWarning } from "@/app/components/submissions"
+import { TaxFieldInfo } from "@/app/components/submissions"
 
 
 interface ComponentState {
@@ -218,8 +219,6 @@ export default function SubmissionDetails() {
     })
   }
 
-  const totalFiles = state.submission?.platforms?.reduce((sum: number, platform: Platform) => sum + platform.files.length, 0) || 0
-
   // Loading state
   if (authLoading || state.isLoading) {
     return (
@@ -313,24 +312,24 @@ export default function SubmissionDetails() {
                 {/* Submission Summary */}
                 <Card className="shadow-sm">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <FileText className="w-5 h-5 text-blue-600" />
                       Submission Summary
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div className="text-center p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold text-white">{state.submission.platforms?.length || 0}</div>
-                        <p className="text-sm text-muted-foreground">Platforms</p>
+                        <div className="text-2xl font-bold text-white">{state.submission.submissionType === "pl_average_weighted" && "Average Weighted P&L"}</div>
+                        <p className="text-sm text-muted-foreground">Submission Type</p>
                       </div>
                       <div className="text-center p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold text-white">{totalFiles}</div>
-                        <p className="text-sm text-muted-foreground">Trade Files</p>
+                        <div className="text-2xl font-bold text-white">{state.submission.year}</div>
+                        <p className="text-sm text-muted-foreground">Year</p>
                       </div>
                       <div className="text-center p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold text-white">{state.submission.baseIrsPath ? '1' : '0'}</div>
-                        <p className="text-sm text-muted-foreground">IRS Files</p>
+                        <div className="text-2xl font-bold text-white">{state.submission.fiscalNumber}</div>
+                        <p className="text-sm text-muted-foreground">Fiscal Number</p>
                       </div>
                     </div>
                   </CardContent>
@@ -442,38 +441,56 @@ export default function SubmissionDetails() {
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div className="bg-white p-4 rounded-lg border">
-                          <div className="text-xl font-bold text-green-600">
-                            {formatCurrency(state.results.total_stocks_pl)}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-xl font-bold text-green-600">
+                              {formatCurrency(state.results.total_stocks_pl)}
+                            </div>
+                            <TaxFieldInfo fieldType="total_stocks_pl" />
                           </div>
                           <p className="text-sm font-medium text-gray-700">Total Stocks P&L</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
-                          <div className="text-xl font-bold text-gray-900">
-                            {formatCurrency(state.results.total_dividends_gross_amount)}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-xl font-bold text-gray-900">
+                              {formatCurrency(state.results.total_dividends_gross_amount)}
+                            </div>
+                            <TaxFieldInfo fieldType="total_dividends_gross" />
                           </div>
                           <p className="text-sm font-medium text-gray-700">Total Dividends (Gross)</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
-                          <div className="text-xl font-bold text-red-600">
-                            {formatCurrency(state.results.total_dividends_taxes_amount)}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-xl font-bold text-red-600">
+                              {formatCurrency(state.results.total_dividends_taxes_amount)}
+                            </div>
+                            <TaxFieldInfo fieldType="dividend_taxes" />
                           </div>
                           <p className="text-sm font-medium text-gray-700">Dividend Taxes</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
-                          <div className="text-xl font-bold text-gray-900">
-                            {formatCurrency(state.results.total_stocks_aquisition_amount)}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-xl font-bold text-gray-900">
+                              {formatCurrency(state.results.total_stocks_aquisition_amount)}
+                            </div>
+                            <TaxFieldInfo fieldType="total_acquisition" />
                           </div>
                           <p className="text-sm font-medium text-gray-700">Total Acquisition</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
-                          <div className="text-xl font-bold text-gray-900">
-                            {formatCurrency(state.results.total_stocks_realized_amount)}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-xl font-bold text-gray-900">
+                              {formatCurrency(state.results.total_stocks_realized_amount)}
+                            </div>
+                            <TaxFieldInfo fieldType="total_realized" />
                           </div>
                           <p className="text-sm font-medium text-gray-700">Total Realized</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
-                          <div className="text-xl font-bold text-gray-900">
-                            {formatCurrency(state.results.total_stocks_trade_expenses_amount)}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="text-xl font-bold text-gray-900">
+                              {formatCurrency(state.results.total_stocks_trade_expenses_amount)}
+                            </div>
+                            <TaxFieldInfo fieldType="trade_expenses" />
                           </div>
                           <p className="text-sm font-medium text-gray-700">Trade Expenses</p>
                         </div>
@@ -500,7 +517,6 @@ export default function SubmissionDetails() {
                             <div className="space-y-2">
                               {(() => {
                                 const groupedTrades = groupTradesByTicker(state.results.stock_pl_trades)
-                                const totalPages = Math.ceil(groupedTrades.length / STOCKS_PER_PAGE)
                                 const startIndex = (stockSummaryPage - 1) * STOCKS_PER_PAGE
                                 const endIndex = startIndex + STOCKS_PER_PAGE
                                 const paginatedTrades = groupedTrades.slice(startIndex, endIndex)
@@ -668,7 +684,6 @@ export default function SubmissionDetails() {
                                   </thead>
                                   <tbody>
                                     {(() => {
-                                      const totalPages = Math.ceil(state.results.year_dividends_by_country.length / DIVIDENDS_PER_PAGE)
                                       const startIndex = (dividendsPage - 1) * DIVIDENDS_PER_PAGE
                                       const endIndex = startIndex + DIVIDENDS_PER_PAGE
                                       const paginatedDividends = state.results.year_dividends_by_country.slice(startIndex, endIndex)

@@ -152,6 +152,12 @@ export class ApiClient {
     }, accessToken);
   }
 
+  async getManualLogTemplate(accessToken: string): Promise<{ message: string; template_path: string }> {
+    return this.request('/brokers/manual_template', {
+      method: 'GET',
+    }, accessToken);
+  }
+
   async uploadBrokerFiles(submissionId: string, brokerId: string, files: File[], accessToken: string): Promise<void> {
     const formData = new FormData();
     formData.append('user_id', submissionId);

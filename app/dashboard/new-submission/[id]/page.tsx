@@ -105,7 +105,7 @@ export default function Step1SubmissionName() {
         const submission = await withAuth((accessToken) =>
           apiClient.createSubmission(state.submissionName, state.submissionType, state.fiscalNumber === "" ? "123456789" : state.fiscalNumber, state.submissionYear, accessToken)
         )
-        router.push(`/dashboard/new-submission/${submission.id}/base-irs-file`)
+        router.push(`/dashboard/new-submission/${submission.id}/brokers`)
       } else {
         // Update submission title if it changed
         if (state.submission && state.submissionName !== state.submission.title) {
@@ -113,7 +113,7 @@ export default function Step1SubmissionName() {
             apiClient.updateSubmission(id as string, { title: state.submissionName }, accessToken)
           )
         }
-        router.push(`/dashboard/new-submission/${id}/base-irs-file`)
+        router.push(`/dashboard/new-submission/${id}/brokers`)
       }
 
     } catch (error) {
