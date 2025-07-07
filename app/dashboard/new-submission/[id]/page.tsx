@@ -3,22 +3,27 @@
 import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/app/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
+import { Card, CardContent } from "@/app/components/ui/card"
 import { Input } from "@/app/components/ui/input"
 import { Label } from "@/app/components/ui/label"
 import { ChevronRight, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
-import SubmissionHeader from "@/app/components/submissions/SubmissionHeader"
+import Navbar from "@/app/components/navbar"
 import ProgressIndicator from "@/app/components/submissions/ProgressIndicator"
 import { SubmissionResponse } from "@/lib/types/submission"
 import { toast } from "@/lib/hooks/use-toast"
 import { apiClient } from "@/lib/api/client"
 import { useAuth } from "@/lib/contexts/auth-context"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
+import { SubmissionWarning } from "@/app/components/submissions"
 
 // Types for component state
 interface ComponentState {
   submission: SubmissionResponse | null
   submissionName: string
+  submissionYear: string
+  submissionType: string
+  fiscalNumber: string
   isLoading: boolean
   isSubmitting: boolean
   error: string | null
@@ -32,6 +37,9 @@ export default function Step1SubmissionName() {
   const [state, setState] = useState<ComponentState>({
     submission: null,
     submissionName: "",
+    submissionYear: new Date().getFullYear().toString(),
+    submissionType: "pl_average_weighted",
+    fiscalNumber: "",
     isLoading: true,
     isSubmitting: false,
     error: null
@@ -95,7 +103,7 @@ export default function Step1SubmissionName() {
       // Create submission if new only / if not new, update the submission
       if (id === "new") {
         const submission = await withAuth((accessToken) =>
-          apiClient.createSubmission(state.submissionName, accessToken)
+          apiClient.createSubmission(state.submissionName, state.submissionType, state.fiscalNumber === "" ? "123456789" : state.fiscalNumber, state.submissionYear, accessToken)
         )
         router.push(`/dashboard/new-submission/${submission.id}/base-irs-file`)
       } else {
@@ -120,6 +128,18 @@ export default function Step1SubmissionName() {
     setState(prev => ({ ...prev, submissionName: name }))
   }, [])
 
+  const updateSubmissionYear = useCallback((year: string) => {
+    setState(prev => ({ ...prev, submissionYear: year }))
+  }, [])
+
+  const updateSubmissionType = useCallback((type: string) => {
+    setState(prev => ({ ...prev, submissionType: type }))
+  }, [])
+
+  const updateFiscalNumber = useCallback((number: string) => {
+    setState(prev => ({ ...prev, fiscalNumber: number }))
+  }, [])
+
   // Effects
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -133,7 +153,7 @@ export default function Step1SubmissionName() {
   if (authLoading || state.isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-2">
@@ -150,7 +170,7 @@ export default function Step1SubmissionName() {
   if (state.error) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
@@ -174,16 +194,16 @@ export default function Step1SubmissionName() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SubmissionHeader />
+      <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
 
       <div className="container mx-auto px-4 py-8">
         <ProgressIndicator currentStep={1} />
 
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Step 1: Name Your Submission</h1>
+          <h1 className="text-3xl font-bold mb-2">Step 1: Submission Details</h1>
           <p className="text-muted-foreground">
-            Give your submission a memorable name for easy identification
+            Fill in the details of your submission
           </p>
           {state.submission && (
             <p className="text-sm text-muted-foreground mt-2">
@@ -191,18 +211,14 @@ export default function Step1SubmissionName() {
             </p>
           )}
         </div>
-
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto mb-8">
           <form onSubmit={handleNext}>
-            {/* Submission Name */}
+            {/* Submission Details */}
             <Card className="mb-8 shadow-sm">
-              <CardHeader>
-                <CardTitle>Submission Details</CardTitle>
-                <CardDescription>Choose a name that helps you identify this submission easily</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Submission Name</Label>
+              {/* Submission Name */}
+              <CardContent>
+                <div className="space-y-2 mb-4">
+                  <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
                     placeholder="e.g., 2024 Tax Year, Q1 2024 Amendment, December Trading"
@@ -216,7 +232,60 @@ export default function Step1SubmissionName() {
                   </p>
                 </div>
               </CardContent>
+              {/* Submission Year */}
+              <CardContent>
+                <div className="space-y-2">
+                  <Label htmlFor="submission-year">Year</Label>
+                  <Input
+                    id="submission-year"
+                    placeholder="e.g., 2024"
+                    value={state.submissionYear}
+                    onChange={(e) => updateSubmissionYear(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    The reference year for the submission
+                  </p>
+                </div>
+              </CardContent>
+              {/* Submission Type */}
+              <CardContent>
+                <div className="space-y-2">
+                  <Label htmlFor="submission-type">Type</Label>
+                  <Select
+                    value={state.submissionType}
+                    onValueChange={(value) => updateSubmissionType(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a submission type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pl_average_weighted">Average Weighted</SelectItem>
+                      <SelectItem value="pl_detailed">Detailed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    The type of submission to be processed (Weighted or Detailed)
+                  </p>
+                </div>
+              </CardContent>
+              {/* Fiscal Identification Number (Optional) */}
+              <CardContent>
+                <div className="space-y-2">
+                  <Label htmlFor="fiscal-identification-number">Fiscal Identification Number</Label>
+                  <Input
+                    id="fiscal-identification-number"
+                    placeholder="e.g., 1234567890"
+                    value={state.fiscalNumber}
+                    onChange={(e) => updateFiscalNumber(e.target.value)}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    The fiscal identification number of the submission (optional)
+                  </p>
+                </div>
+              </CardContent>
             </Card>
+
+            <SubmissionWarning />
 
             {/* Navigation */}
             <div className="flex justify-end">

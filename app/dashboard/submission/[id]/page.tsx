@@ -6,13 +6,14 @@ import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Badge } from "@/app/components/ui/badge"
 import { FileText, Building2, Upload, CheckCircle, AlertCircle, Download, ExternalLink, ChevronDown, ChevronRight } from "lucide-react"
-import SubmissionHeader from "@/app/components/submissions/SubmissionHeader"
+import Navbar from "@/app/components/navbar"
 import { Platform, UploadedFile, SubmissionResponse, SubmissionStatus, SubmissionResults, StockTrade } from "@/lib/types/submission"
 import { toast } from "@/lib/hooks/use-toast"
 import { apiClient } from "@/lib/api/client"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { getCountryFlag, getCountryName } from "@/lib/utils/country"
 import Image from "next/image"
+import { SubmissionWarning } from "@/app/components/submissions"
 
 
 interface ComponentState {
@@ -42,6 +43,24 @@ export default function SubmissionDetails() {
   })
 
   const [expandedTickers, setExpandedTickers] = useState<Set<string>>(new Set())
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['results'])) // Summary collapsed by default
+  const [stockSummaryPage, setStockSummaryPage] = useState(1)
+  const [dividendsPage, setDividendsPage] = useState(1)
+  
+  const STOCKS_PER_PAGE = 6 // Number of stock tickers per page
+  const DIVIDENDS_PER_PAGE = 4 // Number of dividend countries per page
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(section)) {
+        newSet.delete(section)
+      } else {
+        newSet.add(section)
+      }
+      return newSet
+    })
+  }
 
   const fetchSubmissionDetails = useCallback(async () => {
     if (!id || typeof id !== 'string') {
@@ -205,7 +224,11 @@ export default function SubmissionDetails() {
   if (authLoading || state.isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar 
+          showBackButton={true} 
+          backButtonText="Back to Dashboard" 
+          backButtonHref="/dashboard" 
+        />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-2">
@@ -222,7 +245,11 @@ export default function SubmissionDetails() {
   if (state.error || !state.submission) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar 
+          showBackButton={true} 
+          backButtonText="Back to Dashboard" 
+          backButtonHref="/dashboard" 
+        />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
@@ -241,7 +268,11 @@ export default function SubmissionDetails() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SubmissionHeader />
+      <Navbar 
+        showBackButton={true} 
+        backButtonText="Back to Dashboard" 
+        backButtonHref="/dashboard" 
+      />
 
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -259,429 +290,552 @@ export default function SubmissionDetails() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-full mx-auto px-4 space-y-8">
 
           {/* Summary Section */}
           <div className="space-y-6">
-            <div className="flex items-center gap-4">
+            <div 
+              className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+              onClick={() => toggleSection('summary')}
+            >
+              {expandedSections.has('summary') ? (
+                <ChevronDown className="w-5 h-5 text-gray-500" />
+              ) : (
+                <ChevronRight className="w-5 h-5 text-gray-500" />
+              )}
               <h2 className="text-2xl font-bold text-gray-300">Summary</h2>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
-            {/* Submission Summary */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  Submission Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-white">{state.submission.platforms?.length || 0}</div>
-                    <p className="text-sm text-muted-foreground">Platforms</p>
-                  </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-white">{totalFiles}</div>
-                    <p className="text-sm text-muted-foreground">Trade Files</p>
-                  </div>
-                  <div className="text-center p-4 bg-muted/50 rounded-lg">
-                    <div className="text-2xl font-bold text-white">{state.submission.baseIrsPath ? '1' : '0'}</div>
-                    <p className="text-sm text-muted-foreground">IRS Files</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Platform Files */}
-            <Card className="shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-green-600" />
-                  Investment Platforms ({state.submission.platforms?.length || 0})
-                </CardTitle>
-                <CardDescription>
-                  Trade files from your broker platforms
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {!state.submission.platforms || state.submission.platforms.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No broker files uploaded</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {state.submission.platforms.map((platform: Platform) => (
-                      <div key={platform.id} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-3 h-3 rounded-full ${platform.color}`}></div>
-                            <span className="font-medium">{platform.name}</span>
-                          </div>
-                          <Badge variant="outline">{platform.files.length} files</Badge>
-                        </div>
-                        <div className="space-y-2">
-                          {platform.files.map((file: UploadedFile) => (
-                            <div key={file.id} className="flex items-center justify-between text-sm bg-muted/50 rounded p-2">
-                              <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-medium">{file.name}</span>
-                              </div>
-                              <span className="text-muted-foreground">{file.uploadedAt}</span>
-                            </div>
-                          ))}
-                        </div>
+            {/* Summary Content */}
+            {expandedSections.has('summary') && (
+              <div className="space-y-6">
+                {/* Submission Summary */}
+                <Card className="shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                      Submission Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold text-white">{state.submission.platforms?.length || 0}</div>
+                        <p className="text-sm text-muted-foreground">Platforms</p>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Base IRS File - Only show if it exists */}
-            {state.submission.baseIrsPath && (
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="w-5 h-5 text-blue-600" />
-                    Base IRS File
-                  </CardTitle>
-                  <CardDescription>
-                    Optional base IRS tax document
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm bg-green-50 border border-green-200 rounded p-3">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="font-medium">{state.submission.baseIrsPath.split('/').pop()}</span>
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold text-white">{totalFiles}</div>
+                        <p className="text-sm text-muted-foreground">Trade Files</p>
+                      </div>
+                      <div className="text-center p-4 bg-muted/50 rounded-lg">
+                        <div className="text-2xl font-bold text-white">{state.submission.baseIrsPath ? '1' : '0'}</div>
+                        <p className="text-sm text-muted-foreground">IRS Files</p>
+                      </div>
                     </div>
-                    <span className="text-muted-foreground">Uploaded</span>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Platform Files */}
+                <Card className="shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building2 className="w-5 h-5 text-green-600" />
+                      Investment Platforms ({state.submission.platforms?.length || 0})
+                    </CardTitle>
+                    <CardDescription>
+                      Trade files from your broker platforms
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {!state.submission.platforms || state.submission.platforms.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No broker files uploaded</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {state.submission.platforms.map((platform: Platform) => (
+                          <div key={platform.id} className="border rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full ${platform.color}`}></div>
+                                <span className="font-medium">{platform.name}</span>
+                              </div>
+                              <Badge variant="outline">{platform.files.length} files</Badge>
+                            </div>
+                            <div className="space-y-2">
+                              {platform.files.map((file: UploadedFile) => (
+                                <div key={file.id} className="flex items-center justify-between text-sm bg-muted/50 rounded p-2">
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-muted-foreground" />
+                                    <span className="font-medium">{file.name}</span>
+                                  </div>
+                                  <span className="text-muted-foreground">{file.uploadedAt}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Base IRS File - Only show if it exists */}
+                {state.submission.baseIrsPath && (
+                  <Card className="shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Upload className="w-5 h-5 text-blue-600" />
+                        Base IRS File
+                      </CardTitle>
+                      <CardDescription>
+                        Optional base IRS tax document
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between text-sm bg-green-50 border border-green-200 rounded p-3">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="font-medium">{state.submission.baseIrsPath.split('/').pop()}</span>
+                        </div>
+                        <span className="text-muted-foreground">Uploaded</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
           </div>
 
           {/* Results Section - Only show for completed submissions */}
           {state.submission.status === SubmissionStatus.COMPLETE && state.results && (
             <div className="space-y-6">
-              <div className="flex items-center gap-4">
+              <div 
+                className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                onClick={() => toggleSection('results')}
+              >
+                {expandedSections.has('results') ? (
+                  <ChevronDown className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-gray-500" />
+                )}
                 <h2 className="text-2xl font-bold text-gray-300">Results</h2>
                 <div className="flex-1 h-px bg-gray-200"></div>
               </div>
-              {/* Tax Summary */}
-              <Card className="shadow-sm">
-                 <CardHeader>
-                   <CardTitle className="flex items-center gap-2 text-white">
-                     <CheckCircle className="w-5 h-5 text-green-600" />
-                        Tax Calculation Results
-                     </CardTitle>
-                   <CardDescription>
-                     Summary of your tax calculations
-                   </CardDescription>
-                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="bg-white p-4 rounded-lg border">
-                      <div className="text-xl font-bold text-green-600">
-                        {formatCurrency(state.results.total_stocks_pl)}
+              
+              {/* Results Content */}
+              {expandedSections.has('results') && (
+                <div className="space-y-6">
+                  {/* Tax Summary */}
+                  <Card className="shadow-sm">
+                     <CardHeader>
+                       <CardTitle className="flex items-center gap-2 text-white">
+                         <CheckCircle className="w-5 h-5 text-green-600" />
+                         Tax Calculation Results
+                       </CardTitle>
+                       <CardDescription>
+                         Summary of your tax calculations
+                       </CardDescription>
+                     </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="bg-white p-4 rounded-lg border">
+                          <div className="text-xl font-bold text-green-600">
+                            {formatCurrency(state.results.total_stocks_pl)}
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">Total Stocks P&L</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border">
+                          <div className="text-xl font-bold text-gray-900">
+                            {formatCurrency(state.results.total_dividends_gross_amount)}
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">Total Dividends (Gross)</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border">
+                          <div className="text-xl font-bold text-red-600">
+                            {formatCurrency(state.results.total_dividends_taxes_amount)}
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">Dividend Taxes</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border">
+                          <div className="text-xl font-bold text-gray-900">
+                            {formatCurrency(state.results.total_stocks_aquisition_amount)}
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">Total Acquisition</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border">
+                          <div className="text-xl font-bold text-gray-900">
+                            {formatCurrency(state.results.total_stocks_realized_amount)}
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">Total Realized</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg border">
+                          <div className="text-xl font-bold text-gray-900">
+                            {formatCurrency(state.results.total_stocks_trade_expenses_amount)}
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">Trade Expenses</p>
+                        </div>
                       </div>
-                      <p className="text-sm font-medium text-gray-700">Total Stocks P&L</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border">
-                      <div className="text-xl font-bold text-gray-900">
-                        {formatCurrency(state.results.total_dividends_gross_amount)}
-                      </div>
-                      <p className="text-sm font-medium text-gray-700">Total Dividends (Gross)</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border">
-                      <div className="text-xl font-bold text-red-600">
-                        {formatCurrency(state.results.total_dividends_taxes_amount)}
-                      </div>
-                      <p className="text-sm font-medium text-gray-700">Dividend Taxes</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border">
-                      <div className="text-xl font-bold text-gray-900">
-                        {formatCurrency(state.results.total_stocks_aquisition_amount)}
-                      </div>
-                      <p className="text-sm font-medium text-gray-700">Total Acquisition</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border">
-                      <div className="text-xl font-bold text-gray-900">
-                        {formatCurrency(state.results.total_stocks_realized_amount)}
-                      </div>
-                      <p className="text-sm font-medium text-gray-700">Total Realized</p>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border">
-                      <div className="text-xl font-bold text-gray-900">
-                        {formatCurrency(state.results.total_stocks_trade_expenses_amount)}
-                      </div>
-                      <p className="text-sm font-medium text-gray-700">Trade Expenses</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
 
-              {/* Stock Summary Table */}
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    Stock Summary
-                  </CardTitle>
-                  <CardDescription>
-                    Overview of stock transactions and P&L
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {state.results.stock_pl_trades && state.results.stock_pl_trades.length > 0 ? (
-                    <div className="space-y-2">
-                      {groupTradesByTicker(state.results.stock_pl_trades).map((stockGroup) => {
-                        const isExpanded = expandedTickers.has(stockGroup.ticker)
-                        
-                        return (
-                          <div key={stockGroup.ticker} className="border border-gray-200 rounded-lg overflow-hidden">
-                            {/* Ticker Header Row */}
-                            <div 
-                              className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                              onClick={() => toggleTicker(stockGroup.ticker)}
-                            >
-                              <div className="flex items-center gap-3">
-                                {isExpanded ? (
-                                  <ChevronDown className="w-4 h-4 text-gray-500" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4 text-gray-500" />
-                                )}
-                                <span className="font-bold text-lg text-gray-900">{stockGroup.ticker}</span>
-                                <Badge variant="secondary">{stockGroup.totalTrades} trades</Badge>
-                              </div>
-                              <div className="text-right">
-                                <div className={`text-lg font-bold ${stockGroup.totalPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {formatCurrency(stockGroup.totalPL)}
-                                </div>
-                                <div className="text-sm text-gray-500">Total P&L</div>
-                              </div>
+                  {/* Two Column Layout for Stock Summary and Dividends */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+                    {/* Stock Summary Table */}
+                    <Card className="shadow-sm flex flex-col h-full">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                          Stock Summary
+                        </CardTitle>
+                        <CardDescription>
+                          Overview of stock transactions and P&L
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="flex-1 flex flex-col">
+                        {state.results.stock_pl_trades && state.results.stock_pl_trades.length > 0 ? (
+                          <div className="flex flex-col space-y-4 flex-1">
+                            <div className="space-y-2">
+                              {(() => {
+                                const groupedTrades = groupTradesByTicker(state.results.stock_pl_trades)
+                                const totalPages = Math.ceil(groupedTrades.length / STOCKS_PER_PAGE)
+                                const startIndex = (stockSummaryPage - 1) * STOCKS_PER_PAGE
+                                const endIndex = startIndex + STOCKS_PER_PAGE
+                                const paginatedTrades = groupedTrades.slice(startIndex, endIndex)
+                                
+                                return (
+                                  <>
+                                    {paginatedTrades.map((stockGroup) => {
+                                      const isExpanded = expandedTickers.has(stockGroup.ticker)
+                                      
+                                      return (
+                                        <div key={stockGroup.ticker} className="border border-gray-200 rounded-lg overflow-hidden">
+                                          {/* Ticker Header Row */}
+                                          <div 
+                                            className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+                                            onClick={() => toggleTicker(stockGroup.ticker)}
+                                          >
+                                            <div className="flex items-center gap-3">
+                                              {isExpanded ? (
+                                                <ChevronDown className="w-4 h-4 text-gray-500" />
+                                              ) : (
+                                                <ChevronRight className="w-4 h-4 text-gray-500" />
+                                              )}
+                                              <span className="font-bold text-lg text-gray-900">{stockGroup.ticker}</span>
+                                              <Badge variant="secondary">{stockGroup.totalTrades} trades</Badge>
+                                            </div>
+                                            <div className="text-right">
+                                              <div className={`text-lg font-bold ${stockGroup.totalPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {formatCurrency(stockGroup.totalPL)}
+                                              </div>
+                                              <div className="text-sm text-gray-500">Total P&L</div>
+                                            </div>
+                                          </div>
+
+                                          {/* Expanded Trade Details */}
+                                          {isExpanded && (
+                                            <div className="bg-white">
+                                              <div className="overflow-x-auto">
+                                                <table className="w-full">
+                                                  <thead className="bg-gray-50 border-t">
+                                                    <tr>
+                                                      <th className="text-left p-3 text-sm font-medium text-gray-700">Buy Date</th>
+                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">Buy Amount</th>
+                                                      <th className="text-left p-3 text-sm font-medium text-gray-700">Sell Date</th>
+                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">Sell Amount</th>
+                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">Expenses</th>
+                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">P&L</th>
+                                                      <th className="text-center p-3 text-sm font-medium text-gray-700">Country</th>
+                                                    </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                    {stockGroup.trades.map((trade, tradeIndex) => {
+                                                      const tradePL = trade.realized_amount - trade.buy_amount - trade.trade_expenses
+                                                      
+                                                      return (
+                                                        <tr key={tradeIndex} className={tradeIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                          <td className="p-3 text-sm text-gray-900">
+                                                            {formatDate(trade.buy_day, trade.buy_month, trade.buy_year)}
+                                                          </td>
+                                                          <td className="p-3 text-sm text-right text-gray-900">
+                                                            {formatCurrency(trade.buy_amount)}
+                                                          </td>
+                                                          <td className="p-3 text-sm text-gray-900">
+                                                            {formatDate(trade.realized_day, trade.realized_month, trade.realized_year)}
+                                                          </td>
+                                                          <td className="p-3 text-sm text-right text-gray-900">
+                                                            {formatCurrency(trade.realized_amount)}
+                                                          </td>
+                                                          <td className="p-3 text-sm text-right text-gray-900">
+                                                            {formatCurrency(trade.trade_expenses)}
+                                                          </td>
+                                                          <td className={`p-3 text-sm text-right font-medium ${tradePL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                            {formatCurrency(tradePL)}
+                                                          </td>
+                                                          <td className="p-3 text-sm text-center">
+                                                            <Image 
+                                                              src={getCountryFlag(trade.country_id)} 
+                                                              alt={`${getCountryName(trade.country_id)} flag`}
+                                                              className="w-5 h-3 mx-auto rounded"
+                                                              width={20}
+                                                              height={16}
+                                                              onError={(e) => {
+                                                                e.currentTarget.style.display = 'none';
+                                                              }}
+                                                            />
+                                                          </td>
+                                                        </tr>
+                                                      )
+                                                    })}
+                                                  </tbody>
+                                                </table>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )
+                                    })}
+                                  </>
+                                )
+                              })()}
                             </div>
+                            
+                            {/* Stock Summary Pagination */}
+                            {(() => {
+                              const groupedTrades = groupTradesByTicker(state.results?.stock_pl_trades || [])
+                              const totalPages = Math.ceil(groupedTrades.length / STOCKS_PER_PAGE)
+                              
+                              return totalPages > 1 ? (
+                                <div className="flex items-center justify-between">
+                                  <div className="text-sm text-gray-700">
+                                    Page {stockSummaryPage} of {totalPages}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setStockSummaryPage(prev => Math.max(1, prev - 1))}
+                                      disabled={stockSummaryPage === 1}
+                                    >
+                                      Previous
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setStockSummaryPage(prev => Math.min(totalPages, prev + 1))}
+                                      disabled={stockSummaryPage === totalPages}
+                                    >
+                                      Next
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : null
+                            })()}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-muted-foreground">
+                            <p>No stock transactions found</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
 
-                            {/* Expanded Trade Details */}
-                            {isExpanded && (
-                              <div className="bg-white">
-                                <div className="overflow-x-auto">
-                                  <table className="w-full">
-                                    <thead className="bg-gray-50 border-t">
-                                      <tr>
-                                        <th className="text-left p-3 text-sm font-medium text-gray-700">Buy Date</th>
-                                        <th className="text-right p-3 text-sm font-medium text-gray-700">Buy Amount</th>
-                                        <th className="text-left p-3 text-sm font-medium text-gray-700">Sell Date</th>
-                                        <th className="text-right p-3 text-sm font-medium text-gray-700">Sell Amount</th>
-                                        <th className="text-right p-3 text-sm font-medium text-gray-700">Expenses</th>
-                                        <th className="text-right p-3 text-sm font-medium text-gray-700">P&L</th>
-                                        <th className="text-center p-3 text-sm font-medium text-gray-700">Country</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {stockGroup.trades.map((trade, tradeIndex) => {
-                                        const tradePL = trade.realized_amount - trade.buy_amount - trade.trade_expenses
-                                        
-                                        return (
-                                          <tr key={tradeIndex} className={tradeIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                            <td className="p-3 text-sm text-gray-900">
-                                              {formatDate(trade.buy_day, trade.buy_month, trade.buy_year)}
-                                            </td>
-                                            <td className="p-3 text-sm text-right text-gray-900">
-                                              {formatCurrency(trade.buy_amount)}
-                                            </td>
-                                            <td className="p-3 text-sm text-gray-900">
-                                              {formatDate(trade.realized_day, trade.realized_month, trade.realized_year)}
-                                            </td>
-                                            <td className="p-3 text-sm text-right text-gray-900">
-                                              {formatCurrency(trade.realized_amount)}
-                                            </td>
-                                            <td className="p-3 text-sm text-right text-gray-900">
-                                              {formatCurrency(trade.trade_expenses)}
-                                            </td>
-                                            <td className={`p-3 text-sm text-right font-medium ${tradePL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                              {formatCurrency(tradePL)}
-                                            </td>
-                                            <td className="p-3 text-sm text-center">
+                    {/* Right Column: Dividends and Download Reports */}
+                    <div className="flex flex-col space-y-6 h-full">
+                      {/* Dividends by Country Table */}
+                      <Card className="shadow-sm flex-1 flex flex-col">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Building2 className="w-5 h-5 text-green-600" />
+                            Dividends by Country
+                          </CardTitle>
+                          <CardDescription>
+                            Total dividends received by country
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-1 flex flex-col">
+                          {state.results.year_dividends_by_country && state.results.year_dividends_by_country.length > 0 ? (
+                            <div className="flex flex-col space-y-4 flex-1">
+                              <div className="overflow-x-auto">
+                                <table className="w-full border-collapse">
+                                  <thead>
+                                    <tr className="border-b">
+                                      <th className="text-left p-3 font-medium text-gray-300">Country</th>
+                                      <th className="text-right p-3 font-medium text-gray-300">Total Dividends (€)</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(() => {
+                                      const totalPages = Math.ceil(state.results.year_dividends_by_country.length / DIVIDENDS_PER_PAGE)
+                                      const startIndex = (dividendsPage - 1) * DIVIDENDS_PER_PAGE
+                                      const endIndex = startIndex + DIVIDENDS_PER_PAGE
+                                      const paginatedDividends = state.results.year_dividends_by_country.slice(startIndex, endIndex)
+                                      
+                                      return paginatedDividends.map((dividend, index) => (
+                                        <tr key={dividend.dividend_country_code} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                                          <td className="p-3">
+                                            <div className="flex items-center gap-2">
                                               <Image 
-                                                src={getCountryFlag(trade.country_id)} 
-                                                alt={`${getCountryName(trade.country_id)} flag`}
-                                                className="w-5 h-3 mx-auto rounded"
+                                                src={getCountryFlag(dividend.dividend_country_code)} 
+                                                alt={`${getCountryName(dividend.dividend_country_code)} flag`}
+                                                className="w-5 h-4 object-cover rounded"
                                                 width={20}
                                                 height={16}
-                                                onError={(e) => {
-                                                  e.currentTarget.style.display = 'none';
+                                                onError={() => {
+                                                  // Handle image loading error
+                                                  console.log('Failed to load flag image');
                                                 }}
                                               />
-                                            </td>
-                                          </tr>
-                                        )
-                                      })}
-                                    </tbody>
-                                  </table>
+                                              <span className="font-medium text-gray-900">{getCountryName(dividend.dividend_country_code)}</span>
+                                            </div>
+                                          </td>
+                                          <td className="p-3 text-right font-medium text-gray-900">
+                                            {formatCurrency(dividend.total_dividends)}
+                                          </td>
+                                        </tr>
+                                      ))
+                                    })()}
+                                  </tbody>
+                                </table>
+                              </div>
+                              
+                              {/* Dividends Pagination */}
+                              {(() => {
+                                const totalPages = Math.ceil((state.results?.year_dividends_by_country?.length || 0) / DIVIDENDS_PER_PAGE)
+                                
+                                if (totalPages > 1) {
+                                  return (
+                                    <div className="flex items-center justify-between">
+                                      <div className="text-sm text-gray-700">
+                                        Page {dividendsPage} of {totalPages}
+                                      </div>
+                                      <div className="flex gap-2">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => setDividendsPage(prev => Math.max(1, prev - 1))}
+                                          disabled={dividendsPage === 1}
+                                        >
+                                          Previous
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => setDividendsPage(prev => Math.min(totalPages, prev + 1))}
+                                          disabled={dividendsPage === totalPages}
+                                        >
+                                          Next
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )
+                                }
+                                return null
+                              })()}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <p>No dividend data found</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      {/* Download Reports */}
+                      <Card className="shadow-sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Download className="w-5 h-5 text-blue-600" />
+                            Download Reports
+                          </CardTitle>
+                          <CardDescription>
+                            Generated tax reports and documents
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {state.results.irs_tax_report_annex_j_url && (
+                              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-blue-600" />
+                                  <span className="font-medium">IRS Tax Report (Annex J)</span>
                                 </div>
+                                <a 
+                                  href={state.results.irs_tax_report_annex_j_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                >
+                                  <Button variant="outline" size="sm">
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    Download
+                                  </Button>
+                                </a>
+                              </div>
+                            )}
+                            {state.results.irs_tax_report_full_report_url && (
+                              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-blue-600" />
+                                  <span className="font-medium">Full Tax Report</span>
+                                </div>
+                                <a 
+                                  href={state.results.irs_tax_report_full_report_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                >
+                                  <Button variant="outline" size="sm">
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    Download
+                                  </Button>
+                                </a>
+                              </div>
+                            )}
+                            {state.results.stocks_pl_file_details_url && (
+                              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-green-600" />
+                                  <span className="font-medium">Stocks P&L Details</span>
+                                </div>
+                                <a 
+                                  href={state.results.stocks_pl_file_details_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                >
+                                  <Button variant="outline" size="sm">
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    Download
+                                  </Button>
+                                </a>
+                              </div>
+                            )}
+                            {state.results.dividends_file_details_url && (
+                              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-purple-600" />
+                                  <span className="font-medium">Dividends Details</span>
+                                </div>
+                                <a 
+                                  href={state.results.dividends_file_details_url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                >
+                                  <Button variant="outline" size="sm">
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    Download
+                                  </Button>
+                                </a>
                               </div>
                             )}
                           </div>
-                        )
-                      })}
+                        </CardContent>
+                      </Card>
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>No stock transactions found</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Dividends by Country Table */}
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="w-5 h-5 text-green-600" />
-                    Dividends by Country
-                  </CardTitle>
-                  <CardDescription>
-                    Total dividends received by country
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {state.results.year_dividends_by_country && state.results.year_dividends_by_country.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-left p-3 font-medium text-gray-300">Country</th>
-                            <th className="text-right p-3 font-medium text-gray-300">Total Dividends (€)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {state.results.year_dividends_by_country.map((dividend, index) => (
-                            <tr key={dividend.dividend_country_code} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                              <td className="p-3">
-                                <div className="flex items-center gap-2">
-                                  <Image 
-                                    src={getCountryFlag(dividend.dividend_country_code)} 
-                                    alt={`${getCountryName(dividend.dividend_country_code)} flag`}
-                                    className="w-5 h-4 object-cover rounded"
-                                    width={20}
-                                    height={16}
-                                    onError={() => {
-                                      // Handle image loading error
-                                      console.log('Failed to load flag image');
-                                    }}
-                                  />
-                                  <span className="font-medium text-gray-900">{getCountryName(dividend.dividend_country_code)}</span>
-                                </div>
-                              </td>
-                              <td className="p-3 text-right font-medium text-gray-900">
-                                {formatCurrency(dividend.total_dividends)}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>No dividend data found</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Download Reports */}
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Download className="w-5 h-5 text-blue-600" />
-                    Download Reports
-                  </CardTitle>
-                  <CardDescription>
-                    Generated tax reports and documents
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {state.results.irs_tax_report_annex_j_url && (
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-blue-600" />
-                          <span className="font-medium">IRS Tax Report (Annex J)</span>
-                        </div>
-                        <a 
-                          href={state.results.irs_tax_report_annex_j_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          <Button variant="outline" size="sm">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Download
-                          </Button>
-                        </a>
-                      </div>
-                    )}
-                    {state.results.irs_tax_report_full_report_url && (
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-blue-600" />
-                          <span className="font-medium">Full Tax Report</span>
-                        </div>
-                        <a 
-                          href={state.results.irs_tax_report_full_report_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          <Button variant="outline" size="sm">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Download
-                          </Button>
-                        </a>
-                      </div>
-                    )}
-                    {state.results.stocks_pl_file_details_url && (
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-green-600" />
-                          <span className="font-medium">Stocks P&L Details</span>
-                        </div>
-                        <a 
-                          href={state.results.stocks_pl_file_details_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          <Button variant="outline" size="sm">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Download
-                          </Button>
-                        </a>
-                      </div>
-                    )}
-                    {state.results.dividends_file_details_url && (
-                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-purple-600" />
-                          <span className="font-medium">Dividends Details</span>
-                        </div>
-                        <a 
-                          href={state.results.dividends_file_details_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          <Button variant="outline" size="sm">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Download
-                          </Button>
-                        </a>
-                      </div>
-                    )}
                   </div>
-                </CardContent>
-              </Card>
+                  <SubmissionWarning />
+                </div>
+              )}
             </div>
           )}
 
@@ -720,8 +874,6 @@ export default function SubmissionDetails() {
               </CardContent>
             </Card>
           )}
-
-
 
         </div>
       </div>

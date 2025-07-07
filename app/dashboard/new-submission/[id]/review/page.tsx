@@ -6,9 +6,9 @@ import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Badge } from "@/app/components/ui/badge"
 import { CheckCircle, ArrowLeft, FileText, Building2, Upload, AlertCircle, Loader2 } from "lucide-react"
-import SubmissionHeader from "@/app/components/submissions/SubmissionHeader"
+import Navbar from "@/app/components/navbar"
 import ProgressIndicator from "@/app/components/submissions/ProgressIndicator"
-import { Platform, UploadedFile, SubmissionResponse, SubmissionStatus } from "@/lib/types/submission"
+import { Platform, UploadedFile, SubmissionResponse } from "@/lib/types/submission"
 import { toast } from "@/lib/hooks/use-toast"
 import { apiClient } from "@/lib/api/client"
 import { useAuth } from "@/lib/contexts/auth-context"
@@ -76,42 +76,20 @@ export default function Step3Preview() {
     setIsProcessing(true)
     
     try {
-      // Step 1: Update status to PROCESSING when user clicks "Process Submission"
       await withAuth((accessToken) =>
-        apiClient.updateSubmissionStatus(id, SubmissionStatus.PROCESSING, accessToken)
-      )
-
-      // Step 2: Calculate taxes with default values
-      const taxResults = await withAuth((accessToken) =>
-        apiClient.calculateTaxes(
-          id,
-          {
-            p_l_analysis_year: new Date().getFullYear() - 1, // Previous year
-            p_l_calculation_type: "pl_average_weighted" // pl_average_weighted or pl_detailed
-          },
-          accessToken
-        )
-      )
-
-      // Step 3: If tax calculation succeeds, store results and update status to COMPLETE
-      await withAuth((accessToken) =>
-        apiClient.storeSubmissionResults(id, taxResults as Record<string, unknown>, accessToken)
-      )
-
-      await withAuth((accessToken) =>
-        apiClient.updateSubmissionStatus(id, SubmissionStatus.COMPLETE, accessToken)
+        apiClient.calculateTaxes(id, accessToken)
       )
 
       toast.success("Processing complete", "Your tax calculation has been completed successfully")
-      
+
       // Navigate to dashboard
       router.push("/dashboard")
     } catch (error) {
       console.error('Error processing submission:', error)
-      
+        
       // If tax calculation fails, keep status as PROCESSING for manual review
       // (We already updated it to PROCESSING at the start)
-      toast.error("Processing failed", "We'll review your submission manually. Check back later for updates.")
+      toast.success("Submission is being processed. Check back later for updates.")
       
       // Still navigate to dashboard so user can see the PROCESSING status
       router.push("/dashboard")
@@ -139,7 +117,7 @@ export default function Step3Preview() {
   if (authLoading || state.isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-2">
@@ -156,7 +134,7 @@ export default function Step3Preview() {
   if (state.error) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
@@ -179,7 +157,7 @@ export default function Step3Preview() {
   if (!state.submission) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">Submission Not Found</h2>
@@ -196,7 +174,7 @@ export default function Step3Preview() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SubmissionHeader />
+      <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
 
       <div className="container mx-auto px-4 py-8">
         <ProgressIndicator currentStep={3} />

@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<ClientUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isTokenValid, setIsTokenValid] = useState(false);
 
   // Token management methods
   const setTokens = useCallback((accessToken: string, refreshToken: string): void => {
@@ -50,7 +51,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, []);
 
-
+  const getCookieValue = useCallback((name: string): string | null => {
+    if (typeof window !== 'undefined') {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) {
+        return parts.pop()?.split(';').shift() || null;
+      }
+    }
+    return null;
+  }, []);
 
   const clearTokens = useCallback((): void => {
     if (typeof window !== 'undefined') {
@@ -85,8 +95,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, []);
 
-
-
   // Validate token expiration without making API calls
   const isTokenExpired = useCallback((token: string): boolean => {
     try {
@@ -116,11 +124,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const currentUser = getStoredUser();
     const accessToken = getAccessToken();
+    const cookieToken = getCookieValue(ACCESS_TOKEN_KEY);
     
     // If no tokens or user data, definitely not authenticated
     if (!accessToken || !currentUser) {
       setUser(null);
+      setIsTokenValid(false);
       return false;
+    }
+
+    // Check if cookies were cleared by middleware (tokens exist in localStorage but not in cookies)
+    // This indicates the middleware found the tokens invalid - try to refresh before clearing
+    if (accessToken && !cookieToken) {
+      console.log('Cookies cleared by middleware, attempting token refresh');
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+      if (refreshToken) {
+        try {
+          const data = await apiClient.refreshToken(refreshToken);
+          const newAccessToken = data.accessToken;
+          
+          // Update access token in storage and cookies
+          localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+          document.cookie = `${ACCESS_TOKEN_KEY}=${newAccessToken}; path=/; max-age=${60 * 15}`;
+          
+          // Token refreshed successfully, user remains authenticated
+          setUser(currentUser);
+          setIsTokenValid(true);
+          return true;
+        } catch {
+          // Refresh failed, now clear auth state
+          console.log('Token refresh failed, clearing auth state');
+          clearTokens();
+          setUser(null);
+          setIsTokenValid(false);
+          return false;
+        }
+      } else {
+        // No refresh token, clear auth state
+        console.log('No refresh token available, clearing auth state');
+        clearTokens();
+        setUser(null);
+        setIsTokenValid(false);
+        return false;
+      }
     }
 
     // Check if access token is expired
@@ -138,35 +184,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Token refreshed successfully, user remains authenticated
           setUser(currentUser);
+          setIsTokenValid(true);
           return true;
         } catch {
           // Refresh failed, clear auth state
           clearTokens();
           setUser(null);
-          setTimeout(() => {
-            if (window.location.pathname !== '/') {
-              window.location.href = '/';
-            }
-          }, 100);
+          setIsTokenValid(false);
           return false;
         }
       } else {
         // No refresh token, clear auth state
         clearTokens();
         setUser(null);
-        setTimeout(() => {
-          if (window.location.pathname !== '/') {
-            window.location.href = '/';
-          }
-        }, 100);
+        setIsTokenValid(false);
         return false;
       }
     }
 
     // Tokens exist and are not expired, user is authenticated
     setUser(currentUser);
+    setIsTokenValid(true);
     return true;
-  }, [getStoredUser, getAccessToken, isTokenExpired, clearTokens]);
+  }, [getStoredUser, getAccessToken, getCookieValue, isTokenExpired, clearTokens]);
 
   const refreshUser = useCallback(async () => {
     await checkAuthStatus();
@@ -215,6 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Store user
     setStoredUser(clientUser);
     setUser(clientUser);
+    setIsTokenValid(true);
     
     return clientUser;
   }, [setTokens, setStoredUser]);
@@ -227,10 +268,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const clearAuth = useCallback((): void => {
     clearTokens();
     setUser(null);
-    // Redirect to home page
-    if (typeof window !== 'undefined') {
-      window.location.href = '/';
-    }
+    setIsTokenValid(false);
   }, [clearTokens]);
 
   // Helper method for authenticated API calls with automatic token refresh
@@ -242,12 +280,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!accessToken) {
         clearTokens();
         setUser(null);
-        // This is to ensure that we are not stuck in a Redirecting page
-        setTimeout(() => {
-          if (window.location.pathname !== '/') {
-            window.location.href = '/';
-          }
-        }, 100);
+        setIsTokenValid(false);
         throw new Error('No access token available');
       }
 
@@ -264,12 +297,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!refreshToken) {
             clearTokens();
             setUser(null);
-            // This is to ensure that we are not stuck in a Redirecting page
-            setTimeout(() => {
-              if (window.location.pathname !== '/') {
-                window.location.href = '/';
-              }
-            }, 100);
+            setIsTokenValid(false);
             throw error;
           }
 
@@ -287,13 +315,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch {
             clearTokens();
             setUser(null);
-
-            // This is to ensure that we are not stuck in a Redirecting page
-            setTimeout(() => {
-              if (window.location.pathname !== '/') {
-                window.location.href = '/';
-              }
-            }, 100);
+            setIsTokenValid(false);
             throw error;
           }
         }
@@ -305,8 +327,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     user,
-    // Only report authenticated after hydration to prevent server/client mismatch
-    isAuthenticated: isHydrated && !!user && !!getAccessToken(),
+    // Only report authenticated after hydration and with valid token
+    isAuthenticated: isHydrated && !!user && isTokenValid,
     isLoading,
     isHydrated,
     setAuthData,

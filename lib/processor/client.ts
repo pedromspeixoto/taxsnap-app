@@ -44,7 +44,7 @@ export class ProcessorClient {
     
     if (!response.ok) {
       const error = await response.json();
-      console.error('Client error', error);
+      console.error('[CLIENT] ProcessorClient.request', error);
       throw new Error(error.message || 'An error occurred');
     }
 

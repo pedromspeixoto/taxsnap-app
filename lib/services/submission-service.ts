@@ -86,10 +86,20 @@ export class SubmissionServiceImpl implements SubmissionService {
   }
 
   async calculateTaxes(request: CalculateTaxesRequest): Promise<CalculateTaxesResponse> {
+    await this.repository.updateStatus(request.user_id, SubmissionStatus.PROCESSING);
     try {
-      return await this.client.calculateTaxes(request);
+      const result = await this.client.calculateTaxes(request);
+      await this.storeSubmissionResults(request.user_id, result);
+      if (result.status === 'error' || result.status === 'failed') {
+        // Keep status as processing
+        console.error('[SERVICE] submissionService.calculateTaxes', result.error_message);
+        // TODO: send email to backoffice with error message
+      } else {
+        await this.repository.updateStatus(request.user_id, SubmissionStatus.COMPLETE);
+      }
+      return result;
     } catch (error) {
-      console.error('Error calculating taxes', error);
+      console.error('[SERVICE] submissionService.calculateTaxes', error);
       throw error;
     }
   }
@@ -220,6 +230,9 @@ export class SubmissionServiceImpl implements SubmissionService {
       status: submission.status,
       title: submission.title,
       baseIrsPath: submission.baseIrsPath,
+      submissionType: submission.submissionType,
+      fiscalNumber: submission.fiscalNumber,
+      year: submission.year,
       createdAt: submission.createdAt,
       updatedAt: submission.updatedAt,
       platforms

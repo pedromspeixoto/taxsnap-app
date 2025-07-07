@@ -7,9 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app
 import { Badge } from "@/app/components/ui/badge"
 import { Input } from "@/app/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select"
-import { Plus, FileText, LogOut, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, FileText, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
-import Logo from "@/app/components/ui/logo"
+import Navbar from "@/app/components/navbar"
 import { SubmissionResponse, SubmissionStatus } from "@/lib/types/submission"
 import { formatDate } from "@/lib/utils/date"
 import { apiClient } from "@/lib/api/client"
@@ -22,7 +22,7 @@ interface DashboardState {
 }
 
 export default function Dashboard() {
-  const { clearAuth, withAuth, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { withAuth, isAuthenticated, isLoading: authLoading } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [currentPage, setCurrentPage] = useState(1)
@@ -69,9 +69,7 @@ export default function Dashboard() {
     }
   }, [authLoading, isAuthenticated, fetchSubmissions])
 
-  const handleLogout = () => {
-    clearAuth()
-  }
+
 
   const getStatusColor = (status: SubmissionStatus) => {
     switch (status) {
@@ -158,19 +156,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">Welcome back!</span>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         {/* Dashboard Header */}

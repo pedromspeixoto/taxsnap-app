@@ -16,11 +16,11 @@ export interface UploadBrokerFilesRequest {
   broker_id: string;
   files: File[];
 }
-
+  
 export interface CalculateTaxesRequest {
   user_id: string;
   nif?: string;
-  p_l_analysis_year: number;
+  p_l_analysis_year?: number;
   p_l_calculation_type: "pl_average_weighted" | "pl_detailed";
 }
 

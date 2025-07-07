@@ -5,14 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { Badge } from "@/app/components/ui/badge"
-import { Mail, CheckCircle, Clock, RefreshCw, LogOut } from "lucide-react"
+import { Mail, CheckCircle, Clock, RefreshCw } from "lucide-react"
 import { useAuth } from "@/lib/contexts/auth-context"
+import Navbar from "@/app/components/navbar"
 import Logo from "@/app/components/ui/logo"
 
 function VerifyAccountContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, isAuthenticated, clearAuth, isLoading } = useAuth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const [isResending, setIsResending] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [userEmail, setUserEmail] = useState("")
@@ -58,10 +59,7 @@ function VerifyAccountContent() {
     }
   }
 
-  const handleLogout = () => {
-          clearAuth()
-    router.push("/")
-  }
+
 
   const handleCheckVerification = () => {
     // Refresh the page to check if user is now verified
@@ -70,16 +68,7 @@ function VerifyAccountContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Logo />
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto">

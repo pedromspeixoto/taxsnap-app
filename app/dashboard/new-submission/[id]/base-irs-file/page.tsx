@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/app/components/ui/button"
 import { ChevronRight, ArrowLeft, Loader2 } from "lucide-react"
-import SubmissionHeader from "@/app/components/submissions/SubmissionHeader"
+import Navbar from "@/app/components/navbar"
 import ProgressIndicator from "@/app/components/submissions/ProgressIndicator"
 import IrsFileUpload from "@/app/components/submissions/IrsFileUpload"
 import BrokerPlatforms from "@/app/components/submissions/BrokerPlatforms"
@@ -196,7 +196,7 @@ export default function Step2PlatformsAndIRS() {
   if (authLoading || state.isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-2">
@@ -213,7 +213,7 @@ export default function Step2PlatformsAndIRS() {
   if (state.error) {
     return (
       <div className="min-h-screen bg-background">
-        <SubmissionHeader />
+        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
@@ -235,7 +235,7 @@ export default function Step2PlatformsAndIRS() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SubmissionHeader />
+      <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
 
       <div className="container mx-auto px-4 py-8">
         <ProgressIndicator currentStep={2} />

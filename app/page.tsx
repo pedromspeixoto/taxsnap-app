@@ -8,6 +8,7 @@ import { Badge } from "@/app/components/ui/badge"
 import { CheckCircle, TrendingUp, Shield, Clock, Users, FileText } from "lucide-react"
 import { AuthDialog } from "@/app/components/auth-dialog"
 import { useAuth } from "@/lib/contexts/auth-context"
+import Navbar from "@/app/components/navbar"
 import Logo from "@/app/components/ui/logo"
 
 export default function LandingPage() {
@@ -17,36 +18,23 @@ export default function LandingPage() {
   useEffect(() => {
     // Only redirect if hydrated, not loading, and user is authenticated
     if (isHydrated && !isLoading && isAuthenticated && user) {
+      // Add a small delay to ensure auth state is stable
       const timer = setTimeout(() => {
-        try {
-          if (user.verified) {
-            router.push("/dashboard")
-          } else {
-            router.push("/verify-account")
-          }
-        } catch {
-          // Fallback to window.location
-          if (user.verified) {
-            window.location.href = "/dashboard"
-          } else {
-            window.location.href = "/verify-account"
+        const targetPath = user.verified ? "/dashboard" : "/verify-account"
+        
+        // Only redirect if we're not already on the target path
+        if (window.location.pathname !== targetPath) {
+          try {
+            router.push(targetPath)
+          } catch (error) {
+            console.error('Router push failed:', error)
+            // Fallback to window.location as last resort
+            window.location.href = targetPath
           }
         }
-      }, 100) // Small delay to ensure router is ready
+      }, 100)
       
-      // Add a failsafe timeout
-      const failsafeTimer = setTimeout(() => {
-        if (user.verified) {
-          window.location.href = "/dashboard"
-        } else {
-          window.location.href = "/verify-account"
-        }
-      }, 2000) // 2 second failsafe
-      
-      return () => {
-        clearTimeout(timer)
-        clearTimeout(failsafeTimer)
-      }
+      return () => clearTimeout(timer)
     }
   }, [isHydrated, isAuthenticated, user, isLoading, router])
 
@@ -76,16 +64,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Logo />
-          <div className="flex items-center space-x-4">
-            <AuthDialog mode="login" />
-            <AuthDialog mode="register" />
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="py-20 px-4">

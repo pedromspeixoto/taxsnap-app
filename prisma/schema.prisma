@@ -41,6 +41,9 @@ enum SubmissionStatus {
 model Submission {
   id              String           @id @default(uuid())
   userId          String           @map("user_id")
+  submissionType  String           @default("pl_average_weighted") @map("submission_type")
+  fiscalNumber    String           @default("123456789") @map("fiscal_number")
+  year            Int              @default(2025)  
   status          SubmissionStatus @default(DRAFT)
   title           String
   baseIrsPath     String?          @map("base_irs_path")

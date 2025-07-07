@@ -135,11 +135,27 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // If accessing home page with invalid token, clear cookies to prevent client-side confusion
+  if (pathname === '/' && token) {
+    try {
+      await jwtService.verifyAccessToken(token);
+      // Token is valid, proceed normally
+      return NextResponse.next();
+    } catch {
+      // Invalid token, clear cookies and proceed to home page
+      const response = NextResponse.next();
+      response.cookies.delete('taxsnap_access_token');
+      response.cookies.delete('taxsnap_refresh_token');
+      return response;
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
+    '/',  // Add home page to allow middleware to clean up invalid tokens
     '/dashboard/:path*', 
     '/login', 
     '/register',

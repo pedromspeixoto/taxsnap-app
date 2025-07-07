@@ -176,10 +176,10 @@ export class ApiClient {
   }
 
   // Submission methods
-  async createSubmission(title: string, accessToken: string): Promise<SubmissionResponse> {
+  async createSubmission(title: string, submissionType: string, fiscalNumber: string, year: string, accessToken: string): Promise<SubmissionResponse> {
     return this.request('/submissions', {
       method: 'POST',
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({ title, submissionType, fiscalNumber, year }),
     }, accessToken);
   }
 
@@ -224,12 +224,10 @@ export class ApiClient {
 
   async calculateTaxes(
     submissionId: string, 
-    data: { nif?: string; p_l_analysis_year: number; p_l_calculation_type: "pl_average_weighted" | "pl_detailed" }, 
     accessToken: string
   ): Promise<CalculateTaxesResponse> {
     return this.request(`/submissions/${submissionId}/calculate-taxes`, {
       method: 'POST',
-      body: JSON.stringify(data),
     }, accessToken);
   }
 }
