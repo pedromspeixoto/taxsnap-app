@@ -69,6 +69,10 @@ export function unauthorized(message: string = 'Unauthorized') {
   return NextResponse.json({ message }, { status: 401 });
 }
 
+export function forbidden(message: string = 'Forbidden') {
+  return NextResponse.json({ message }, { status: 403 });
+}
+
 export function ok<T>(data: T) {
   return NextResponse.json(data);
 }
@@ -82,6 +86,10 @@ export function notFound(message = 'Not found'): NextResponse {
     { message, error: 'Not Found' },
     { status: 404 }
   );
+}
+
+export function conflict(message: string = 'Conflict') {
+  return NextResponse.json({ message }, { status: 409 });
 }
 
 // Error handling

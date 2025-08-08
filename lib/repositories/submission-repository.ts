@@ -31,6 +31,9 @@ function mapPrismaSubmissionToSubmission(prismaSubmission: PrismaSubmissionWithF
     status: prismaSubmission.status as SubmissionStatus,
     title: prismaSubmission.title,
     baseIrsPath: prismaSubmission.baseIrsPath || undefined,
+    submissionType: prismaSubmission.submissionType || undefined,
+    fiscalNumber: prismaSubmission.fiscalNumber || undefined,
+    year: prismaSubmission.year || undefined,
     createdAt: prismaSubmission.createdAt,
     updatedAt: prismaSubmission.updatedAt,
     // Preserve files if they exist
@@ -46,9 +49,12 @@ class PrismaSubmissionRepository implements SubmissionRepository {
         title: data.title,
         status: SubmissionStatus.DRAFT,
         baseIrsPath: data.baseIrsPath,
+        submissionType: data.submissionType,
+        fiscalNumber: data.fiscalNumber,
+        year: data.year,
       }
     });
-    
+
     return mapPrismaSubmissionToSubmission(submission);
   }
 

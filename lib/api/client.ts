@@ -152,6 +152,12 @@ export class ApiClient {
     }, accessToken);
   }
 
+  async getManualLogTemplate(accessToken: string): Promise<{ message: string; template_path: string }> {
+    return this.request('/brokers/manual_template', {
+      method: 'GET',
+    }, accessToken);
+  }
+
   async uploadBrokerFiles(submissionId: string, brokerId: string, files: File[], accessToken: string): Promise<void> {
     const formData = new FormData();
     formData.append('user_id', submissionId);
@@ -169,17 +175,24 @@ export class ApiClient {
     }, accessToken);
   }
 
-  async deleteSubmissionFile(fileId: string, accessToken: string): Promise<void> {
-    return this.request(`/submissions/files/${fileId}`, {
+  async deleteSubmissionFile(submissionId: string, fileId: string, accessToken: string): Promise<void> {
+    return this.request(`/submissions/${submissionId}/files/${fileId}`, {
       method: 'DELETE',
     }, accessToken);
   }
 
+  async deleteAllSubmissionFiles(submissionId: string, brokerId: string, accessToken: string): Promise<void> {
+    return this.request(`/submissions/${submissionId}/files`, {
+      method: 'DELETE',
+      body: JSON.stringify({ broker_id: brokerId }),
+    }, accessToken);
+  }
+
   // Submission methods
-  async createSubmission(title: string, accessToken: string): Promise<SubmissionResponse> {
+  async createSubmission(title: string, submissionType: string, fiscalNumber: string, year: number, accessToken: string): Promise<SubmissionResponse> {
     return this.request('/submissions', {
       method: 'POST',
-      body: JSON.stringify({ title }),
+      body: JSON.stringify({ title, submissionType, fiscalNumber, year }),
     }, accessToken);
   }
 
@@ -224,12 +237,10 @@ export class ApiClient {
 
   async calculateTaxes(
     submissionId: string, 
-    data: { nif?: string; p_l_analysis_year: number; p_l_calculation_type: "pl_average_weighted" | "pl_detailed" }, 
     accessToken: string
   ): Promise<CalculateTaxesResponse> {
     return this.request(`/submissions/${submissionId}/calculate-taxes`, {
       method: 'POST',
-      body: JSON.stringify(data),
     }, accessToken);
   }
 }

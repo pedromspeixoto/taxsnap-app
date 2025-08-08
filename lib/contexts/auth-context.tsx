@@ -22,14 +22,43 @@ interface AuthContextType {
   checkAuthStatus: () => Promise<boolean>;
   // Helper method for authenticated API calls
   withAuth: <T>(apiCall: (accessToken: string) => Promise<T>) => Promise<T>;
+  // Direct access token method with automatic refresh
+  getValidAccessToken: () => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Helper function to check if current path is a protected route
+const isOnProtectedRoute = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const protectedRoutes = ['/dashboard'];
+  return protectedRoutes.some(route => window.location.pathname.startsWith(route));
+};
+
+// Helper function to redirect to home if on protected route
+const redirectIfOnProtectedRoute = (): void => {
+  if (typeof window !== 'undefined' && isOnProtectedRoute()) {
+    window.location.href = '/';
+  }
+};
+
+// Generic function to handle authentication failure - clears tokens, user state, and redirects
+const handleAuthFailure = (
+  clearTokens: () => void,
+  setUser: (user: ClientUser | null) => void,
+  setIsTokenValid: (valid: boolean) => void
+): void => {
+  clearTokens();
+  setUser(null);
+  setIsTokenValid(false);
+  redirectIfOnProtectedRoute();
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<ClientUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isTokenValid, setIsTokenValid] = useState(false);
 
   // Token management methods
   const setTokens = useCallback((accessToken: string, refreshToken: string): void => {
@@ -50,7 +79,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, []);
 
-
+  const getCookieValue = useCallback((name: string): string | null => {
+    if (typeof window !== 'undefined') {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) {
+        return parts.pop()?.split(';').shift() || null;
+      }
+    }
+    return null;
+  }, []);
 
   const clearTokens = useCallback((): void => {
     if (typeof window !== 'undefined') {
@@ -85,8 +123,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, []);
 
-
-
   // Validate token expiration without making API calls
   const isTokenExpired = useCallback((token: string): boolean => {
     try {
@@ -116,11 +152,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const currentUser = getStoredUser();
     const accessToken = getAccessToken();
+    const cookieToken = getCookieValue(ACCESS_TOKEN_KEY);
     
     // If no tokens or user data, definitely not authenticated
     if (!accessToken || !currentUser) {
-      setUser(null);
+      handleAuthFailure(clearTokens, setUser, setIsTokenValid);
       return false;
+    }
+
+    // Check if cookies were cleared by middleware (tokens exist in localStorage but not in cookies)
+    // This indicates the middleware found the tokens invalid - try to refresh before clearing
+    if (accessToken && !cookieToken) {
+      console.log('Cookies cleared by middleware, attempting token refresh');
+      const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+      if (refreshToken) {
+        try {
+          const data = await apiClient.refreshToken(refreshToken);
+          const newAccessToken = data.accessToken;
+          
+          // Update access token in storage and cookies
+          localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+          document.cookie = `${ACCESS_TOKEN_KEY}=${newAccessToken}; path=/; max-age=${60 * 15}`;
+          
+          // Token refreshed successfully, user remains authenticated
+          setUser(currentUser);
+          setIsTokenValid(true);
+          return true;
+        } catch {
+          // Refresh failed, now clear auth state
+          console.log('Token refresh failed, clearing auth state');
+          handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+          return false;
+        }
+      } else {
+        // No refresh token, clear auth state
+        console.log('No refresh token available, clearing auth state');
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+        return false;
+      }
     }
 
     // Check if access token is expired
@@ -138,35 +207,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           
           // Token refreshed successfully, user remains authenticated
           setUser(currentUser);
+          setIsTokenValid(true);
           return true;
         } catch {
           // Refresh failed, clear auth state
-          clearTokens();
-          setUser(null);
-          setTimeout(() => {
-            if (window.location.pathname !== '/') {
-              window.location.href = '/';
-            }
-          }, 100);
+          handleAuthFailure(clearTokens, setUser, setIsTokenValid);
           return false;
         }
       } else {
         // No refresh token, clear auth state
-        clearTokens();
-        setUser(null);
-        setTimeout(() => {
-          if (window.location.pathname !== '/') {
-            window.location.href = '/';
-          }
-        }, 100);
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
         return false;
       }
     }
 
     // Tokens exist and are not expired, user is authenticated
     setUser(currentUser);
+    setIsTokenValid(true);
     return true;
-  }, [getStoredUser, getAccessToken, isTokenExpired, clearTokens]);
+  }, [getStoredUser, getAccessToken, getCookieValue, isTokenExpired, clearTokens]);
 
   const refreshUser = useCallback(async () => {
     await checkAuthStatus();
@@ -215,6 +274,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Store user
     setStoredUser(clientUser);
     setUser(clientUser);
+    setIsTokenValid(true);
     
     return clientUser;
   }, [setTokens, setStoredUser]);
@@ -227,34 +287,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const clearAuth = useCallback((): void => {
     clearTokens();
     setUser(null);
-    // Redirect to home page
+    setIsTokenValid(false);
+    // Redirect to home when explicitly logging out
     if (typeof window !== 'undefined') {
       window.location.href = '/';
     }
   }, [clearTokens]);
 
-  // Helper method for authenticated API calls with automatic token refresh
-  const withAuth = useCallback(
-    async function<T>(apiCall: (accessToken: string) => Promise<T>): Promise<T> {
-      // Get tokens directly from localStorage to avoid dependency on callback functions
-      const accessToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
-      
-      if (!accessToken) {
-        clearTokens();
-        setUser(null);
-        // This is to ensure that we are not stuck in a Redirecting page
-        setTimeout(() => {
-          if (window.location.pathname !== '/') {
-            window.location.href = '/';
-          }
-        }, 100);
-        throw new Error('No access token available');
+  // Direct access token method with automatic refresh
+  const getValidAccessToken = useCallback(async (): Promise<string> => {
+    // Get tokens directly from localStorage
+    const accessToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
+    
+    if (!accessToken) {
+      handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+      throw new Error('No access token available');
+    }
+
+    // Check if token is expired
+    if (isTokenExpired(accessToken)) {
+      const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
+      if (!refreshToken) {
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+        throw new Error('No refresh token available');
       }
 
       try {
+        const data = await apiClient.refreshToken(refreshToken);
+        const newAccessToken = data.accessToken;
+        
+        // Update access token in storage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+          document.cookie = `${ACCESS_TOKEN_KEY}=${newAccessToken}; path=/; max-age=${60 * 15}`;
+        }
+
+        return newAccessToken;
+      } catch {
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+        throw new Error('Token refresh failed');
+      }
+    }
+
+    return accessToken;
+  }, [clearTokens, isTokenExpired]);
+
+  // Helper method for authenticated API calls with automatic token refresh
+  const withAuth = useCallback(
+    async function<T>(apiCall: (accessToken: string) => Promise<T>): Promise<T> {
+      try {
+        const accessToken = await getValidAccessToken();
         return await apiCall(accessToken);
       } catch (error: unknown) {
-        // If unauthorized, try to refresh token
+        // If unauthorized, try to refresh token once more
         if (error instanceof Error && (
           error.message.includes('401') || 
           error.message.includes('Unauthorized') ||
@@ -262,14 +347,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         )) {
           const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
           if (!refreshToken) {
-            clearTokens();
-            setUser(null);
-            // This is to ensure that we are not stuck in a Redirecting page
-            setTimeout(() => {
-              if (window.location.pathname !== '/') {
-                window.location.href = '/';
-              }
-            }, 100);
+            handleAuthFailure(clearTokens, setUser, setIsTokenValid);
             throw error;
           }
 
@@ -285,28 +363,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             return await apiCall(newAccessToken);
           } catch {
-            clearTokens();
-            setUser(null);
-
-            // This is to ensure that we are not stuck in a Redirecting page
-            setTimeout(() => {
-              if (window.location.pathname !== '/') {
-                window.location.href = '/';
-              }
-            }, 100);
+            handleAuthFailure(clearTokens, setUser, setIsTokenValid);
             throw error;
           }
         }
         throw error;
       }
     },
-    [clearTokens] // Only depend on clearTokens which is stable
+    [getValidAccessToken, clearTokens]
   );
 
   const value: AuthContextType = {
     user,
-    // Only report authenticated after hydration to prevent server/client mismatch
-    isAuthenticated: isHydrated && !!user && !!getAccessToken(),
+    // Only report authenticated after hydration and with valid token
+    isAuthenticated: isHydrated && !!user && isTokenValid,
     isLoading,
     isHydrated,
     setAuthData,
@@ -315,6 +385,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser,
     checkAuthStatus,
     withAuth,
+    getValidAccessToken,
   };
 
   return (

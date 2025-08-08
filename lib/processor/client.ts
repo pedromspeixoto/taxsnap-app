@@ -1,4 +1,4 @@
-import { SupportedBrokersResponse, UploadBrokerFilesRequest, CalculateTaxesRequest, CalculateTaxesResponse } from '../types/broker';
+import { SupportedBrokersResponse, UploadBrokerFilesRequest, CalculateTaxesRequest, CalculateTaxesResponse, UploadBrokerFilesResponse } from '../types/broker';
 
 const API_BASE_URL = process.env.PROCESSOR_BASE_URL || 'https://taxsnap-app-661634892388.europe-west1.run.app';
 
@@ -44,7 +44,7 @@ export class ProcessorClient {
     
     if (!response.ok) {
       const error = await response.json();
-      console.error('Client error', error);
+      console.error('[CLIENT] ProcessorClient.request', error);
       throw new Error(error.message || 'An error occurred');
     }
 
@@ -57,7 +57,13 @@ export class ProcessorClient {
     });
   }
 
-  async uploadBrokerFiles(request: UploadBrokerFilesRequest): Promise<void> {
+  async getManualLogTemplate(): Promise<{ message: string; template_path: string }> {
+    return this.request(`/download_manual_trades_upoad_template`, {
+      method: 'GET',
+    });
+  }
+
+  async uploadBrokerFiles(request: UploadBrokerFilesRequest): Promise<UploadBrokerFilesResponse> {
     const formData = new FormData();
     
     // Add required fields
@@ -69,9 +75,27 @@ export class ProcessorClient {
       formData.append('files', file, file.name);
     });
 
-    return this.request(`/upload_broker_documents`, {
+    const response = await this.request(`/upload_broker_documents`, {
       method: 'POST',
       body: formData,
+    });
+
+    console.log('[CLIENT] ProcessorClient.uploadBrokerFiles', response);
+
+    return response as UploadBrokerFilesResponse;
+  }
+
+  async deleteSubmissionFile(submissionId: string, brokerId: string, fileType: string, fileName: string): Promise<void> {
+    return this.request(`/delete_user_broker_documents`, {
+      method: 'POST',
+      body: JSON.stringify({ user_id: submissionId, broker_id: brokerId, document_type: fileType, document_name: fileName }),
+    });
+  }
+
+  async deleteAllSubmissionFiles(submissionId: string, brokerId: string): Promise<void> {
+    return this.request(`/delete_user_broker_documents`, {
+      method: 'POST',
+      body: JSON.stringify({ user_id: submissionId, broker_id: brokerId, document_type: '', document_name: '' }),
     });
   }
 

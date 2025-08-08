@@ -24,6 +24,9 @@ export interface Submission {
   status: SubmissionStatus
   title: string
   baseIrsPath?: string
+  submissionType?: string
+  fiscalNumber?: string
+  year?: number
   createdAt: Date
   updatedAt: Date
 }
@@ -32,6 +35,9 @@ export interface CreateSubmissionRequest {
   userId: string
   title: string
   baseIrsPath?: string
+  submissionType?: string
+  fiscalNumber?: string
+  year?: number
 }
 
 export interface UpdateSubmissionRequest {
@@ -54,6 +60,9 @@ export interface SubmissionResponse {
   status: SubmissionStatus
   title: string
   baseIrsPath?: string
+  submissionType?: string
+  fiscalNumber?: string
+  year?: number
   createdAt: Date
   updatedAt: Date
   files?: SubmissionFile[]

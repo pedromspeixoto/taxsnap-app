@@ -7,6 +7,7 @@ import { prisma } from '../repositories/prisma';
 export interface SubmissionService {
   // Broker management
   getBrokers(): Promise<BrokerResponse>;
+  getManualLogTemplate(): Promise<{ message: string; template_path: string }>;
   // File management
   uploadBrokerFiles(submissionId: string, broker: string, files: File[]): Promise<void>;
   deleteSubmissionFile(fileId: string): Promise<void>;
@@ -42,7 +43,17 @@ export class SubmissionServiceImpl implements SubmissionService {
 
       return { brokers };
     } catch (error) {
-      console.error('Error fetching brokers', error);
+      console.error('[SERVICE] submissionService.getBrokers', error);
+      throw error;
+    }
+  }
+
+  async getManualLogTemplate(): Promise<{ message: string; template_path: string }> {
+    try {
+      const response = await this.client.getManualLogTemplate();
+      return response;
+    } catch (error) {
+      console.error('[SERVICE] submissionService.getManualLogTemplate', error);
       throw error;
     }
   }
@@ -50,46 +61,95 @@ export class SubmissionServiceImpl implements SubmissionService {
   async uploadBrokerFiles(submissionId: string, broker: string, files: File[]): Promise<void> {
     try {
       // First, upload files to the external processor API
-      await this.client.uploadBrokerFiles({
+      const response = await this.client.uploadBrokerFiles({
         user_id: submissionId,
         broker_id: broker,
         files: files,
       });
 
-      // Only if the processor API call succeeds, save file metadata to our database
-      const fileRecords = files.map(file => ({
-        submissionId,
-        brokerName: broker,
-        fileType: file.type || 'application/octet-stream',
-        filePath: file.name, // For now, using filename as path since processor handles actual storage
-      }));
+      console.log('response', response);
+      const fileRecords: {
+        submissionId: string;
+        brokerName: string;
+        fileType: string;
+        filePath: string;
+      }[] = [];
 
+      // Loop response (there might be files that were skipped)
+      response.forEach(file => {
+        if (file.error_message === undefined || file.error_message === '' || file.error_message === null || file.error_message === 'None' || file.error_message === 'none') {
+          fileRecords.push({
+            submissionId,
+            brokerName: broker,
+            fileType: file.document_type,
+            filePath: file.filepath,
+          });
+        }
+      });
+
+      // Only if the processor API call succeeds, save file metadata to our database
       await prisma.submissionFile.createMany({
         data: fileRecords,
       });
 
     } catch (error) {
-      console.error('Error uploading broker files', error);
+      console.error('[SERVICE] submissionService.uploadBrokerFiles', error);
       throw error;
     }
   }
 
   async deleteSubmissionFile(fileId: string): Promise<void> {
     try {
+      // Delete file from our database
+      const file = await prisma.submissionFile.findUnique({
+        where: { id: fileId }
+      });
+
+      if (!file) {
+        throw new Error('File not found');
+      }
+
+      // Delete file from external processor API
+      await this.client.deleteSubmissionFile(file.submissionId, file.brokerName, file.fileType, file.filePath);
+
       await prisma.submissionFile.delete({
         where: { id: fileId }
       });
     } catch (error) {
-      console.error('Error deleting submission file', error);
+      console.error('[SERVICE] submissionService.deleteSubmissionFile', error);
+      throw error;
+    }
+  }
+
+  async deleteAllSubmissionFiles(submissionId: string, brokerId: string): Promise<void> {
+    try {
+      await this.client.deleteAllSubmissionFiles(submissionId, brokerId);
+
+      // Delete files from our database
+      await prisma.submissionFile.deleteMany({
+        where: { submissionId, brokerName: brokerId }
+      });
+    } catch (error) {
+      console.error('[SERVICE] submissionService.deleteAllSubmissionFiles', error);
       throw error;
     }
   }
 
   async calculateTaxes(request: CalculateTaxesRequest): Promise<CalculateTaxesResponse> {
+    await this.repository.updateStatus(request.user_id, SubmissionStatus.PROCESSING);
     try {
-      return await this.client.calculateTaxes(request);
+      const result = await this.client.calculateTaxes(request);
+      await this.storeSubmissionResults(request.user_id, result);
+      if (result.status === 'error' || result.status === 'failed') {
+        // Keep status as processing
+        console.error('[SERVICE] submissionService.calculateTaxes', result.error_message);
+        // TODO: send email to backoffice with error message
+      } else {
+        await this.repository.updateStatus(request.user_id, SubmissionStatus.COMPLETE);
+      }
+      return result;
     } catch (error) {
-      console.error('Error calculating taxes', error);
+      console.error('[SERVICE] submissionService.calculateTaxes', error);
       throw error;
     }
   }
@@ -142,7 +202,7 @@ export class SubmissionServiceImpl implements SubmissionService {
         },
       });
     } catch (error) {
-      console.error('Error storing submission results', error);
+      console.error('[SERVICE] submissionService.storeSubmissionResults', error);
       throw error;
     }
   }
@@ -156,7 +216,7 @@ export class SubmissionServiceImpl implements SubmissionService {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return result?.results as any || null;
     } catch (error) {
-      console.error('Error fetching submission results', error);
+      console.error('[SERVICE] submissionService.getSubmissionResults', error);
       throw error;
     }
   }
@@ -220,6 +280,9 @@ export class SubmissionServiceImpl implements SubmissionService {
       status: submission.status,
       title: submission.title,
       baseIrsPath: submission.baseIrsPath,
+      submissionType: submission.submissionType,
+      fiscalNumber: submission.fiscalNumber,
+      year: submission.year,
       createdAt: submission.createdAt,
       updatedAt: submission.updatedAt,
       platforms
