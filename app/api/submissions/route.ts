@@ -29,17 +29,17 @@ export async function POST(request: NextRequest) {
       return badRequest('Fiscal number is required');
     }
 
-    if (!year?.trim()) {
+    if (!year) {
       return badRequest('Year is required');
     }
 
     // Validate year is a number
-    if (isNaN(parseInt(year))) {
+    if (isNaN(year)) {
       return badRequest('Year must be a number');
     }
 
     // Validate year is a valid year
-    if (parseInt(year) < 2020) {
+    if (year < 2020) {
       return badRequest('Year must be greater than 2020');
     }
 

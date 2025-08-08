@@ -22,6 +22,8 @@ interface AuthContextType {
   checkAuthStatus: () => Promise<boolean>;
   // Helper method for authenticated API calls
   withAuth: <T>(apiCall: (accessToken: string) => Promise<T>) => Promise<T>;
+  // Direct access token method with automatic refresh
+  getValidAccessToken: () => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -292,21 +294,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [clearTokens]);
 
-  // Helper method for authenticated API calls with automatic token refresh
-  const withAuth = useCallback(
-    async function<T>(apiCall: (accessToken: string) => Promise<T>): Promise<T> {
-      // Get tokens directly from localStorage to avoid dependency on callback functions
-      const accessToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
-      
-      if (!accessToken) {
+  // Direct access token method with automatic refresh
+  const getValidAccessToken = useCallback(async (): Promise<string> => {
+    // Get tokens directly from localStorage
+    const accessToken = typeof window !== 'undefined' ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
+    
+    if (!accessToken) {
+      handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+      throw new Error('No access token available');
+    }
+
+    // Check if token is expired
+    if (isTokenExpired(accessToken)) {
+      const refreshToken = typeof window !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
+      if (!refreshToken) {
         handleAuthFailure(clearTokens, setUser, setIsTokenValid);
-        throw new Error('No access token available');
+        throw new Error('No refresh token available');
       }
 
       try {
+        const data = await apiClient.refreshToken(refreshToken);
+        const newAccessToken = data.accessToken;
+        
+        // Update access token in storage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
+          document.cookie = `${ACCESS_TOKEN_KEY}=${newAccessToken}; path=/; max-age=${60 * 15}`;
+        }
+
+        return newAccessToken;
+      } catch {
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+        throw new Error('Token refresh failed');
+      }
+    }
+
+    return accessToken;
+  }, [clearTokens, isTokenExpired]);
+
+  // Helper method for authenticated API calls with automatic token refresh
+  const withAuth = useCallback(
+    async function<T>(apiCall: (accessToken: string) => Promise<T>): Promise<T> {
+      try {
+        const accessToken = await getValidAccessToken();
         return await apiCall(accessToken);
       } catch (error: unknown) {
-        // If unauthorized, try to refresh token
+        // If unauthorized, try to refresh token once more
         if (error instanceof Error && (
           error.message.includes('401') || 
           error.message.includes('Unauthorized') ||
@@ -337,7 +370,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
     },
-    [clearTokens] // Only depend on clearTokens which is stable
+    [getValidAccessToken, clearTokens]
   );
 
   const value: AuthContextType = {
@@ -352,6 +385,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser,
     checkAuthStatus,
     withAuth,
+    getValidAccessToken,
   };
 
   return (

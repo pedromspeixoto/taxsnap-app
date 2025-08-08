@@ -16,6 +16,17 @@ export interface UploadBrokerFilesRequest {
   broker_id: string;
   files: File[];
 }
+
+export type UploadBrokerFilesResponse = {
+  user_id: string;
+  status: string;
+  error_message: string;
+  broker: string;
+  document_type: string;
+  document_name: string;
+  filepath: string;
+  file_hash: string;
+}[]
   
 export interface CalculateTaxesRequest {
   user_id: string;
@@ -28,3 +39,4 @@ export interface CalculateTaxesResponse {
   // Add response fields based on what the API returns
   [key: string]: unknown;
 }
+

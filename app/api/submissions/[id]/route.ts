@@ -20,6 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return ok(submission);
   } catch (error) {
+    console.error('[API] GET /submissions/[id]:', error);
     return handleError(error);
   }
 }
@@ -43,6 +44,7 @@ export async function PUT(request: NextRequest,{ params }: { params: Promise<{ i
     const updatedSubmission = await submissionService.updateSubmission(id, { title });
     return ok(updatedSubmission);
   } catch (error) {
+    console.error('[API] PUT /submissions/[id]:', error);
     return handleError(error);
   }
 }

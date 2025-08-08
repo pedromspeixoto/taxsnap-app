@@ -2,14 +2,14 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/app/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card"
-import { Badge } from "@/app/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { CheckCircle, TrendingUp, Shield, Clock, Users, FileText } from "lucide-react"
-import { AuthDialog } from "@/app/components/auth-dialog"
+import { AuthDialog } from "@/components/auth-dialog"
 import { useAuth } from "@/lib/contexts/auth-context"
-import Navbar from "@/app/components/navbar"
-import Logo from "@/app/components/ui/logo"
+import { Navbar } from "@/components/navbar"
+import { Logo } from "@/components/ui/logo"
 
 export default function LandingPage() {
   const router = useRouter()

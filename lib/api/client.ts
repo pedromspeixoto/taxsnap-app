@@ -175,14 +175,21 @@ export class ApiClient {
     }, accessToken);
   }
 
-  async deleteSubmissionFile(fileId: string, accessToken: string): Promise<void> {
-    return this.request(`/submissions/files/${fileId}`, {
+  async deleteSubmissionFile(submissionId: string, fileId: string, accessToken: string): Promise<void> {
+    return this.request(`/submissions/${submissionId}/files/${fileId}`, {
       method: 'DELETE',
     }, accessToken);
   }
 
+  async deleteAllSubmissionFiles(submissionId: string, brokerId: string, accessToken: string): Promise<void> {
+    return this.request(`/submissions/${submissionId}/files`, {
+      method: 'DELETE',
+      body: JSON.stringify({ broker_id: brokerId }),
+    }, accessToken);
+  }
+
   // Submission methods
-  async createSubmission(title: string, submissionType: string, fiscalNumber: string, year: string, accessToken: string): Promise<SubmissionResponse> {
+  async createSubmission(title: string, submissionType: string, fiscalNumber: string, year: number, accessToken: string): Promise<SubmissionResponse> {
     return this.request('/submissions', {
       method: 'POST',
       body: JSON.stringify({ title, submissionType, fiscalNumber, year }),
