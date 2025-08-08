@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { apiClient } from '@/lib/api/client'
 import { SubmissionResponse, SubmissionResults } from '@/lib/types/submission'
+import { submissionService } from '@/lib/services/submission-service'
 
 // Action state types
 export interface ActionState {
@@ -229,7 +230,8 @@ export async function uploadBrokerFilesAction(
       return { error: 'Not authenticated' }
     }
 
-    await apiClient.uploadBrokerFiles(submissionId, platformId, files, accessToken)
+    // Call service directly to avoid re-encoding files through our API route
+    await submissionService.uploadBrokerFiles(submissionId, platformId, files)
 
     revalidatePath(`/dashboard/new-submission/${submissionId}/brokers`)
     
