@@ -54,7 +54,7 @@
     "login": "Entrar",
     "register": "Registar",
     "logout": "Sair",
-    "backToDashboard": "Voltar ao Painel"
+    "backToDashboard": "Voltar ao Dashboard"
   },
   "common": {
     "loading": "A carregar...",
@@ -83,7 +83,7 @@
     }
   },
   "dashboard": {
-    "title": "Painel",
+    "title": "Dashboard",
     "subtitle": "Gerir as suas submissões fiscais e acompanhar o progresso",
     "newSubmission": "Nova Submissão",
     "searchPlaceholder": "Procurar por nome ou número de transações...",
@@ -134,7 +134,7 @@
     "amount": "Montante",
     "showDetails": "Mostrar Detalhes",
     "hideDetails": "Ocultar Detalhes",
-    "backToDashboard": "Voltar ao Painel",
+    "backToDashboard": "Voltar ao Dashboard",
     "downloadReports": "Descarregar Relatórios",
     "generatedReports": "Relatórios fiscais e documentos gerados"
   },
@@ -156,7 +156,7 @@
     "referenceYear": "O ano de referência para a submissão",
     "submissionType": "O tipo de submissão a ser processada (Ponderada ou Detalhada)",
     "fiscalIdOptional": "O número de identificação fiscal da submissão (opcional)",
-    "nameHelper": "Este nome ajudará a identificar a sua submissão no painel",
+    "nameHelper": "Este nome ajudará a identificar a sua submissão no Dashboard",
     "submissionSummary": "Resumo da Submissão",
     "investmentPlatforms": "Plataformas de Investimento",
     "tradeFiles": "Ficheiros de negociação das suas plataformas de corretagem",
@@ -200,7 +200,7 @@
     "verifying": "A verificar o seu email...",
     "success": "Email verificado com sucesso!",
     "error": "Verificação falhada",
-    "redirecting": "A redirecionar para o painel...",
+    "redirecting": "A redirecionar para o Dashboard...",
     "tokenMissing": "Token de verificação em falta",
     "accountVerification": "Verificação da Conta",
     "checkEmail": "Verifique o seu email",
@@ -231,7 +231,7 @@
       "chooseBroker": "Escolha uma plataforma de corretora...",
       "addMoreFiles": "Adicionar Mais Ficheiros",
       "uploadTradeFiles": "Carregar Ficheiros de Negociação",
-      "downloadTemplate": "Descarregar Modelo",
+      "downloadTemplate": "Descarregar Template",
       "removePlatform": "Remover Plataforma",
       "dragDropFiles": "Arraste e largue ficheiros aqui ou clique para navegar",
       "supportedFormats": "Suporta ficheiros CSV e Excel",
@@ -308,7 +308,7 @@
     "verifyingEmail": "A verificar o seu email...",
     "pleaseWaitVerifying": "Por favor aguarde enquanto verificamos a sua conta.",
     "emailVerifiedSuccessfully": "Email Verificado com Sucesso!",
-    "redirectingToDashboard": "A redirecioná-lo para o seu painel em alguns segundos...",
+    "redirectingToDashboard": "A redirecioná-lo para o seu Dashboard em alguns segundos...",
     "verificationFailed": "Verificação Falhada",
     "backToHome": "Voltar ao Início",
     "verificationTokenMissing": "Token de verificação em falta",
