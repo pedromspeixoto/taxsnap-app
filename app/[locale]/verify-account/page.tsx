@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -14,6 +15,7 @@ function VerifyAccountContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, isAuthenticated, isLoading } = useAuth()
+  const { createPath } = useLocalizedNavigation()
   const [isResending, setIsResending] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [userEmail, setUserEmail] = useState("")
@@ -26,16 +28,16 @@ function VerifyAccountContent() {
 
     // If user is authenticated and verified, redirect to dashboard
     if (!isLoading && isAuthenticated && user?.verified) {
-      router.push("/dashboard")
+      router.push(createPath("dashboard"))
       return
     }
 
     // If no user and no email in params, redirect to home
     if (!isLoading && !isAuthenticated && !emailFromParams) {
-      router.push("/")
+      router.push(createPath(""))
       return
     }
-  }, [user, isAuthenticated, isLoading, router, searchParams])
+  }, [user, isAuthenticated, isLoading, router, searchParams, createPath])
 
   const handleResendEmail = async () => {
     if (!userEmail) return

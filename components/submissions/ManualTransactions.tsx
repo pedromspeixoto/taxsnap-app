@@ -3,6 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Upload, FileText, Download, X } from "lucide-react"
 import { UploadedFile } from "@/lib/types/submission"
 import FileList from "./FileList"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
+import { useState, useEffect } from "react"
 
 interface ManualTransactionsProps {
   files: UploadedFile[]
@@ -23,6 +26,15 @@ export default function ManualTransactions({
   showSkipOption = false,
   onSkip
 }: ManualTransactionsProps) {
+  const { currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
   const downloadTemplate = () => {
     const csvContent = `Date,Symbol,Quantity,Price,Transaction Type,Fees,Exchange
 2024-01-15,AAPL,10,150.50,BUY,1.00,NASDAQ
@@ -60,14 +72,17 @@ export default function ManualTransactions({
           <p className={`font-semibold text-blue-900 ${
             size === "large" ? "text-lg mb-1" : "text-sm"
           }`}>
-            Download CSV Template
+            {t?.t('manualTransactions.downloadCsvTemplate') || 'Download CSV Template'}
           </p>
           <p className="text-sm text-blue-700">
-            Get the CSV template with the required format{size === "large" && " for manual transactions"}
+            {size === "large" 
+              ? (t?.t('manualTransactions.getCsvTemplateForManual') || 'Get the CSV template with the required format for manual transactions')
+              : (t?.t('manualTransactions.getCsvTemplate') || 'Get the CSV template with the required format')
+            }
           </p>
           {size === "large" && (
             <div className="mt-3 text-xs text-blue-600">
-              <p><strong>Required columns:</strong> Date, Symbol, Quantity, Price, Transaction Type, Fees, Exchange</p>
+              <p><strong>{t?.t('manualTransactions.requiredColumns') || 'Required columns: Date, Symbol, Quantity, Price, Transaction Type, Fees, Exchange'}</strong></p>
             </div>
           )}
         </div>
@@ -78,7 +93,7 @@ export default function ManualTransactions({
           className={size === "large" ? "ml-4" : ""}
         >
           <Download className={`mr-2 ${size === "large" ? "w-5 h-5" : "w-4 h-4"}`} />
-          Template
+          {t?.t('manualTransactions.template') || 'Template'}
         </Button>
       </div>
 
@@ -88,7 +103,7 @@ export default function ManualTransactions({
           <div className="flex items-center gap-2 pb-2 border-b">
             <FileText className="w-5 h-5 text-primary" />
             <h3 className="text-lg font-semibold text-foreground">
-              Manual Transaction Files ({files.length})
+              {t?.t('manualTransactions.manualTransactionFilesCount')?.replace('{{count}}', files.length.toString()) || `Manual Transaction Files (${files.length})`}
             </h3>
           </div>
           <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
@@ -100,7 +115,7 @@ export default function ManualTransactions({
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     <p className="text-sm font-medium truncate text-foreground">{file.name}</p>
-                    <p className="text-xs text-muted-foreground">Uploaded {file.uploadedAt}</p>
+                    <p className="text-xs text-muted-foreground">{t?.t('manualTransactions.uploadedAt')?.replace('{{date}}', file.uploadedAt) || `Uploaded ${file.uploadedAt}`}</p>
                   </div>
                 </div>
                 <Button
@@ -119,7 +134,7 @@ export default function ManualTransactions({
         <FileList 
           files={files}
           onRemove={onFileRemove}
-          title="Manual Transaction Files"
+          title={t?.t('manualTransactions.manualTransactionFiles') || "Manual Transaction Files"}
           maxHeight="max-h-40"
         />
       )}
@@ -136,18 +151,18 @@ export default function ManualTransactions({
           <Upload className={`mr-2 group-hover/upload:scale-110 transition-transform ${
             size === "large" ? "w-5 h-5 mr-3" : "w-4 h-4"
           }`} />
-          {files.length > 0 ? "Add More Manual Files" : "Upload Manual Transaction Files"}
+          {files.length > 0 ? (t?.t('manualTransactions.addMoreManualFiles') || "Add More Manual Files") : (t?.t('manualTransactions.uploadManualTransactionFiles') || "Upload Manual Transaction Files")}
         </Button>
         
         <div className="text-center space-y-2">
           <p className={`text-muted-foreground ${
             size === "large" ? "text-sm" : "text-xs"
           }`}>
-            Only CSV files supported - Use the template above for correct format
+            {t?.t('manualTransactions.csvFilesSupported') || 'Only CSV files supported - Use the template above for correct format'}
           </p>
           {size === "large" && (
             <p className="text-xs text-muted-foreground italic">
-              This step is optional. Manual transactions can supplement data from your brokers.
+              {t?.t('manualTransactions.optionalStep') || 'This step is optional. Manual transactions can supplement data from your brokers.'}
             </p>
           )}
         </div>
@@ -161,7 +176,7 @@ export default function ManualTransactions({
             onClick={onSkip} 
             className="text-muted-foreground hover:text-foreground"
           >
-            Skip manual transactions and proceed to processing
+            {t?.t('manualTransactions.skipManualTransactions') || 'Skip manual transactions and proceed to processing'}
           </Button>
         </div>
       )}
@@ -179,11 +194,13 @@ export default function ManualTransactions({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5 text-blue-600" />
-          Manual Transactions (Optional)
+          {t?.t('manualTransactions.manualTransactionsOptional') || 'Manual Transactions (Optional)'}
         </CardTitle>
         <CardDescription>
-          Upload manual transaction files using our template format, or download the template to get started.
-          {size === "large" && " This step is optional - you can skip it if you don't have manual transactions to add."}
+          {size === "large" 
+            ? (t?.t('manualTransactions.uploadManualTransactionsDescriptionLong') || 'Upload manual transaction files using our template format, or download the template to get started. This step is optional - you can skip it if you don\'t have manual transactions to add.')
+            : (t?.t('manualTransactions.uploadManualTransactionsDescription') || 'Upload manual transaction files using our template format, or download the template to get started.')
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>

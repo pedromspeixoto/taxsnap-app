@@ -3,6 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Upload, FileText } from "lucide-react"
 import FileList from "./FileList"
 import { UploadedFile } from "@/lib/types/submission"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
+import { useState, useEffect } from "react"
 
 interface IrsFileUploadProps {
   files: UploadedFile[]
@@ -23,6 +26,15 @@ export default function IrsFileUpload({
   singleFile = false,
   optional = false
 }: IrsFileUploadProps) {
+  const { currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
   const handleUpload = () => {
     const input = document.createElement("input")
     input.type = "file"
@@ -48,7 +60,7 @@ export default function IrsFileUpload({
       <FileList 
         files={files}
         onRemove={onFileRemove}
-        title={singleFile ? "Uploaded IRS File" : "Uploaded IRS Files"}
+        title={singleFile ? (t?.t('components.irsUpload.irsFiles') || "Uploaded IRS File") : (t?.t('components.irsUpload.irsFiles') || "Uploaded IRS Files")}
         maxHeight={size === "large" ? "max-h-60" : "max-h-40"}
         showCount={!singleFile}
       />
@@ -64,15 +76,15 @@ export default function IrsFileUpload({
           size === "large" ? "w-5 h-5 mr-3" : "w-4 h-4"
         }`} />
         {singleFile 
-          ? (files.length > 0 ? "Replace IRS File" : "Upload IRS File")
-          : (files.length > 0 ? "Add More IRS Files" : "Upload IRS Files")
+          ? (files.length > 0 ? (t?.t('components.irsUpload.uploadFiles') || "Replace IRS File") : (t?.t('components.irsUpload.uploadFiles') || "Upload IRS File"))
+          : (files.length > 0 ? (t?.t('components.irsUpload.uploadFiles') || "Add More IRS Files") : (t?.t('components.irsUpload.uploadFiles') || "Upload IRS Files"))
         }
       </Button>
       
       <p className={`text-muted-foreground text-center ${
         size === "large" ? "text-sm" : "text-xs"
       }`}>
-        Supports PDF, CSV, XLSX, and XLS files{size === "large" && ". These will be validated automatically."}
+        {t?.t('components.irsUpload.supportedFormats') || 'Supports PDF, CSV, and Excel files (.pdf, .csv, .xlsx, .xls)'}{size === "large" && ". These will be validated automatically."}
         {singleFile && " (Only one file allowed)"}
       </p>
     </div>
@@ -87,12 +99,12 @@ export default function IrsFileUpload({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className={`w-5 h-5 ${optional ? "text-blue-600" : "text-red-600"}`} />
-          Base IRS File{optional ? " (Optional)" : " (Required)"}
+          {t?.t('components.irsUpload.irsFiles') || 'IRS Files'}{optional ? (t?.t('components.irsUpload.optional') || ' (Optional)') : " (Required)"}
         </CardTitle>
         <CardDescription>
           {optional 
-            ? "Optionally upload your base IRS tax document (Form 1099-B, etc.). This step can be skipped if not available."
-            : "Upload your base IRS tax documents (Form 1099-B, etc.). These files will be validated automatically."
+            ? (t?.t('components.irsUpload.dragDropUpload') || "Drag and drop your IRS files here or click to upload")
+            : (t?.t('components.irsUpload.dragDropUpload') || "Drag and drop your IRS files here or click to upload")
           }
         </CardDescription>
       </CardHeader>

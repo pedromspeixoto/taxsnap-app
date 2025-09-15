@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label"
 import { ChevronRight, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
 import ProgressIndicator from "@/components/submissions/ProgressIndicator"
 import { SubmissionResponse } from "@/lib/types/submission"
 import { toast } from "@/lib/hooks/use-toast"
@@ -27,7 +29,7 @@ interface ComponentState {
 }
 
 // Submit button component that uses useFormStatus
-function SubmitButton({ disabled }: { disabled: boolean }) {
+function SubmitButton({ disabled, t }: { disabled: boolean, t: TranslationHelper | null }) {
   const { pending } = useFormStatus()
   
   return (
@@ -39,11 +41,11 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
       {pending ? (
         <>
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          Processing...
+          {t?.t('newSubmission.processing') || 'Processing...'}
         </>
       ) : (
         <>
-          Next: Upload Files
+          {t?.t('newSubmission.nextUploadFiles') || 'Next: Upload Files'}
           <ChevronRight className="w-4 h-4 ml-2" />
         </>
       )}
@@ -54,6 +56,15 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
 export default function Step1SubmissionName() {
   const { id } = useParams()
   const { getValidAccessToken, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { createPath, currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
   const router = useRouter()
   const [state, setState] = useState<ComponentState>({
     submission: null,
@@ -76,7 +87,7 @@ export default function Step1SubmissionName() {
       const result = await createOrUpdateSubmissionAction({}, formData)
       
       if (result.error) {
-        toast.error("Error", result.error)
+        toast.error(t?.t('errors.errorLoadingSubmission') || "Error", result.error)
       }
 
       if (result.submissionId) {
@@ -84,7 +95,7 @@ export default function Step1SubmissionName() {
       }
     } catch (error) {
       console.error('Error in form submission:', error)
-      toast.error("Error", "Authentication failed. Please try again.")
+      toast.error(t?.t('errors.errorLoadingSubmission') || "Error", t?.t('errors.authenticationFailed') || "Authentication failed. Please try again.")
     }
   }
 
@@ -92,7 +103,7 @@ export default function Step1SubmissionName() {
     if (!id || typeof id !== 'string') {
       setState(prev => ({ 
         ...prev, 
-        error: "Invalid submission ID", 
+        error: t?.t('errors.invalidSubmissionId') || "Invalid submission ID", 
         isLoading: false 
       }))
       return
@@ -110,7 +121,7 @@ export default function Step1SubmissionName() {
           error: result.error!, 
           isLoading: false 
         }))
-        toast.error("Error loading submission", result.error)
+        toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", result.error)
         return
       }
 
@@ -137,7 +148,7 @@ export default function Step1SubmissionName() {
         isLoading: false 
       }))
       
-      toast.error("Error loading submission", errorMessage)
+      toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", errorMessage)
     }
   }
 
@@ -154,7 +165,7 @@ export default function Step1SubmissionName() {
   if (authLoading || state.isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+        <Navbar showBackButton={true} backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-2">
@@ -171,19 +182,19 @@ export default function Step1SubmissionName() {
   if (state.error) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+        <Navbar showBackButton={true} backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
+            <h2 className="text-xl font-semibold mb-2">{t?.t('newSubmission.errorLoading') || 'Error Loading Submission'}</h2>
             <p className="text-muted-foreground mb-4">{state.error}</p>
             <div className="space-x-2">
               <Button onClick={fetchSubmission} variant="outline">
-                Try Again
+                {t?.t('newSubmission.tryAgain') || 'Try Again'}
               </Button>
-              <Link href="/dashboard">
+              <Link href={createPath("dashboard")}>
                 <Button variant="outline">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Dashboard
+                  {t?.t('submission.backToDashboard') || 'Back to Dashboard'}
                 </Button>
               </Link>
             </div>
@@ -202,9 +213,9 @@ export default function Step1SubmissionName() {
 
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Step 1: Submission Details</h1>
+          <h1 className="text-3xl font-bold mb-2">{t?.t('newSubmission.step1') || 'Step 1: Submission Details'}</h1>
           <p className="text-muted-foreground">
-            Fill in the details of your submission
+            {t?.t('newSubmission.fillDetails') || 'Fill in the details of your submission'}
           </p>
           {state.submission && (
             <p className="text-sm text-muted-foreground mt-2">
@@ -222,25 +233,25 @@ export default function Step1SubmissionName() {
               {/* Submission Name */}
               <CardContent>
                 <div className="space-y-2 mb-4">
-                  <Label htmlFor="submissionName">Name</Label>
+                  <Label htmlFor="submissionName">{t?.t('newSubmission.name') || 'Name'}</Label>
                   <Input
                     id="submissionName"
                     name="submissionName"
-                    placeholder="e.g., 2024 Tax Year, Q1 2024 Amendment, December Trading"
+                    placeholder={t?.t('newSubmission.submissionNamePlaceholder') || 'e.g., 2024 Tax Year, Q1 2024 Amendment, December Trading'}
                     value={submissionName}
                     onChange={(e) => setSubmissionName(e.target.value)}
                     required
                     className="text-lg"
                   />
                   <p className="text-sm text-muted-foreground">
-                    This name will help you identify your submission in your dashboard
+                    {t?.t('newSubmission.nameHelper') || 'This name will help you identify your submission in your dashboard'}
                   </p>
                 </div>
               </CardContent>
               {/* Submission Year */}
               <CardContent>
                 <div className="space-y-2">
-                  <Label htmlFor="submissionYear">Year</Label>
+                  <Label htmlFor="submissionYear">{t?.t('newSubmission.year') || 'Year'}</Label>
                   <Input
                     id="submissionYear"
                     name="submissionYear"
@@ -249,14 +260,14 @@ export default function Step1SubmissionName() {
                     onChange={(e) => setSubmissionYear(Number(e.target.value) )}
                   />
                   <p className="text-sm text-muted-foreground">
-                    The reference year for the submission
+                    {t?.t('newSubmission.referenceYear') || 'The reference year for the submission'}
                   </p>
                 </div>
               </CardContent>
               {/* Submission Type */}
               <CardContent>
                 <div className="space-y-2">
-                  <Label htmlFor="submissionType">Type</Label>
+                  <Label htmlFor="submissionType">{t?.t('newSubmission.type') || 'Type'}</Label>
                   <Select
                     value={submissionType}
                     onValueChange={setSubmissionType}
@@ -271,14 +282,14 @@ export default function Step1SubmissionName() {
                   </Select>
                   <input type="hidden" name="submissionType" value={submissionType} />
                   <p className="text-sm text-muted-foreground">
-                    The type of submission to be processed (Weighted or Detailed)
+                    {t?.t('newSubmission.submissionType') || 'The type of submission to be processed (Weighted or Detailed)'}
                   </p>
                 </div>
               </CardContent>
               {/* Fiscal Identification Number (Optional) */}
               <CardContent>
                 <div className="space-y-2">
-                  <Label htmlFor="fiscalNumber">Fiscal Identification Number</Label>
+                  <Label htmlFor="fiscalNumber">{t?.t('newSubmission.fiscalIdNumber') || 'Fiscal Identification Number'}</Label>
                   <Input
                     id="fiscalNumber"
                     name="fiscalNumber"
@@ -287,7 +298,7 @@ export default function Step1SubmissionName() {
                     onChange={(e) => setFiscalNumber(e.target.value)}
                   />
                   <p className="text-sm text-muted-foreground">
-                    The fiscal identification number of the submission (optional)
+                    {t?.t('newSubmission.fiscalIdOptional') || 'The fiscal identification number of the submission (optional)'}
                   </p>
                 </div>
               </CardContent>
@@ -299,6 +310,7 @@ export default function Step1SubmissionName() {
             <div className="flex justify-end">
               <SubmitButton 
                 disabled={!submissionName.trim() || !isAuthenticated}
+                t={t}
               />
             </div>
           </form>

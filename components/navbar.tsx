@@ -6,6 +6,10 @@ import Link from "next/link"
 import { Logo } from "@/components/ui/logo"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { AuthDialog } from "@/components/auth-dialog"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { useState, useEffect } from "react"
 
 interface NavbarProps {
   title?: string
@@ -13,16 +17,37 @@ interface NavbarProps {
   backButtonText?: string
   backButtonHref?: string
   className?: string
+  useLocalizedHref?: boolean  // Flag to enable automatic localization of backButtonHref
 }
 
 export function Navbar({ 
   title,
   showBackButton = false,
-  backButtonText = "Back to Dashboard",
+  backButtonText,
   backButtonHref = "/dashboard",
-  className = ""
+  className = "",
+  useLocalizedHref = true
 }: NavbarProps) {
   const { user, isAuthenticated, clearAuth } = useAuth()
+  const { currentLocale, createPath } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
+  
+  // Create the appropriate href for the back button
+  const getBackButtonHref = () => {
+    if (useLocalizedHref) {
+      // Remove leading slash and create localized path
+      const path = backButtonHref.startsWith('/') ? backButtonHref.substring(1) : backButtonHref
+      return createPath(path)
+    }
+    return backButtonHref
+  }
 
   const handleLogout = async () => {
     try {
@@ -39,10 +64,10 @@ export function Navbar({
         <div className="flex items-center space-x-4">
           <Logo />
           {showBackButton && (
-            <Link href={backButtonHref}>
+            <Link href={getBackButtonHref()}>
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                {backButtonText}
+                {backButtonText || (t ? t.t('nav.backToDashboard') : 'Voltar ao Painel')}
               </Button>
             </Link>
           )}
@@ -53,18 +78,19 @@ export function Navbar({
 
         {/* Right side */}
         <div className="flex items-center space-x-4">
+          <LanguageSwitcher currentLocale={currentLocale} />
           {isAuthenticated && user ? (
             <>
-              <span className="text-sm text-muted-foreground">{user.email}</span>
+              <span className="text-sm text-muted-foreground hidden md:inline">{user.email}</span>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                <span className="hidden sm:inline">{t?.t('nav.logout') || 'Logout'}</span>
               </Button>
             </>
           ) : (
             <>
-              <AuthDialog mode="login" />
-              <AuthDialog mode="register" />
+              <AuthDialog mode="login" t={t} />
+              <AuthDialog mode="register" t={t} />
             </>
           )}
         </div>

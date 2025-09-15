@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { FileText, X } from "lucide-react"
 import { UploadedFile } from "@/lib/types/submission"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
+import { useState, useEffect } from "react"
 
 interface FileListProps {
   files: UploadedFile[]
@@ -13,17 +16,28 @@ interface FileListProps {
 export default function FileList({ 
   files, 
   onRemove, 
-  title = "Uploaded Files",
+  title,
   maxHeight = "max-h-40",
   showCount = false
 }: FileListProps) {
+  const { currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
+
+  const displayTitle = title || t?.t('components.fileList.uploadedFiles') || 'Uploaded Files'
   if (files.length === 0) return null
 
   return (
     <div className="space-y-3">
       <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
         <FileText className="w-4 h-4" />
-        {title} {showCount && `(${files.length})`}
+        {displayTitle} {showCount && `(${files.length})`}
       </p>
       <div className={`space-y-2 ${maxHeight} overflow-y-auto pr-1`}>
         {files.map((file) => (

@@ -1,4 +1,4 @@
-# Taxsnap
+# IRSimples
 
 Professional tax submissions from your brokerage exports.
 
@@ -45,7 +45,7 @@ prisma/                # Prisma schema
 Create `.env.local` for local/dev; set equivalent variables in Vercel for production.
 
 Required
-- `DATABASE_URL` (e.g. `postgresql://postgres:password@localhost:5432/taxsnap`)
+- `DATABASE_URL` (e.g. `postgresql://postgres:password@localhost:5432/irsimples`)
 - `NEXT_PUBLIC_BASE_URL` (e.g. `http://localhost:3000` or your Vercel domain)
 - `JWT_ACCESS_SECRET` (strong secret)
 - `JWT_REFRESH_SECRET` (strong secret)

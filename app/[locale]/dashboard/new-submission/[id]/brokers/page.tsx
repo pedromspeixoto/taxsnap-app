@@ -6,6 +6,8 @@ import { useFormStatus } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ArrowLeft, Loader2 } from "lucide-react"
 import { Navbar } from "@/components/navbar"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
 import ProgressIndicator from "@/components/submissions/ProgressIndicator"
 import IrsFileUpload from "@/components/submissions/IrsFileUpload"
 import BrokerPlatforms from "@/components/submissions/BrokerPlatforms"
@@ -33,7 +35,7 @@ interface ComponentState {
 }
 
 // Navigation button component
-function NavigationButton({ platforms, disabled }: { platforms: Platform[], disabled: boolean }) {
+function NavigationButton({ platforms, disabled, t }: { platforms: Platform[], disabled: boolean, t: TranslationHelper | null }) {
   const { pending } = useFormStatus()
   const platformsWithFiles = platforms.filter((p) => p.files.length > 0)
   
@@ -46,11 +48,11 @@ function NavigationButton({ platforms, disabled }: { platforms: Platform[], disa
       {pending ? (
         <>
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          Processing...
+          {t?.t('newSubmission.processing') || 'Processing...'}
         </>
       ) : (
         <>
-          Next: Preview & Submit
+          {t?.t('newSubmission.nextPreviewSubmit') || 'Next: Preview & Submit'}
           <ChevronRight className="w-4 h-4 ml-2" />
         </>
       )}
@@ -62,6 +64,15 @@ export default function Step2PlatformsAndIRS() {
   const { id } = useParams()
   const { getValidAccessToken, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
+  const { currentLocale, createPath } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
 
   // Navigation form handler
   const handleNavigationSubmit = async (formData: FormData) => {
@@ -71,13 +82,13 @@ export default function Step2PlatformsAndIRS() {
       
       const result = await navigateToReviewAction({}, formData)
       if (result.error) {
-        toast.error("Navigation Error", result.error)
+        toast.error(t?.t('errors.navigationError') || "Navigation Error", result.error)
       }
       
-      router.push(`/dashboard/new-submission/${id}/review`)
+      router.push(createPath(`dashboard/new-submission/${id}/review`))
     } catch (error) {
       console.error('Error in navigation:', error)
-      toast.error("Navigation Error", "Authentication failed. Please try again.")
+      toast.error(t?.t('errors.navigationError') || "Navigation Error", t?.t('errors.authenticationFailed') || "Authentication failed. Please try again.")
     }
   }
 
@@ -94,7 +105,7 @@ export default function Step2PlatformsAndIRS() {
     if (!id || typeof id !== 'string') {
       setState(prev => ({ 
         ...prev, 
-        error: "Invalid submission ID", 
+        error: t?.t('errors.invalidSubmissionId') || "Invalid submission ID", 
         isLoading: false 
       }))
       return
@@ -118,7 +129,7 @@ export default function Step2PlatformsAndIRS() {
           error: result.error!, 
           isLoading: false 
         }))
-        toast.error("Error loading submission", result.error)
+        toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", result.error)
         return
       }
 
@@ -138,9 +149,9 @@ export default function Step2PlatformsAndIRS() {
         isLoading: false 
       }))
       
-      toast.error("Error loading submission", errorMessage)
+      toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", errorMessage)
     }
-  }, [id, getValidAccessToken])
+  }, [id, getValidAccessToken, t])
 
   const refreshSubmissionData = useCallback(async () => {
     if (!id || typeof id !== 'string') {
@@ -164,7 +175,7 @@ export default function Step2PlatformsAndIRS() {
     } catch (error) {
       console.error('Error refreshing submission:', error)
     }
-  }, [id, getValidAccessToken])
+  }, [id, getValidAccessToken, t])
 
   const addPlatform = (platform: Platform) => {
     setState(prev => ({
@@ -203,13 +214,13 @@ export default function Step2PlatformsAndIRS() {
       }
       
       if (result.message) {
-        toast.success("Files uploaded successfully", result.message)
+        toast.success(t?.t('success.filesUploadedSuccessfully') || "Files uploaded successfully", result.message)
         // Refresh submission data to show updated files
         await refreshSubmissionData()
       }
     } catch (error) {
       console.error('Error uploading broker files', error)
-      toast.error("Error uploading broker files", "Please try again")
+      toast.error(t?.t('errors.errorUploadingFiles') || "Error uploading broker files", t?.t('errors.authenticationFailed') || "Please try again")
     } finally {
       // Clear loading state
       setState(prev => ({
@@ -221,7 +232,7 @@ export default function Step2PlatformsAndIRS() {
 
   const removeFile = async (fileId: string) => {
     if (!id) {
-      toast.error("Missing submission ID")
+      toast.error(t?.t('errors.missingSubmissionId') || "Missing submission ID")
       return
     }
 
@@ -242,13 +253,13 @@ export default function Step2PlatformsAndIRS() {
       }
 
       if (result.message) {
-        toast.success("File deleted successfully", result.message)
+        toast.success(t?.t('success.fileDeletedSuccessfully') || "File deleted successfully", result.message)
         // Refresh submission data to show updated files
         await refreshSubmissionData()
       }
     } catch (error) {
       console.error('Error deleting file', error)
-      toast.error("Error deleting file", "Please try again")
+      toast.error(t?.t('errors.errorDeletingFile') || "Error deleting file", t?.t('errors.authenticationFailed') || "Please try again")
     }
   }
 
@@ -295,11 +306,11 @@ export default function Step2PlatformsAndIRS() {
           
           document.body.removeChild(link)
           
-          toast.success("Template downloaded", "Use this template to format your manual trades")
+          toast.success(t?.t('success.templateDownloaded') || "Template downloaded", t?.t('success.templateDownloadDescription') || "Use this template to format your manual trades")
         }
       } catch (error) {
         console.error('Error downloading template:', error)
-        toast.error("Error downloading template", "Please try again")
+        toast.error(t?.t('errors.errorDownloadingTemplate') || "Error downloading template", t?.t('errors.authenticationFailed') || "Please try again")
       }
     }
   }
@@ -320,7 +331,7 @@ export default function Step2PlatformsAndIRS() {
   }
 
   const handleBack = () => {
-    window.location.href = `/dashboard/new-submission/${id}`
+    window.location.href = createPath(`dashboard/new-submission/${id}`)
   }
 
   // Effects
@@ -328,7 +339,7 @@ export default function Step2PlatformsAndIRS() {
     if (!authLoading && isAuthenticated) {
       fetchSubmission()
     } else if (!authLoading && !isAuthenticated) {
-      window.location.href = '/'
+      window.location.href = createPath('')
     }
   }, [authLoading, isAuthenticated,fetchSubmission])
 
@@ -336,12 +347,12 @@ export default function Step2PlatformsAndIRS() {
   if (authLoading || state.isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+        <Navbar showBackButton={true} backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading submission...</span>
+              <span>{t?.t('common.loading') || 'Loading submission...'}</span>
             </div>
           </div>
         </div>
@@ -353,18 +364,18 @@ export default function Step2PlatformsAndIRS() {
   if (state.error) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+        <Navbar showBackButton={true} backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
+            <h2 className="text-xl font-semibold mb-2">{t?.t('newSubmission.errorLoading') || 'Error Loading Submission'}</h2>
             <p className="text-muted-foreground mb-4">{state.error}</p>
             <div className="space-x-2">
               <Button onClick={fetchSubmission} variant="outline">
-                Try Again
+                {t?.t('newSubmission.tryAgain') || 'Try Again'}
               </Button>
               <Button variant="outline" onClick={handleBack}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Step 1
+                {t?.t('newSubmission.backSubmissionName') || 'Back to Step 1'}
               </Button>
             </div>
           </div>
@@ -375,20 +386,20 @@ export default function Step2PlatformsAndIRS() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+      <Navbar showBackButton={true} backButtonHref="/dashboard" />
 
       <div className="container mx-auto px-4 py-8">
         <ProgressIndicator currentStep={2} />
 
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Step 2: Broker Files & IRS Document</h1>
+          <h1 className="text-3xl font-bold mb-2">{t?.t('newSubmission.step2Title') || 'Step 2: Broker Files & IRS Document'}</h1>
           <p className="text-muted-foreground">
-            Upload trade files from your broker platforms and optionally add your base IRS document
+            {t?.t('newSubmission.step2Description') || 'Upload trade files from your broker platforms and optionally add your base IRS document'}
           </p>
           {state.submission && (
             <p className="text-sm text-muted-foreground mt-2">
-              Submission: {state.submission.title}
+              {t?.t('newSubmission.submissionLabel') || 'Submission:'} {state.submission.title}
             </p>
           )}
         </div>
@@ -418,7 +429,7 @@ export default function Step2PlatformsAndIRS() {
           {/* Skip Option */}
           <div className="max-w-4xl mx-auto mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Base IRS file is optional - you can skip this if you don&apos;t have one
+              {t?.t('newSubmission.baseIrsOptional') || 'Base IRS file is optional - you can skip this if you don\'t have one'}
             </p>
           </div>
         </div>
@@ -427,13 +438,14 @@ export default function Step2PlatformsAndIRS() {
         <div className="flex justify-between pt-8">
           <Button variant="outline" onClick={handleBack}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back: Submission Name
+            {t?.t('newSubmission.backSubmissionName') || 'Back: Submission Name'}
           </Button>
           <form action={handleNavigationSubmit}>
             <input type="hidden" name="submissionId" value={id as string} />
             <NavigationButton 
               platforms={state.platforms} 
               disabled={!isAuthenticated}
+              t={t}
             />
           </form>
         </div>

@@ -1,0 +1,337 @@
+{
+  "hero": {
+    "badge": "Gestão Fiscal Profissional",
+    "title": "Simplifique as Suas Declarações Fiscais",
+    "subtitle": "Fotografe as suas transações. Declare os seus impostos. IRSimples.",
+    "cta": "Começar Gratuitamente"
+  },
+  "advantages": {
+    "title": "Porquê Escolher o IRSimples?",
+    "multiPlatform": {
+      "title": "Suporte Multi-Plataforma",
+      "description": "Suporte para todas as principais plataformas de investimento incluindo Interactive Brokers, Trading 212, Revolut, e outras."
+    },
+    "secure": {
+      "title": "Seguro e Conforme",
+      "description": "Segurança ao nível bancário com total conformidade com regulamentações fiscais e padrões de proteção de dados."
+    },
+    "saveTime": {
+      "title": "Poupe Tempo",
+      "description": "O processamento e cálculos automatizados reduzem o trabalho manual de horas para minutos."
+    }
+  },
+  "offer": {
+    "title": "O Que Oferecemos",
+    "autoProcessing": {
+      "title": "Processamento Automático de Ficheiros",
+      "description": "Carregue ficheiros CSV/Excel de qualquer corretora e obtenha processamento instantâneo"
+    },
+    "transactionManagement": {
+      "title": "Gestão de Transações",
+      "description": "Revise, edite e organize todas as suas transações num só lugar"
+    },
+    "taxReports": {
+      "title": "Geração de Relatórios Fiscais",
+      "description": "Gere relatórios fiscais conformes para a sua jurisdição"
+    },
+    "historicalTracking": {
+      "title": "Rastreamento Histórico",
+      "description": "Mantenha registo de todas as submissões passadas e alterações"
+    },
+    "supportedPlatforms": "Plataformas Suportadas"
+  },
+  "about": {
+    "title": "Sobre o IRSimples",
+    "description": "O IRSimples foi fundado por uma equipa de profissionais fiscais e engenheiros de software que experienciaram em primeira mão a complexidade de gerir impostos de investimento através de múltiplas plataformas. A nossa missão é democratizar ferramentas de gestão fiscal de nível profissional para investidores individuais.",
+    "activeUsers": "Utilizadores Ativos",
+    "processedSubmissions": "Submissões Processadas",
+    "uptimeGuarantee": "Garantia de Disponibilidade"
+  },
+  "footer": {
+    "copyright": "2025 IRSimples. Todos os direitos reservados."
+  },
+  "nav": {
+    "login": "Entrar",
+    "register": "Registar",
+    "logout": "Sair",
+    "backToDashboard": "Voltar ao Painel"
+  },
+  "common": {
+    "loading": "A carregar...",
+    "redirecting": "A redirecionar..."
+  },
+  "auth": {
+    "login": {
+      "title": "Entrar",
+      "description": "Insira as suas credenciais para aceder à sua conta",
+      "welcomeBack": "Bem-vindo de volta",
+      "subtitle": "Entre na sua conta IRSimples",
+      "email": "Email",
+      "emailPlaceholder": "Insira o seu email",
+      "password": "Palavra-passe",
+      "passwordPlaceholder": "Insira a sua palavra-passe",
+      "signIn": "Entrar"
+    },
+    "register": {
+      "title": "Criar Conta",
+      "description": "Crie uma nova conta para começar",
+      "email": "Email",
+      "emailPlaceholder": "Insira o seu email",
+      "password": "Palavra-passe",
+      "passwordPlaceholder": "Insira a sua palavra-passe",
+      "signUp": "Registar"
+    }
+  },
+  "dashboard": {
+    "title": "Painel",
+    "subtitle": "Gerir as suas submissões fiscais e acompanhar o progresso",
+    "newSubmission": "Nova Submissão",
+    "searchPlaceholder": "Procurar por nome ou número de transações...",
+    "filterByStatus": "Filtrar por estado",
+    "allStatus": "Todos os Estados",
+    "completed": "Concluído",
+    "processing": "A processar",
+    "draft": "Rascunho",
+    "failed": "Falhado",
+    "noSubmissions": "Nenhuma submissão encontrada",
+    "adjustFilter": "Tente ajustar os seus critérios de pesquisa ou filtro",
+    "createFirst": "Crie a sua primeira submissão fiscal para começar",
+    "createFirstSubmission": "Criar Primeira Submissão",
+    "submissionName": "Nome da Submissão",
+    "transactions": "transações",
+    "createdOn": "Criado em",
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "showingResults": "A mostrar {{start}}-{{end}} de {{total}} submissões",
+    "taxSubmissions": "Submissões Fiscais",
+    "submissionsFound": "{{count}} submissões encontradas",
+    "pageOfPages": "Página {{current}} de {{total}}",
+    "viewResults": "Ver Resultados",
+    "continueEditing": "Continuar Edição"
+  },
+  "submission": {
+    "details": "Detalhes da Submissão",
+    "calculationCompleted": "Cálculo fiscal concluído com sucesso",
+    "summary": "Resumo",
+    "results": "Resultados",
+    "taxCalculationResults": "Resultados do Cálculo Fiscal",
+    "summaryOfCalculations": "Resumo dos seus cálculos fiscais",
+    "totalStocksPL": "Total P&L Ações",
+    "totalDividends": "Total Dividendos (Bruto)",
+    "dividendTaxes": "Impostos sobre Dividendos",
+    "totalAcquisition": "Total Aquisição",
+    "totalRealized": "Total Realizado",
+    "tradeExpenses": "Despesas de Negociação",
+    "stockSummary": "Resumo de Ações",
+    "stockOverview": "Visão geral das transações de ações e P&L",
+    "dividendsByCountry": "Dividendos por País",
+    "totalDividendsByCountry": "Total de dividendos recebidos por país",
+    "ticker": "Símbolo",
+    "trades": "negociações",
+    "profit": "Lucro",
+    "loss": "Perda",
+    "country": "País",
+    "amount": "Montante",
+    "showDetails": "Mostrar Detalhes",
+    "hideDetails": "Ocultar Detalhes",
+    "backToDashboard": "Voltar ao Painel",
+    "downloadReports": "Descarregar Relatórios",
+    "generatedReports": "Relatórios fiscais e documentos gerados"
+  },
+  "newSubmission": {
+    "step1": "Passo 1: Detalhes da Submissão",
+    "submissionName": "Nome da Submissão",
+    "submissionNamePlaceholder": "Inserir nome da submissão",
+    "taxYear": "Ano Fiscal",
+    "selectTaxYear": "Selecionar ano fiscal",
+    "processing": "A processar...",
+    "nextUploadFiles": "Seguinte: Carregar Ficheiros",
+    "errorLoading": "Erro ao carregar submissão",
+    "tryAgain": "Tentar Novamente",
+    "fillDetails": "Preencha os detalhes da sua submissão",
+    "name": "Nome",
+    "year": "Ano",
+    "type": "Tipo",
+    "fiscalIdNumber": "Número de Identificação Fiscal",
+    "referenceYear": "O ano de referência para a submissão",
+    "submissionType": "O tipo de submissão a ser processada (Ponderada ou Detalhada)",
+    "fiscalIdOptional": "O número de identificação fiscal da submissão (opcional)",
+    "nameHelper": "Este nome ajudará a identificar a sua submissão no painel",
+    "submissionSummary": "Resumo da Submissão",
+    "investmentPlatforms": "Plataformas de Investimento",
+    "tradeFiles": "Ficheiros de negociação das suas plataformas de corretagem",
+    "step2": "Passo 2: Carregar Ficheiros",
+    "uploadBrokerFiles": "Carregar ficheiros de exportação da corretora e formulários IRS",
+    "brokerFiles": "Ficheiros da Corretora",
+    "irsFiles": "Ficheiros IRS (Opcional)",
+    "nextReview": "Seguinte: Rever e Calcular",
+    "step2Title": "Passo 2: Ficheiros da Corretora e Documento IRS",
+    "step2Description": "Carregar ficheiros de negociação das suas plataformas de corretagem e opcionalmente adicionar o seu documento IRS base",
+    "submissionLabel": "Submissão:",
+    "taxSubmissions": "Submissões Fiscais",
+    "investmentPlatforms": "Plataformas de Investimento",
+    "investmentPlatformsDescription": "Carregar ficheiros de negociação das suas plataformas de investimento",
+    "addNewPlatform": "Adicionar Nova Plataforma",
+    "brokersAvailable": "corretoras disponíveis",
+    "baseIrsOptional": "O ficheiro IRS base é opcional - pode ignorar se não tiver um",
+    "backSubmissionName": "Voltar: Nome da Submissão",
+    "nextPreviewSubmit": "Seguinte: Pré-visualizar e Submeter",
+    "step3Title": "Passo 3: Rever e Submeter",
+    "step3Description": "Reveja os detalhes da sua submissão e ficheiros antes de calcular os impostos",
+    "summary": "Resumo",
+    "submissionSummary": "Resumo da Submissão",
+    "submissionType": "Tipo de Submissão",
+    "year": "Ano",
+    "fiscalNumber": "Número Fiscal",
+    "investmentPlatformsCount": "Plataformas de Investimento",
+    "tradeFilesDescription": "Ficheiros de negociação das suas plataformas de corretagem",
+    "beforeSubmitting": "Antes de submeter:",
+    "ensureFilesComplete": "Certifique-se de que todos os ficheiros de negociação estão completos e precisos",
+    "doubleCheckDetails": "Verifique duas vezes os detalhes da sua submissão",
+    "processMayTakeTime": "Este processo pode demorar alguns minutos a concluir",
+    "backUploadFiles": "Voltar: Carregar Ficheiros",
+    "calculateTaxes": "Calcular Impostos",
+    "files": "ficheiros",
+    "step3": "Passo 3: Rever",
+    "reviewCalculate": "Rever e calcular os seus impostos"
+  },
+  "verification": {
+    "emailVerification": "Verificação de Email",
+    "verifying": "A verificar o seu email...",
+    "success": "Email verificado com sucesso!",
+    "error": "Verificação falhada",
+    "redirecting": "A redirecionar para o painel...",
+    "tokenMissing": "Token de verificação em falta",
+    "accountVerification": "Verificação da Conta",
+    "checkEmail": "Verifique o seu email",
+    "verificationSent": "Enviámos um link de verificação para:",
+    "clickLink": "Clique no link no email para verificar a sua conta.",
+    "resendEmail": "Reenviar email de verificação",
+    "emailSent": "Email de verificação enviado!",
+    "newEmailSent": "Um novo email de verificação foi enviado.",
+    "verifyFirst": "Por favor, verifique o seu endereço de email para aceder à sua conta.",
+    "sendingEmail": "A enviar email..."
+  },
+  "components": {
+    "progress": {
+      "submissionName": "Nome da Submissão",
+      "brokerFilesAndIRS": "Ficheiros da Corretora e IRS",
+      "reviewAndSubmit": "Rever e Submeter"
+    },
+    "warning": {
+      "notesToConsider": "Notas a considerar no relatório:",
+      "fifoLogic": "O cálculo de P&L é baseado numa lógica FIFO de acordo com a Lei Portuguesa",
+      "exchangeRates": "Algumas corretoras não partilham taxas de câmbio nem o valor final da transação na moeda da conta (EUR). Nesses casos utilizamos a taxa de câmbio média do dia da transação. Isto pode causar flutuações menores nos valores comparados com os relatórios financeiros PDF de cada corretora no final do ano",
+      "portugueseDividends": "Os dividendos reportados para fins fiscais excluem dividendos portugueses, pois os impostos para estes já são totalmente retidos pela corretora"
+    },
+    "fileList": {
+      "uploadedFiles": "Ficheiros Carregados"
+    },
+    "brokerPlatforms": {
+      "chooseBroker": "Escolha uma plataforma de corretora...",
+      "addMoreFiles": "Adicionar Mais Ficheiros",
+      "uploadTradeFiles": "Carregar Ficheiros de Negociação",
+      "downloadTemplate": "Descarregar Modelo",
+      "removePlatform": "Remover Plataforma",
+      "dragDropFiles": "Arraste e largue ficheiros aqui ou clique para navegar",
+      "supportedFormats": "Suporta ficheiros CSV, Excel e PDF",
+      "selectFiles": "Seleccionar Ficheiros"
+    },
+    "irsUpload": {
+      "irsFiles": "Ficheiros IRS",
+      "optional": "(Opcional)",
+      "dragDropUpload": "Arraste e largue os seus ficheiros IRS aqui ou clique para carregar",
+      "supportedFormats": "Suporta ficheiros PDF, CSV e Excel (.pdf, .csv, .xlsx, .xls)",
+      "uploadFiles": "Carregar Ficheiros"
+    },
+    "taxFieldInfo": {
+      "learnMore": "Saber Mais",
+      "gotIt": "Entendi",
+      "learnMoreAbout": "Saber mais sobre",
+      "fields": {
+        "totalStocksPL": {
+          "title": "Total P&L Ações",
+          "description": "Isto representa o seu lucro ou perda total da negociação de ações. Um valor positivo significa que teve lucro, mas os impostos sobre mais-valias devem ser pagos em negociações lucrativas. As perdas podem ser usadas para compensar os ganhos para fins fiscais."
+        },
+        "totalDividendsGross": {
+          "title": "Total Dividendos (Bruto)",
+          "description": "Este é o valor total de dividendos que recebeu antes de quaisquer impostos serem deduzidos. Os dividendos estão sujeitos ao imposto sobre o rendimento e podem também ter impostos de retenção na fonte de países estrangeiros."
+        },
+        "dividendTaxes": {
+          "title": "Impostos sobre Dividendos",
+          "description": "Isto mostra o valor total de impostos retidos dos seus dividendos por países estrangeiros. Estes impostos de retenção podem frequentemente ser reclamados como créditos fiscais para reduzir a sua responsabilidade fiscal doméstica."
+        },
+        "totalAcquisition": {
+          "title": "Total Aquisição",
+          "description": "Este é o valor total que gastou na compra de ações durante o ano fiscal. Isto inclui o preço de compra das ações mas exclui taxas de negociação e comissões."
+        },
+        "totalRealized": {
+          "title": "Total Realizado",
+          "description": "Este é o valor total que recebeu da venda de ações durante o ano fiscal. Este é o produto bruto das suas vendas de ações antes de deduzir o preço de compra original e despesas."
+        },
+        "tradeExpenses": {
+          "title": "Despesas de Negociação",
+          "description": "Estas são as taxas e comissões que pagou pela compra e venda de ações. Estas despesas podem ser deduzidas das suas mais-valias para reduzir o seu montante tributável."
+        }
+      }
+    }
+  },
+  "errors": {
+    "navigationError": "Erro de Navegação",
+    "authenticationFailed": "Falha na autenticação. Por favor, tente novamente.",
+    "errorLoadingSubmission": "Erro ao carregar submissão",
+    "missingSubmissionId": "ID da submissão em falta",
+    "errorUploadingFiles": "Erro ao carregar ficheiros da corretora",
+    "errorDeletingFile": "Erro ao eliminar ficheiro",
+    "errorDownloadingTemplate": "Erro ao descarregar modelo",
+    "errorCalculatingTaxes": "Erro ao calcular impostos",
+    "failedToSubmit": "Falha ao submeter. Por favor, tente novamente.",
+    "errorLoadingSubmissions": "Erro ao carregar submissões",
+    "authenticationFailed2": "Falha na autenticação",
+    "invalidSubmissionId": "ID da submissão inválido",
+    "submissionNotFound": "Submissão não encontrada",
+    "verificationTokenRequired": "Token de verificação é obrigatório",
+    "failedToVerifyEmail": "Falha ao verificar email"
+  },
+  "success": {
+    "filesUploadedSuccessfully": "Ficheiros carregados com sucesso",
+    "fileDeletedSuccessfully": "Ficheiro eliminado com sucesso",
+    "templateDownloaded": "Modelo descarregado",
+    "templateDownloadDescription": "Use este modelo para formatar as suas negociações manuais",
+    "registrationSuccessful": "Registo bem-sucedido!",
+    "checkEmailConfirmation": "Por favor, verifique o seu email para confirmar a sua conta.",
+    "loginSuccessful": "Login bem-sucedido!",
+    "welcomeBack": "Bem-vindo de volta, {{email}}!",
+    "emailVerifiedSuccessfully": "Email verificado com sucesso"
+  },
+  "verifyPage": {
+    "verifyingEmail": "A verificar o seu email...",
+    "pleaseWaitVerifying": "Por favor aguarde enquanto verificamos a sua conta.",
+    "emailVerifiedSuccessfully": "Email Verificado com Sucesso!",
+    "redirectingToDashboard": "A redirecioná-lo para o seu painel em alguns segundos...",
+    "verificationFailed": "Verificação Falhada",
+    "backToHome": "Voltar ao Início",
+    "verificationTokenMissing": "Token de verificação em falta",
+    "welcomeEmailVerified": "Bem-vindo {{email}}! O seu email foi verificado com sucesso.",
+    "verificationFailedNoAuth": "Verificação falhada - não foram recebidos dados de autenticação",
+    "errorDuringVerification": "Ocorreu um erro durante a verificação"
+  },
+  "manualTransactions": {
+    "downloadCsvTemplate": "Descarregar Modelo CSV",
+    "getCsvTemplate": "Obtenha o modelo CSV com o formato necessário",
+    "getCsvTemplateForManual": "Obtenha o modelo CSV com o formato necessário para transações manuais",
+    "requiredColumns": "Colunas obrigatórias: Data, Símbolo, Quantidade, Preço, Tipo de Transação, Taxas, Bolsa",
+    "template": "Modelo",
+    "manualTransactionFiles": "Ficheiros de Transações Manuais",
+    "manualTransactionFilesCount": "Ficheiros de Transações Manuais ({{count}})",
+    "addMoreManualFiles": "Adicionar Mais Ficheiros Manuais",
+    "uploadManualTransactionFiles": "Carregar Ficheiros de Transações Manuais",
+    "csvFilesSupported": "Apenas ficheiros CSV suportados - Use o modelo acima para o formato correto",
+    "optionalStep": "Este passo é opcional. As transações manuais podem complementar os dados das suas corretoras.",
+    "skipManualTransactions": "Ignorar transações manuais e prosseguir para o processamento",
+    "manualTransactionsOptional": "Transações Manuais (Opcional)",
+    "uploadManualTransactionsDescription": "Carregue ficheiros de transações manuais usando o nosso formato de modelo, ou descarregue o modelo para começar.",
+    "uploadManualTransactionsDescriptionLong": "Carregue ficheiros de transações manuais usando o nosso formato de modelo, ou descarregue o modelo para começar. Este passo é opcional - pode ignorá-lo se não tiver transações manuais para adicionar.",
+    "uploadedAt": "Carregado em {{date}}"
+  }
+}

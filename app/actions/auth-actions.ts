@@ -21,20 +21,20 @@ export async function verifyEmailAction(
 ): Promise<VerifyEmailActionState> {
   try {
     if (!token) {
-      return { error: 'Verification token is required' }
+      return { error: 'Verification token is required' } // Keep English for server actions
     }
     const authResponse = await apiClient.verify(token)
 
     return { 
       success: true, 
       authResponse,
-      message: 'Email verified successfully'
+      message: 'Email verified successfully' // Keep English for server actions
     }
 
   } catch (error) {
     console.error('[ACTION] verifyEmailAction:', error)
     return { 
-      error: error instanceof Error ? error.message : 'Failed to verify email' 
+      error: error instanceof Error ? error.message : 'Failed to verify email' // Keep English for server actions 
     }
   }
 } 

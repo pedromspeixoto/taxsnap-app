@@ -39,7 +39,7 @@ export function Logo({
           "text-primary-foreground font-bold",
           iconTextSizeClasses[size]
         )}>
-          T
+          I
         </span>
       </div>
       {showText && (
@@ -47,7 +47,7 @@ export function Logo({
           "font-bold",
           textSizeClasses[size]
         )}>
-          Taxsnap
+          IRSimples
         </span>
       )}
     </div>

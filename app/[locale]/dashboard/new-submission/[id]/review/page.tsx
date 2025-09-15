@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Loader2, FileText, CheckCircle, AlertTriangle, Building2 } from "lucide-react"
 import { Navbar } from "@/components/navbar"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
 import ProgressIndicator from "@/components/submissions/ProgressIndicator"
 import { SubmissionResponse } from "@/lib/types/submission"
 import { toast } from "@/lib/hooks/use-toast"
@@ -22,7 +24,7 @@ interface ComponentState {
 }
 
 // Submit button component
-function SubmitButton({ disabled }: { disabled: boolean }) {
+function SubmitButton({ disabled, t }: { disabled: boolean, t: TranslationHelper | null }) {
   const { pending } = useFormStatus()
   
   return (
@@ -34,12 +36,12 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
       {pending ? (
         <>
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          Calculating taxes...
+          {t?.t('newSubmission.processing') || 'Calculating taxes...'}
         </>
       ) : (
         <>
           <CheckCircle className="w-4 h-4 mr-2" />
-          Calculate Taxes
+          {t?.t('newSubmission.calculateTaxes') || 'Calculate Taxes'}
         </>
       )}
     </Button>
@@ -50,6 +52,15 @@ export default function Step3ReviewSubmission() {
   const { id } = useParams()
   const { getValidAccessToken, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
+  const { currentLocale, createPath } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
 
   // Form submission handler
   const handleSubmit = async (formData: FormData) => {
@@ -60,11 +71,11 @@ export default function Step3ReviewSubmission() {
       const result = await calculateTaxesAction({}, formData)
       
       if (result.error) {
-        toast.error("Error calculating taxes", result.error)
+        toast.error(t?.t('errors.errorCalculatingTaxes') || "Error calculating taxes", result.error)
       }
 
       if (result.submissionId) {
-        router.push(`/dashboard/submission/${result.submissionId}`)
+        router.push(createPath(`dashboard/submission/${result.submissionId}`))
       }
     } catch (error) {
       console.error('Error in form submission:', error)
@@ -80,7 +91,7 @@ export default function Step3ReviewSubmission() {
       }
       
       // For other errors, show a generic error message
-      toast.error("Error", "Failed to submit. Please try again.")
+      toast.error(t?.t('errors.errorCalculatingTaxes') || "Error", t?.t('errors.failedToSubmit') || "Failed to submit. Please try again.")
     }
   }
 
@@ -94,7 +105,7 @@ export default function Step3ReviewSubmission() {
     if (!id || typeof id !== 'string') {
       setState(prev => ({ 
         ...prev, 
-        error: "Invalid submission ID", 
+        error: t?.t('errors.invalidSubmissionId') || "Invalid submission ID", 
         isLoading: false 
       }))
       return
@@ -112,7 +123,7 @@ export default function Step3ReviewSubmission() {
           error: result.error!, 
           isLoading: false 
         }))
-        toast.error("Error loading submission", result.error)
+        toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", result.error)
         return
       }
 
@@ -142,12 +153,12 @@ export default function Step3ReviewSubmission() {
         isLoading: false 
       }))
       
-      toast.error("Error loading submission", errorMessage)
+      toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", errorMessage)
     }
-  }, [id, getValidAccessToken])
+  }, [id, getValidAccessToken, t])
 
   const handleBack = () => {
-    window.location.href = `/dashboard/new-submission/${id}/brokers`
+    window.location.href = createPath(`dashboard/new-submission/${id}/brokers`)
   }
 
   // Effects
@@ -159,13 +170,13 @@ export default function Step3ReviewSubmission() {
       // This prevents race conditions with token refresh
       const timer = setTimeout(() => {
         if (!isAuthenticated) {
-          window.location.href = '/'
+          window.location.href = createPath('')
         }
       }, 100)
       
       return () => clearTimeout(timer)
     }
-  }, [authLoading, isAuthenticated, fetchSubmission])
+  }, [authLoading, isAuthenticated, fetchSubmission, createPath])
 
   // Additional effect to handle authentication state changes during component lifecycle
   useEffect(() => {
@@ -184,12 +195,12 @@ export default function Step3ReviewSubmission() {
   if (authLoading || state.isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+        <Navbar showBackButton={true} backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Loading submission...</span>
+              <span>{t?.t('common.loading') || 'Loading submission...'}</span>
             </div>
           </div>
         </div>
@@ -201,18 +212,18 @@ export default function Step3ReviewSubmission() {
   if (state.error) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+        <Navbar showBackButton={true} backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
+            <h2 className="text-xl font-semibold mb-2">{t?.t('newSubmission.errorLoading') || 'Error Loading Submission'}</h2>
             <p className="text-muted-foreground mb-4">{state.error}</p>
             <div className="space-x-2">
               <Button onClick={fetchSubmission} variant="outline">
-                Try Again
+                {t?.t('newSubmission.tryAgain') || 'Try Again'}
               </Button>
               <Button variant="outline" onClick={handleBack}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Upload Files
+                {t?.t('newSubmission.backUploadFiles') || 'Back to Upload Files'}
               </Button>
             </div>
           </div>
@@ -224,14 +235,14 @@ export default function Step3ReviewSubmission() {
   if (!state.submission) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+        <Navbar showBackButton={true} backButtonHref="/dashboard" />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <h2 className="text-xl font-semibold mb-2">Submission Not Found</h2>
-            <p className="text-muted-foreground mb-4">The submission you&apos;re looking for doesn&apos;t exist.</p>
+            <h2 className="text-xl font-semibold mb-2">{t?.t('newSubmission.errorLoading') || 'Submission Not Found'}</h2>
+            <p className="text-muted-foreground mb-4">{t?.t('newSubmission.errorLoading') || 'The submission you\'re looking for doesn\'t exist.'}</p>
             <Button variant="outline" onClick={handleBack}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Upload Files
+              {t?.t('newSubmission.backUploadFiles') || 'Back to Upload Files'}
             </Button>
           </div>
         </div>
@@ -244,16 +255,16 @@ export default function Step3ReviewSubmission() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+      <Navbar showBackButton={true} backButtonHref="/dashboard" />
 
       <div className="container mx-auto px-4 py-8">
         <ProgressIndicator currentStep={3} />
 
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">Step 3: Review & Submit</h1>
+          <h1 className="text-3xl font-bold mb-2">{t?.t('newSubmission.step3Title') || 'Step 3: Review & Submit'}</h1>
           <p className="text-muted-foreground">
-            Review your submission details and files before calculating taxes
+            {t?.t('newSubmission.step3Description') || 'Review your submission details and files before calculating taxes'}
           </p>
         </div>
 
@@ -261,7 +272,7 @@ export default function Step3ReviewSubmission() {
           {/* Summary Section */}
           <div className="space-y-6">
             <div className="flex items-center gap-4 p-2">
-              <h2 className="text-2xl font-bold text-gray-300">Summary</h2>
+              <h2 className="text-2xl font-bold text-gray-300">{t?.t('newSubmission.summary') || 'Summary'}</h2>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
@@ -270,7 +281,7 @@ export default function Step3ReviewSubmission() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-blue-600" />
-                  Submission Summary
+                  {t?.t('newSubmission.submissionSummary') || 'Submission Summary'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -279,15 +290,15 @@ export default function Step3ReviewSubmission() {
                     <div className="text-2xl font-bold">
                       {submission.submissionType === 'pl_average_weighted' ? 'Average Weighted P&L' : 'Detailed P&L'}
                     </div>
-                    <p className="text-sm text-muted-foreground">Submission Type</p>
+                    <p className="text-sm text-muted-foreground">{t?.t('newSubmission.submissionType') || 'Submission Type'}</p>
                   </div>
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <div className="text-2xl font-bold">{submission.year || 'Not specified'}</div>
-                    <p className="text-sm text-muted-foreground">Year</p>
+                    <p className="text-sm text-muted-foreground">{t?.t('newSubmission.year') || 'Year'}</p>
                   </div>
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <div className="text-2xl font-bold">{submission.fiscalNumber || 'Not specified'}</div>
-                    <p className="text-sm text-muted-foreground">Fiscal Number</p>
+                    <p className="text-sm text-muted-foreground">{t?.t('newSubmission.fiscalNumber') || 'Fiscal Number'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -298,17 +309,17 @@ export default function Step3ReviewSubmission() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-green-600" />
-                  Investment Platforms ({platformsWithFiles.length})
+                  {t?.t('newSubmission.investmentPlatformsCount') || 'Investment Platforms'} ({platformsWithFiles.length})
                 </CardTitle>
                 <CardDescription>
-                  Trade files from your broker platforms
+                  {t?.t('newSubmission.tradeFilesDescription') || 'Trade files from your broker platforms'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {platformsWithFiles.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No broker files uploaded</p>
+                    <p>{t?.t('newSubmission.tradeFilesDescription') || 'No broker files uploaded'}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -319,7 +330,7 @@ export default function Step3ReviewSubmission() {
                             <div className={`w-3 h-3 rounded-full ${platform.color || 'bg-gray-400'}`}></div>
                             <span className="font-medium">{platform.name}</span>
                           </div>
-                          <Badge variant="outline">{platform.files.length} files</Badge>
+                          <Badge variant="outline">{platform.files.length} {t?.t('newSubmission.files') || 'files'}</Badge>
                         </div>
                         <div className="space-y-2">
                           {platform.files.map((file) => (
@@ -346,11 +357,11 @@ export default function Step3ReviewSubmission() {
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-semibold text-amber-900 mb-2">Before submitting:</p>
+                  <p className="font-semibold text-amber-900 mb-2">{t?.t('newSubmission.beforeSubmitting') || 'Before submitting:'}</p>
                   <ul className="text-sm text-amber-700 space-y-1">
-                    <li>• Ensure all trade files are complete and accurate</li>
-                    <li>• Double-check your submission details</li>
-                    <li>• This process may take a few minutes to complete</li>
+                    <li>• {t?.t('newSubmission.ensureFilesComplete') || 'Ensure all trade files are complete and accurate'}</li>
+                    <li>• {t?.t('newSubmission.doubleCheckDetails') || 'Double-check your submission details'}</li>
+                    <li>• {t?.t('newSubmission.processMayTakeTime') || 'This process may take a few minutes to complete'}</li>
                   </ul>
                 </div>
               </div>
@@ -361,11 +372,11 @@ export default function Step3ReviewSubmission() {
           <div className="flex justify-between pt-6">
             <Button variant="outline" onClick={handleBack}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back: Upload Files
+              {t?.t('newSubmission.backUploadFiles') || 'Back: Upload Files'}
             </Button>
             <form action={handleSubmit}>
               <input type="hidden" name="submissionId" value={id as string} />
-              <SubmitButton disabled={!isAuthenticated || platformsWithFiles.length === 0} />
+              <SubmitButton disabled={!isAuthenticated || platformsWithFiles.length === 0} t={t} />
             </form>
           </div>
         </div>

@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, FileText, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
 import { SubmissionResponse, SubmissionStatus } from "@/lib/types/submission"
 import { formatDate } from "@/lib/utils/date"
 import { toast } from "@/lib/hooks/use-toast"
@@ -37,6 +39,15 @@ export default function Dashboard() {
 
 function DashboardContent() {
   const { getValidAccessToken, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { createPath, currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
   const [{ q, status, page }, setQuery] = useQueryStates({
     q: parseAsString.withDefault(""),
     status: parseAsString.withDefault("all"),
@@ -64,7 +75,7 @@ function DashboardContent() {
           isLoading: false,
           submissions: [] 
         }))
-        toast.error("Error loading submissions", result.error)
+        toast.error(t?.t('errors.errorLoadingSubmissions') || "Error loading submissions", result.error)
         return
       }
 
@@ -84,7 +95,7 @@ function DashboardContent() {
         submissions: [] 
       }))
       
-      toast.error("Error loading submissions", errorMessage)
+      toast.error(t?.t('errors.errorLoadingSubmissions') || "Error loading submissions", errorMessage)
     }
   }
 
@@ -140,15 +151,15 @@ function DashboardContent() {
   const getDetailsButtonText = (status: SubmissionStatus) => {
     switch (status) {
       case SubmissionStatus.DRAFT:
-        return "Continue Editing"
+        return t?.t('dashboard.continueEditing') || "Continue Editing"
       case SubmissionStatus.COMPLETE:
-        return "View Results"
+        return t?.t('dashboard.viewResults') || "View Results"
       case SubmissionStatus.PROCESSING:
-        return "View Details"
+        return t?.t('dashboard.viewResults') || "View Details"
       case SubmissionStatus.FAILED:
-        return "View Details"
+        return t?.t('dashboard.viewResults') || "View Details"
       default:
-        return "View Details"
+        return t?.t('dashboard.viewResults') || "View Details"
     }
   }
 
@@ -178,13 +189,13 @@ function DashboardContent() {
         {/* Dashboard Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Manage your tax submissions and track progress</p>
+            <h1 className="text-3xl font-bold">{t?.t('dashboard.title') || 'Dashboard'}</h1>
+            <p className="text-muted-foreground">{t?.t('dashboard.subtitle') || 'Manage your tax submissions and track progress'}</p>
           </div>
-          <Link href="/dashboard/new-submission/new">
+          <Link href={createPath("dashboard/new-submission/new")}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              New Submission
+              {t?.t('dashboard.newSubmission') || 'New Submission'}
             </Button>
           </Link>
         </div>
@@ -196,7 +207,7 @@ function DashboardContent() {
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
-                  placeholder="Search by name or transaction count..."
+                  placeholder={t?.t('dashboard.searchPlaceholder') || 'Search by name or transaction count...'}
                   value={q}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   className="pl-10"
@@ -204,14 +215,14 @@ function DashboardContent() {
               </div>
               <Select value={status} onValueChange={handleStatusChange}>
                 <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Filter by status" />
+                  <SelectValue placeholder={t?.t('dashboard.filterByStatus') || 'Filter by status'} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value={SubmissionStatus.COMPLETE}>Completed</SelectItem>
-                  <SelectItem value={SubmissionStatus.PROCESSING}>Processing</SelectItem>
-                  <SelectItem value={SubmissionStatus.DRAFT}>Draft</SelectItem>
-                  <SelectItem value={SubmissionStatus.FAILED}>Failed</SelectItem>
+                  <SelectItem value="all">{t?.t('dashboard.allStatus') || 'All Status'}</SelectItem>
+                  <SelectItem value={SubmissionStatus.COMPLETE}>{t?.t('dashboard.completed') || 'Completed'}</SelectItem>
+                  <SelectItem value={SubmissionStatus.PROCESSING}>{t?.t('dashboard.processing') || 'Processing'}</SelectItem>
+                  <SelectItem value={SubmissionStatus.DRAFT}>{t?.t('dashboard.draft') || 'Draft'}</SelectItem>
+                  <SelectItem value={SubmissionStatus.FAILED}>{t?.t('dashboard.failed') || 'Failed'}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -223,17 +234,20 @@ function DashboardContent() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Tax Submissions</CardTitle>
+                <CardTitle>{t?.t('dashboard.taxSubmissions') || 'Tax Submissions'}</CardTitle>
                 <CardDescription>
                   {state.isLoading 
                     ? "Loading submissions..." 
-                    : `${filteredSubmissions.length} submission${filteredSubmissions.length !== 1 ? 's' : ''} found`
+                    : (t?.t('dashboard.submissionsFound')?.replace('{{count}}', String(filteredSubmissions.length)) || `${filteredSubmissions.length} submission${filteredSubmissions.length !== 1 ? 's' : ''} found`)
                   }
                 </CardDescription>
               </div>
               {filteredSubmissions.length > itemsPerPage && (
                 <div className="text-sm text-muted-foreground">
-                  Page {currentPage} of {totalPages}
+                  {t?.t('dashboard.pageOfPages')
+                    ?.replace('{{current}}', String(currentPage))
+                    ?.replace('{{total}}', String(totalPages))
+                    || `Page ${currentPage} of ${totalPages}`}
                 </div>
               )}
             </div>
@@ -257,19 +271,19 @@ function DashboardContent() {
               <div className="text-center py-8">
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">
-                  {q || status !== "all" ? "No submissions found" : "No submissions yet"}
+                  {q || status !== "all" ? (t?.t('dashboard.noSubmissions') || "No submissions found") : (t?.t('dashboard.noSubmissions') || "No submissions yet")}
                 </h3>
                 <p className="text-muted-foreground mb-4">
                   {q || status !== "all" 
-                    ? "Try adjusting your search or filter criteria"
-                    : "Create your first tax submission to get started"
+                    ? (t?.t('dashboard.adjustFilter') || "Try adjusting your search or filter criteria")
+                    : (t?.t('dashboard.createFirst') || "Create your first tax submission to get started")
                   }
                 </p>
                 {!q && status === "all" && (
-                  <Link href="/dashboard/new-submission/new">
+                  <Link href={createPath("dashboard/new-submission/new")}>
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />
-                      Create First Submission
+                      {t?.t('dashboard.createFirstSubmission') || 'Create First Submission'}
                     </Button>
                   </Link>
                 )}
@@ -307,7 +321,11 @@ function DashboardContent() {
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-6 pt-4 border-t">
                     <div className="text-sm text-muted-foreground">
-                      Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredSubmissions.length)} of {filteredSubmissions.length} submissions
+                      {t?.t('dashboard.showingResults')
+                        ?.replace('{{start}}', String(startIndex + 1))
+                        ?.replace('{{end}}', String(Math.min(startIndex + itemsPerPage, filteredSubmissions.length)))
+                        ?.replace('{{total}}', String(filteredSubmissions.length))
+                        || `Showing ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredSubmissions.length)} of ${filteredSubmissions.length} submissions`}
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button
@@ -317,7 +335,7 @@ function DashboardContent() {
                         disabled={currentPage === 1}
                       >
                         <ChevronLeft className="w-4 h-4 mr-1" />
-                        Previous
+                        {t?.t('dashboard.previous') || 'Previous'}
                       </Button>
                       <span className="text-sm text-muted-foreground px-2">
                         {currentPage} of {totalPages}
@@ -328,7 +346,7 @@ function DashboardContent() {
                         onClick={() => setQuery({ page: currentPage + 1 })}
                         disabled={currentPage === totalPages}
                       >
-                        Next
+                        {t?.t('dashboard.next') || 'Next'}
                         <ChevronRight className="w-4 h-4 ml-1" />
                       </Button>
                     </div>

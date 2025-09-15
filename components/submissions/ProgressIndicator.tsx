@@ -1,8 +1,21 @@
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
+import { useState, useEffect } from "react"
+
 interface ProgressIndicatorProps {
   currentStep: 1 | 2 | 3
 }
 
 export default function ProgressIndicator({ currentStep }: ProgressIndicatorProps) {
+  const { currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
   return (
     <div className="mb-8">
       <div className="flex items-center justify-center mb-6">
@@ -24,7 +37,7 @@ export default function ProgressIndicator({ currentStep }: ProgressIndicatorProp
                 ? "text-primary" 
                 : "text-gray-500"
             }`}>
-              Submission Name
+              {t?.t('components.progress.submissionName') || 'Submission Name'}
             </span>
           </div>
           <div className={`w-16 h-px ${currentStep > 1 ? "bg-green-500" : "bg-gray-300"}`}></div>
@@ -45,7 +58,7 @@ export default function ProgressIndicator({ currentStep }: ProgressIndicatorProp
                 ? "text-primary" 
                 : "text-gray-500"
             }`}>
-              Broker Files & IRS
+              {t?.t('components.progress.brokerFilesAndIRS') || 'Broker Files & IRS'}
             </span>
           </div>
           <div className={`w-16 h-px ${currentStep > 2 ? "bg-green-500" : "bg-gray-300"}`}></div>
@@ -62,7 +75,7 @@ export default function ProgressIndicator({ currentStep }: ProgressIndicatorProp
                 ? "text-primary" 
                 : "text-gray-500"
             }`}>
-              Review & Submit
+              {t?.t('components.progress.reviewAndSubmit') || 'Review & Submit'}
             </span>
           </div>
         </div>

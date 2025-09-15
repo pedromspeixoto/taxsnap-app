@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -50,6 +52,15 @@ export default function BrokerPlatforms({
   showTitle = true,
   uploadingFiles = {}
 }: BrokerPlatformsProps) {
+  const { currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
   const [selectedBroker, setSelectedBroker] = useState("")
   const [showAddForm, setShowAddForm] = useState(false)
   const [availableBrokers, setAvailableBrokers] = useState<BrokerWithColor[]>([])
@@ -216,7 +227,7 @@ export default function BrokerPlatforms({
               <FileList 
                 files={platform.files}
                 onRemove={(fileId) => onFileRemove(fileId)}
-                title="Uploaded Files"
+                title={t?.t('components.fileList.uploadedFiles') || 'Uploaded Files'}
                 maxHeight="max-h-40"
               />
 
@@ -245,7 +256,7 @@ export default function BrokerPlatforms({
                 ) : (
                   <>
                     <Upload className="w-4 h-4 mr-2 group-hover/upload:scale-110 transition-transform" />
-                    {platform.files.length > 0 ? "Add More Files" : "Upload Trade Files"}
+                    {platform.files.length > 0 ? (t?.t('components.brokerPlatforms.addMoreFiles') || "Add More Files") : (t?.t('components.brokerPlatforms.uploadTradeFiles') || "Upload Trade Files")}
                   </>
                 )}
               </Button>
@@ -309,7 +320,7 @@ export default function BrokerPlatforms({
               </Label>
               <Select value={selectedBroker} onValueChange={setSelectedBroker}>
                 <SelectTrigger id="broker-select" className="h-12 bg-background">
-                  <SelectValue placeholder="Choose a broker platform..." />
+                  <SelectValue placeholder={t?.t('components.brokerPlatforms.chooseBroker') || "Choose a broker platform..."} />
                 </SelectTrigger>
                 <SelectContent>
                   {getAvailableBrokers().map((broker) => (

@@ -18,6 +18,8 @@ import {
   getSubmissionWithResultsAction, 
   getSubmissionResultsAction 
 } from "@/app/actions/submission-actions"
+import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
 
 
 interface ComponentState {
@@ -38,6 +40,15 @@ export default function SubmissionDetails() {
   const router = useRouter()
   const { id } = useParams()
   const { getValidAccessToken, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
 
   const [state, setState] = useState<ComponentState>({
     submission: null,
@@ -70,7 +81,7 @@ export default function SubmissionDetails() {
     if (!id || typeof id !== 'string') {
       setState(prev => ({ 
         ...prev, 
-        error: "Invalid submission ID", 
+        error: t?.t('errors.invalidSubmissionId') || "Invalid submission ID", 
         isLoading: false 
       }))
       return
@@ -88,14 +99,14 @@ export default function SubmissionDetails() {
           error: submissionResult.error!, 
           isLoading: false 
         }))
-        toast.error("Error loading submission", submissionResult.error)
+        toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", submissionResult.error)
         return
       }
 
       if (!submissionResult.submission) {
         setState(prev => ({ 
           ...prev, 
-          error: "Submission not found", 
+          error: t?.t('errors.submissionNotFound') || "Submission not found", 
           isLoading: false 
         }))
         return
@@ -146,7 +157,7 @@ export default function SubmissionDetails() {
         isLoading: false 
       }))
       
-      toast.error("Error loading submission", errorMessage)
+      toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", errorMessage)
     }
   }
 
@@ -235,7 +246,6 @@ export default function SubmissionDetails() {
       <div className="min-h-screen bg-background">
         <Navbar 
           showBackButton={true} 
-          backButtonText="Back to Dashboard" 
           backButtonHref="/dashboard" 
         />
         <div className="container mx-auto px-4 py-8">
@@ -256,14 +266,13 @@ export default function SubmissionDetails() {
       <div className="min-h-screen bg-background">
         <Navbar 
           showBackButton={true} 
-          backButtonText="Back to Dashboard" 
           backButtonHref="/dashboard" 
         />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
-            <p className="text-muted-foreground mb-4">{state.error || "Submission not found"}</p>
+            <p className="text-muted-foreground mb-4">{state.error || (t?.t('errors.submissionNotFound') || "Submission not found")}</p>
             <div className="space-x-2">
               <Button onClick={fetchSubmissionDetails} variant="outline">
                 Try Again
@@ -279,7 +288,6 @@ export default function SubmissionDetails() {
     <div className="min-h-screen bg-background">
       <Navbar 
         showBackButton={true} 
-        backButtonText="Back to Dashboard" 
         backButtonHref="/dashboard" 
       />
 
@@ -292,7 +300,7 @@ export default function SubmissionDetails() {
           </div>
           
           <p className="text-muted-foreground">
-            {state.submission.status === SubmissionStatus.COMPLETE && "Tax calculation completed successfully"}
+            {state.submission.status === SubmissionStatus.COMPLETE && (t?.t('submission.calculationCompleted') || "Tax calculation completed successfully")}
             {state.submission.status === SubmissionStatus.PROCESSING && "Tax calculation in progress"}
             {state.submission.status === SubmissionStatus.DRAFT && "Submission in draft mode"}
             {state.submission.status === SubmissionStatus.FAILED && "Tax calculation failed - under manual review"}
@@ -312,7 +320,7 @@ export default function SubmissionDetails() {
               ) : (
                 <ChevronRight className="w-5 h-5 text-gray-500" />
               )}
-              <h2 className="text-2xl font-bold text-gray-300">Summary</h2>
+              <h2 className="text-2xl font-bold text-gray-300">{t?.t('submission.summary') || 'Summary'}</h2>
               <div className="flex-1 h-px bg-gray-200"></div>
             </div>
 
@@ -324,7 +332,7 @@ export default function SubmissionDetails() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-white">
                       <FileText className="w-5 h-5 text-blue-600" />
-                      Submission Summary
+                      {t?.t('newSubmission.submissionSummary') || 'Submission Summary'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -350,10 +358,10 @@ export default function SubmissionDetails() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Building2 className="w-5 h-5 text-green-600" />
-                      Investment Platforms ({state.submission.platforms?.length || 0})
+                      {t?.t('newSubmission.investmentPlatforms') || 'Investment Platforms'} ({state.submission.platforms?.length || 0})
                     </CardTitle>
                     <CardDescription>
-                      Trade files from your broker platforms
+                      {t?.t('newSubmission.tradeFiles') || 'Trade files from your broker platforms'}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -430,7 +438,7 @@ export default function SubmissionDetails() {
                 ) : (
                   <ChevronRight className="w-5 h-5 text-gray-500" />
                 )}
-                <h2 className="text-2xl font-bold text-gray-300">Results</h2>
+                <h2 className="text-2xl font-bold text-gray-300">{t?.t('submission.results') || 'Results'}</h2>
                 <div className="flex-1 h-px bg-gray-200"></div>
               </div>
               
@@ -442,10 +450,10 @@ export default function SubmissionDetails() {
                      <CardHeader>
                        <CardTitle className="flex items-center gap-2 text-white">
                          <CheckCircle className="w-5 h-5 text-green-600" />
-                         Tax Calculation Results
+                         {t?.t('submission.taxCalculationResults') || 'Tax Calculation Results'}
                        </CardTitle>
                        <CardDescription>
-                         Summary of your tax calculations
+                         {t?.t('submission.summaryOfCalculations') || 'Summary of your tax calculations'}
                        </CardDescription>
                      </CardHeader>
                     <CardContent>
@@ -457,7 +465,7 @@ export default function SubmissionDetails() {
                             </div>
                             <TaxFieldInfo fieldType="total_stocks_pl" />
                           </div>
-                          <p className="text-sm font-medium text-gray-700">Total Stocks P&L</p>
+                          <p className="text-sm font-medium text-gray-700">{t?.t('submission.totalStocksPL') || 'Total Stocks P&L'}</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
                           <div className="flex items-center justify-between mb-1">
@@ -466,7 +474,7 @@ export default function SubmissionDetails() {
                             </div>
                             <TaxFieldInfo fieldType="total_dividends_gross" />
                           </div>
-                          <p className="text-sm font-medium text-gray-700">Total Dividends (Gross)</p>
+                          <p className="text-sm font-medium text-gray-700">{t?.t('submission.totalDividends') || 'Total Dividends (Gross)'}</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
                           <div className="flex items-center justify-between mb-1">
@@ -475,7 +483,7 @@ export default function SubmissionDetails() {
                             </div>
                             <TaxFieldInfo fieldType="dividend_taxes" />
                           </div>
-                          <p className="text-sm font-medium text-gray-700">Dividend Taxes</p>
+                          <p className="text-sm font-medium text-gray-700">{t?.t('submission.dividendTaxes') || 'Dividend Taxes'}</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
                           <div className="flex items-center justify-between mb-1">
@@ -484,7 +492,7 @@ export default function SubmissionDetails() {
                             </div>
                             <TaxFieldInfo fieldType="total_acquisition" />
                           </div>
-                          <p className="text-sm font-medium text-gray-700">Total Acquisition</p>
+                          <p className="text-sm font-medium text-gray-700">{t?.t('submission.totalAcquisition') || 'Total Acquisition'}</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
                           <div className="flex items-center justify-between mb-1">
@@ -493,7 +501,7 @@ export default function SubmissionDetails() {
                             </div>
                             <TaxFieldInfo fieldType="total_realized" />
                           </div>
-                          <p className="text-sm font-medium text-gray-700">Total Realized</p>
+                          <p className="text-sm font-medium text-gray-700">{t?.t('submission.totalRealized') || 'Total Realized'}</p>
                         </div>
                         <div className="bg-white p-4 rounded-lg border">
                           <div className="flex items-center justify-between mb-1">
@@ -502,7 +510,7 @@ export default function SubmissionDetails() {
                             </div>
                             <TaxFieldInfo fieldType="trade_expenses" />
                           </div>
-                          <p className="text-sm font-medium text-gray-700">Trade Expenses</p>
+                          <p className="text-sm font-medium text-gray-700">{t?.t('submission.tradeExpenses') || 'Trade Expenses'}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -515,10 +523,10 @@ export default function SubmissionDetails() {
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                           <FileText className="w-5 h-5 text-blue-600" />
-                          Stock Summary
+                          {t?.t('submission.stockSummary') || 'Stock Summary'}
                         </CardTitle>
                         <CardDescription>
-                          Overview of stock transactions and P&L
+                          {t?.t('submission.stockOverview') || 'Overview of stock transactions and P&L'}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="flex-1 flex flex-col">
@@ -675,10 +683,10 @@ export default function SubmissionDetails() {
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
                             <Building2 className="w-5 h-5 text-green-600" />
-                            Dividends by Country
+                            {t?.t('submission.dividendsByCountry') || 'Dividends by Country'}
                           </CardTitle>
                           <CardDescription>
-                            Total dividends received by country
+                            {t?.t('submission.totalDividendsByCountry') || 'Total dividends received by country'}
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="flex-1 flex flex-col">
@@ -773,10 +781,10 @@ export default function SubmissionDetails() {
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
                             <Download className="w-5 h-5 text-blue-600" />
-                            Download Reports
+                            {t?.t('submission.downloadReports') || 'Download Reports'}
                           </CardTitle>
                           <CardDescription>
-                            Generated tax reports and documents
+                            {t?.t('submission.generatedReports') || 'Generated tax reports and documents'}
                           </CardDescription>
                         </CardHeader>
                         <CardContent>

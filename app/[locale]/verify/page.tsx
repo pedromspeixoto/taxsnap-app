@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/auth-context';
 import { verifyEmailAction } from '@/app/actions/auth-actions';
+import { getTranslations, TranslationHelper } from '@/lib/utils/get-translations';
+import { useLocalizedNavigation } from '@/lib/utils/locale-navigation';
 
 function VerifyContent() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -11,13 +13,22 @@ function VerifyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { setAuthData, isAuthenticated, isHydrated } = useAuth();
+  const { currentLocale, createPath } = useLocalizedNavigation();
+  const [t, setT] = useState<TranslationHelper | null>(null);
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
 
   useEffect(() => {
     const token = searchParams.get('token');
 
     if (!token) {
       setStatus('error');
-      setMessage('Verification token is missing');
+      setMessage(t?.t('verifyPage.verificationTokenMissing') || 'Verification token is missing');
       return;
     }
 
@@ -33,30 +44,31 @@ function VerifyContent() {
         if (result.authResponse) {
           const user = setAuthData(result.authResponse);
           setStatus('success');
-          setMessage(`Welcome ${user.email}! Your email has been successfully verified.`);
+          const welcomeMessage = t?.t('verifyPage.welcomeEmailVerified')?.replace('{{email}}', user.email) || `Welcome ${user.email}! Your email has been successfully verified.`;
+          setMessage(welcomeMessage);
           // Note: Redirect will be handled by the useEffect that monitors auth state
         } else {
           setStatus('error');
-          setMessage('Verification failed - no authentication data received');
+          setMessage(t?.t('verifyPage.verificationFailedNoAuth') || 'Verification failed - no authentication data received');
         }
       })
       .catch((error) => {
         setStatus('error');
-        setMessage(error instanceof Error ? error.message : 'An error occurred during verification');
+        setMessage(error instanceof Error ? error.message : (t?.t('verifyPage.errorDuringVerification') || 'An error occurred during verification'));
       });
-  }, [searchParams, router, setAuthData]);
+  }, [searchParams, router, setAuthData, t]);
 
   // Monitor authentication state and redirect when ready
   useEffect(() => {
     if (status === 'success' && isHydrated && isAuthenticated) {
       // Add a small delay to show the success message briefly
       const timer = setTimeout(() => {
-        router.push('/dashboard');
+        router.push(createPath('dashboard'));
       }, 1500);
       
       return () => clearTimeout(timer);
     }
-  }, [status, isHydrated, isAuthenticated, router]);
+  }, [status, isHydrated, isAuthenticated, router, createPath]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -66,9 +78,9 @@ function VerifyContent() {
             <>
               <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-primary mx-auto mb-6"></div>
               <h1 className="text-2xl font-bold text-foreground mb-4">
-                Verifying your email...
+                {t?.t('verifyPage.verifyingEmail') || 'Verifying your email...'}
               </h1>
-              <p className="text-muted-foreground">Please wait while we verify your account.</p>
+              <p className="text-muted-foreground">{t?.t('verifyPage.pleaseWaitVerifying') || 'Please wait while we verify your account.'}</p>
             </>
           )}
           
@@ -80,12 +92,12 @@ function VerifyContent() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-foreground mb-4">
-                Email Verified Successfully!
+                {t?.t('verifyPage.emailVerifiedSuccessfully') || 'Email Verified Successfully!'}
               </h1>
               <p className="text-muted-foreground mb-6">{message}</p>
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                 <p className="text-primary text-sm">
-                  Redirecting you to your dashboard in a few seconds...
+                  {t?.t('verifyPage.redirectingToDashboard') || 'Redirecting you to your dashboard in a few seconds...'}
                 </p>
               </div>
             </>
@@ -99,14 +111,14 @@ function VerifyContent() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-foreground mb-6">
-                Verification Failed
+                {t?.t('verifyPage.verificationFailed') || 'Verification Failed'}
               </h1>
               <p className="text-muted-foreground mb-6">{message}</p>
               <button
-                onClick={() => router.push('/')}
+                onClick={() => router.push(createPath(''))}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg transition-colors duration-200 w-full"
               >
-                Back to Home
+                {t?.t('verifyPage.backToHome') || 'Back to Home'}
               </button>
             </>
           )}
