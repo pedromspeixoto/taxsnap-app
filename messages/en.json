@@ -3,17 +3,17 @@
     "badge": "Professional Tax Management",
     "title": "Simplify Your Tax Submissions",
     "subtitle": "Snap your trades. File your taxes. IRSimples.",
-    "cta": "Get Started Free"
+    "cta": "Get Started for Free"
   },
   "advantages": {
     "title": "Why Choose IRSimples?",
     "multiPlatform": {
       "title": "Multi-Platform Support",
-      "description": "Support for all major investment platforms including Interactive Brokers, Trading 212, Revolut, and more."
+      "description": "Support for all major investment platforms including Degiro, Trading 212 and more comming up."
     },
     "secure": {
       "title": "Secure & Compliant",
-      "description": "Bank-level security with full compliance to tax regulations and data protection standards."
+      "description": "Your data is protected on European servers and used strictly on a need-to-use basis."
     },
     "saveTime": {
       "title": "Save Time",
@@ -24,19 +24,19 @@
     "title": "What We Offer",
     "autoProcessing": {
       "title": "Automated File Processing",
-      "description": "Upload CSV/Excel files from any broker and get instant processing"
+      "description": "Upload CSV/Excel files from your broker directly and get instant yearly P&L results."
     },
     "transactionManagement": {
       "title": "Transaction Management",
-      "description": "Review, edit, and organize all your trades in one place"
+      "description": "Review in an organized format all your realized gains/losses in one place."
     },
     "taxReports": {
       "title": "Tax Report Generation",
-      "description": "Generate compliant tax reports for your jurisdiction"
+      "description": "Generate Portuguese IRS tax report (annex J) for international brokers."
     },
     "historicalTracking": {
       "title": "Historical Tracking",
-      "description": "Keep track of all past submissions and amendments"
+      "description": "Keep track of all your historical tax calculations overtime."
     },
     "supportedPlatforms": "Supported Platforms"
   },
@@ -163,7 +163,7 @@
     "step2": "Step 2: Upload Files",
     "uploadBrokerFiles": "Upload broker export files and IRS forms",
     "brokerFiles": "Broker Files",
-    "irsFiles": "IRS Files (Optional)",
+    "irsFiles": "IRS Base File (Optional)",
     "nextReview": "Next: Review & Calculate",
     "step2Title": "Step 2: Broker Files & IRS Document",
     "step2Description": "Upload trade files from your broker platforms and optionally add your base IRS document",
@@ -173,7 +173,7 @@
     "investmentPlatformsDescription": "Upload trade files from your investment platforms",
     "addNewPlatform": "Add New Platform",
     "brokersAvailable": "brokers available",
-    "baseIrsOptional": "Base IRS file is optional - you can skip this if you don't have one",
+    "baseIrsOptional": "Base IRS file is optional - you can skip this if you don't have one or you do not want to include it",
     "backSubmissionName": "Back: Submission Name",
     "nextPreviewSubmit": "Next: Preview & Submit",
     "step3Title": "Step 3: Review & Submit",
@@ -221,7 +221,7 @@
     "warning": {
       "notesToConsider": "Notes to consider on the report:",
       "fifoLogic": "P&L calculation is based on a FIFO logic according to the Portuguese Law",
-      "exchangeRates": "Some brokers do not share exchange rates nor the final transaction value in the account currency (EUR). In those cases we use the average exchange rate of the transaction day. This may cause minor fluctuation on values compared with the PDF financial reports from each broker at the end of the year",
+      "exchangeRates": "Some brokers exports do not share exchange rates nor the final transaction value in the account currency (EUR). In those cases we use the average exchange rate of the transaction day. This may cause minor fluctuation on values compared with the PDF financial reports from each broker at the end of the year",
       "portugueseDividends": "Reported dividends for tax purposes exclude portuguese dividends, as taxes for these are already fully retained by the broker"
     },
     "fileList": {
@@ -234,14 +234,14 @@
       "downloadTemplate": "Download Template",
       "removePlatform": "Remove Platform",
       "dragDropFiles": "Drag and drop files here or click to browse",
-      "supportedFormats": "Supports CSV, Excel, and PDF files",
+      "supportedFormats": "Supports CSV and Excel files",
       "selectFiles": "Select Files"
     },
     "irsUpload": {
       "irsFiles": "IRS Files",
       "optional": "(Optional)",
       "dragDropUpload": "Drag and drop your IRS files here or click to upload",
-      "supportedFormats": "Supports PDF, CSV, and Excel files (.pdf, .csv, .xlsx, .xls)",
+      "supportedFormats": "Supports CSV, and Excel files (.csv, .xlsx)",
       "uploadFiles": "Upload Files"
     },
     "taxFieldInfo": {
@@ -317,16 +317,16 @@
     "errorDuringVerification": "An error occurred during verification"
   },
   "manualTransactions": {
-    "downloadCsvTemplate": "Download CSV Template",
-    "getCsvTemplate": "Get the CSV template with the required format",
-    "getCsvTemplateForManual": "Get the CSV template with the required format for manual transactions",
-    "requiredColumns": "Required columns: Date, Symbol, Quantity, Price, Transaction Type, Fees, Exchange",
+    "downloadCsvTemplate": "Download Excel Template",
+    "getCsvTemplate": "Get the Excel template with the required format",
+    "getCsvTemplateForManual": "Get the Excel template with the required format for manual transactions",
+    "requiredColumns": "Required columns: Transaction Type, Action, ISIN, Ticker, Name, Quantity, Price, Trade Currency, Exchange Rate, Total Fees, Dividend per Share, Dividend Withholding Tax per Share, Dividend Withholding Tax Currency",
     "template": "Template",
     "manualTransactionFiles": "Manual Transaction Files",
     "manualTransactionFilesCount": "Manual Transaction Files ({{count}})",
     "addMoreManualFiles": "Add More Manual Files",
     "uploadManualTransactionFiles": "Upload Manual Transaction Files",
-    "csvFilesSupported": "Only CSV files supported - Use the template above for correct format",
+    "csvFilesSupported": "Only Excel files supported - Use the template above for correct format",
     "optionalStep": "This step is optional. Manual transactions can supplement data from your brokers.",
     "skipManualTransactions": "Skip manual transactions and proceed to processing",
     "manualTransactionsOptional": "Manual Transactions (Optional)",
