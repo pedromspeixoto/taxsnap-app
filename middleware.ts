@@ -13,32 +13,10 @@ function getLocaleFromPathname(pathname: string) {
   return isValidLocale(potentialLocale) ? potentialLocale : null;
 }
 
-// Helper function to get locale from accept-language header
-function getLocaleFromHeaders(request: NextRequest) {
-  const acceptLanguage = request.headers.get('accept-language');
-  if (!acceptLanguage) return defaultLocale;
+// Note: Removed automatic browser language detection to ensure Portuguese is always the default
+// Users can manually switch to English using the language switcher
 
-  // Parse accept-language header and find the best match
-  const languages = acceptLanguage
-    .split(',')
-    .map(lang => lang.split(';')[0].trim().toLowerCase());
-
-  for (const lang of languages) {
-    // Check exact match
-    if (isValidLocale(lang)) {
-      return lang;
-    }
-    // Check language prefix (e.g., 'pt' from 'pt-BR')
-    const langPrefix = lang.split('-')[0];
-    if (isValidLocale(langPrefix)) {
-      return langPrefix;
-    }
-  }
-
-  return defaultLocale;
-}
-
-// Helper function to get preferred locale (cookie > header > default)
+// Helper function to get preferred locale (cookie > default > header)
 function getPreferredLocale(request: NextRequest) {
   // Check for locale cookie first
   const localeCookie = request.cookies.get('NEXT_LOCALE')?.value;
@@ -46,8 +24,9 @@ function getPreferredLocale(request: NextRequest) {
     return localeCookie;
   }
 
-  // Fallback to accept-language header
-  return getLocaleFromHeaders(request);
+  // Always default to Portuguese unless user explicitly requests English
+  // This ensures Portuguese is the true default for new visitors
+  return defaultLocale;
 }
 
 // Handle non-locale routes (API routes, static files, etc.)
