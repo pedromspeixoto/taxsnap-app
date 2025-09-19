@@ -10,8 +10,9 @@ import { Upload, Plus, X, FileText, Loader2, AlertCircle, Download } from "lucid
 import { Platform } from "@/lib/types/submission"
 import { Broker } from "@/lib/types/broker"
 import FileList from "./FileList"
-import { apiClient } from "@/lib/api/client"
+import { getBrokersAction } from "@/app/actions/submission-actions"
 import { useAuth } from "@/lib/contexts/auth-context"
+import { toast } from "@/lib/hooks/use-toast"
 
 interface BrokerPlatformsProps {
   platforms: Platform[]
@@ -66,7 +67,7 @@ export default function BrokerPlatforms({
   const [availableBrokers, setAvailableBrokers] = useState<BrokerWithColor[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { withAuth } = useAuth()
+  const { getValidAccessToken } = useAuth()
 
   // Fetch brokers from API
   useEffect(() => {
@@ -75,10 +76,18 @@ export default function BrokerPlatforms({
         setIsLoading(true)
         setError(null)
 
-        const response = await withAuth((accessToken) => apiClient.getBrokers(accessToken))
+        const accessToken = await getValidAccessToken()
+        const result = await getBrokersAction(accessToken)
+
+        if (result.error) {
+          console.error('Error fetching brokers:', result.error)
+          setError(result.error)
+          toast.error(t?.t('errors.errorLoadingBrokers') || "Error loading brokers", result.error)
+          return
+        }
 
         // Map brokers with colors
-        const brokersWithColors: BrokerWithColor[] = response.brokers.map((broker: Broker) => ({
+        const brokersWithColors: BrokerWithColor[] = (result.brokers || []).map((broker: Broker) => ({
           ...broker,
           color: assignBrokerColor()
         }))
@@ -86,14 +95,16 @@ export default function BrokerPlatforms({
         setAvailableBrokers(brokersWithColors)
       } catch (err) {
         console.error('Error fetching brokers:', err)
-        setError(err instanceof Error ? err.message : 'Failed to fetch brokers')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch brokers'
+        setError(errorMessage)
+        toast.error(t?.t('errors.errorLoadingBrokers') || "Error loading brokers", errorMessage)
       } finally {
         setIsLoading(false)
       }
     }
 
     fetchBrokers()
-  }, [withAuth])
+  }, [getValidAccessToken, t])
 
   const addPlatform = () => {
     if (selectedBroker) {

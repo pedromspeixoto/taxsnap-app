@@ -18,10 +18,16 @@ export enum SubmissionStatus {
   FAILED = 'FAILED'
 }
 
+export enum SubmissionTier {
+  STANDARD = 'STANDARD',
+  PREMIUM = 'PREMIUM'
+}
+
 export interface Submission {
   id: string
   userId: string
   status: SubmissionStatus
+  tier: SubmissionTier
   title: string
   baseIrsPath?: string
   submissionType?: string
@@ -33,7 +39,9 @@ export interface Submission {
 
 export interface CreateSubmissionRequest {
   userId: string
+  userPackId?: string
   title: string
+  tier?: SubmissionTier
   baseIrsPath?: string
   submissionType?: string
   fiscalNumber?: string
@@ -58,6 +66,7 @@ export interface SubmissionResponse {
   id: string
   userId?: string
   status: SubmissionStatus
+  tier: SubmissionTier
   title: string
   baseIrsPath?: string
   submissionType?: string

@@ -14,21 +14,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                String    @id @default(uuid())
-  email             String    @unique
-  password          String?
-  verified          Boolean   @default(false)
-  verificationToken String?   @map("verification_token")
-  verificationUrl   String?   @map("verification_url")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-  deletedAt         DateTime? @map("deleted_at")
+// Enums
+enum UserRole {
+  USER
+  ADMIN
 
-  // Relations
-  submissions       Submission[]
-
-  @@map("users")
+  @@map("user_roles")
 }
 
 enum SubmissionStatus {
@@ -36,24 +27,68 @@ enum SubmissionStatus {
   PROCESSING
   COMPLETE
   FAILED
+
+  @@map("submission_statuses")
+}
+
+enum SubmissionTier {
+  STANDARD
+  PREMIUM
+
+  @@map("submission_tiers")
+}
+
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  ERROR
+  CANCELLED
+
+  @@map("payment_statuses")
+}
+
+// Models
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String    @map("password")
+  role              UserRole  @default(USER)
+  verified          Boolean   @default(false)
+  verificationToken String?   @map("verification_token")
+  verificationUrl   String?   @map("verification_url")
+  deletedAt         DateTime? @map("deleted_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  submissions Submission[]
+  packs       UserPack[]
+  payments    Payment[]
+
+  @@map("users")
 }
 
 model Submission {
   id              String           @id @default(uuid())
   userId          String           @map("user_id")
+  userPackId      String?          @map("user_pack_id")
   submissionType  String           @default("pl_average_weighted") @map("submission_type")
   fiscalNumber    String           @default("123456789") @map("fiscal_number")
   year            Int              @default(2025)  
   status          SubmissionStatus @default(DRAFT)
   title           String
   baseIrsPath     String?          @map("base_irs_path")
+  tier            SubmissionTier   @default(STANDARD)
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
 
   // Relations
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  files           SubmissionFile[]
-  results         SubmissionResult[]
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userPack UserPack?           @relation(fields: [userPackId], references: [id], onDelete: SetNull)
+  files    SubmissionFile[]
+  taxes    SubmissionResult?
 
   @@map("submissions")
 }
@@ -67,19 +102,74 @@ model SubmissionFile {
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations
-  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@map("submission_files")
 }
 
 model SubmissionResult {
-  id            String @id @default(uuid())
-  submissionId  String @map("submission_id")
+  id           String    @id @default(uuid())
+  submissionId String    @unique @map("submission_id")
   results       Json
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations
-  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@map("submission_results")
+}
+
+model Pack {
+  id          String  @id @default(uuid())
+  name        String
+  description String
+  price       Decimal @db.Decimal(10, 2)
+  submissions Int
+  isPremium   Boolean @default(false)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  userPacks UserPack[]
+  payments  Payment[]
+
+  @@map("packs")
+}
+
+model UserPack {
+  id                  String   @id @default(uuid())
+  userId              String   @map("user_id")
+  packId              String   @map("pack_id")
+  submissionsRemaining Int     @map("submissions_remaining")
+  isPremium           Boolean  @default(false) @map("is_premium")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pack        Pack         @relation(fields: [packId], references: [id])
+  submissions Submission[]
+
+  @@map("user_pack")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  userId        String        @map("user_id")
+  packId        String        @map("pack_id")
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("EUR")
+  status        PaymentStatus @default(PENDING)
+  paymentMethod String?       @map("payment_method")
+  transactionId String?       @map("transaction_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pack Pack @relation(fields: [packId], references: [id])
+
+  @@map("payments")
 }

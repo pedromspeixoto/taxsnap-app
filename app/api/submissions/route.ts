@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
-import { submissionService, handleError, ok, requireAuth, badRequest } from '@/lib/api/utils';
+import { submissionService, handleError, ok, requireAuth, badRequest, forbidden } from '@/lib/api/utils';
+import { paymentService } from '@/lib/services/payment-service';
+import { SubmissionTier } from '@/lib/types/submission';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +17,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = requireAuth(request);
-    const { title, submissionType, fiscalNumber, year } = await request.json();
+    const { title, submissionType, fiscalNumber, year, isPremium } = await request.json();
 
     if (!title?.trim()) {
       return badRequest('Title is required');
@@ -43,13 +45,43 @@ export async function POST(request: NextRequest) {
       return badRequest('Year must be greater than 2020');
     }
 
+    // Check if user can create a submission (payment logic)
+    const submissionCapability = await paymentService.canUserCreateSubmission(user.userId);
+    if (!submissionCapability.canCreate) {
+      return forbidden('No available submissions remaining. Please purchase a pack to continue.');
+    }
+
+    // Validate premium request
+    const requestedPremium = isPremium === true || isPremium === 'true';
+    if (requestedPremium && submissionCapability.tier !== 'PREMIUM') {
+      return forbidden('Premium processing requested but no premium subscriptions available.');
+    }
+
+    // Determine final tier based on user choice and availability
+    const finalTier = requestedPremium ? SubmissionTier.PREMIUM : SubmissionTier.STANDARD;
+
+    // Get the appropriate subscription for the requested tier
+    const targetSubscription = await paymentService.getNextAvailableSubscription(
+      user.userId, 
+      requestedPremium
+    );
+    
+    if (!targetSubscription) {
+      return forbidden(`No ${requestedPremium ? 'premium' : 'standard'} subscriptions available.`);
+    }
+
     const submission = await submissionService.createSubmission({
       userId: user.userId,
+      userPackId: targetSubscription.id, // Link to the UserPack that provided this submission
       title: title.trim(),
       submissionType,
       fiscalNumber,
       year,
+      tier: finalTier,
     });
+
+    // Consume a submission from the appropriate subscription
+    await paymentService.consumeSubmissionFromSubscription(user.userId, targetSubscription.id);
 
     return ok(submission);
   } catch (error) {

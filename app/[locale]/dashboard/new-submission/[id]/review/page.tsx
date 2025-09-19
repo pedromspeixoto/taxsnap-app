@@ -176,7 +176,9 @@ export default function Step3ReviewSubmission() {
       
       return () => clearTimeout(timer)
     }
-  }, [authLoading, isAuthenticated, fetchSubmission, createPath])
+  // This is needed since createPath is not a dependency of the useEffect and creates an infinite loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, isAuthenticated, fetchSubmission])
 
   // Additional effect to handle authentication state changes during component lifecycle
   useEffect(() => {

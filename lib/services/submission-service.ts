@@ -278,6 +278,7 @@ export class SubmissionServiceImpl implements SubmissionService {
       id: submission.id,
       userId: submission.userId,
       status: submission.status,
+      tier: submission.tier,
       title: submission.title,
       baseIrsPath: submission.baseIrsPath,
       submissionType: submission.submissionType,

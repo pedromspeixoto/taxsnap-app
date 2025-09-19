@@ -47,6 +47,155 @@
     "processedSubmissions": "Processed Submissions",
     "uptimeGuarantee": "Uptime Guarantee"
   },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that works best for you",
+    "freeStarter": {
+      "name": "Free Starter",
+      "description": "Perfect for trying out our service",
+      "submissions": "3 submissions included",
+      "price": "Free",
+      "features": [
+        "Multi-platform support",
+        "Automated calculations",
+        "Tax report generation",
+        "Email support"
+      ],
+      "cta": "Get Started Free"
+    },
+    "small": {
+      "name": "Small Pack",
+      "description": "Great value for multiple submissions",
+      "price": "€8",
+      "submissions": "5 submissions",
+      "pricePerSubmission": "€1.60 per submission",
+      "features": [
+        "Everything in Free Starter",
+        "Bulk processing",
+        "Historical data export"
+      ],
+      "cta": "Purchase Pack"
+    },
+    "large": {
+      "name": "Large Pack",
+      "description": "Best value for frequent users",
+      "price": "€16",
+      "submissions": "10 submissions",
+      "pricePerSubmission": "€1.60 per submission",
+      "features": [
+        "Everything in Small Pack",
+        "Priority support",
+        "Extended data retention"
+      ],
+      "cta": "Purchase Pack"
+    },
+    "premium": {
+      "name": "Premium Package",
+      "description": "Professional-grade service with expert support",
+      "price": "€39",
+      "submissions": "10 submissions",
+      "highlight": "Plus Manual Review",
+      "features": [
+        "Everything in Large Pack",
+        "Personalized accountant review",
+        "Direct consultation access",
+        "Custom report formatting"
+      ],
+      "cta": "Go Premium"
+    }
+  },
+  "profile": {
+    "title": "User Profile",
+    "subtitle": "Manage your account and subscription details",
+    "userInfo": {
+      "title": "Account Information",
+      "email": "Email Address",
+      "memberSince": "Member Since",
+      "accountStatus": "Account Status",
+      "verified": "Verified",
+      "unverified": "Unverified"
+    },
+    "paymentSummary": {
+      "title": "Submission Packs",
+      "purchasePack": "Purchase Pack",
+      "availableSubmissions": "Available",
+      "usedSubmissions": "Used",
+      "totalSpent": "Total Spent",
+      "premiumAccess": "Premium",
+      "remaining": "remaining",
+      "noActiveSubscriptions": "You don't have any active submission packs.",
+      "purchaseFirstPack": "Purchase Your First Pack",
+      "errorLoading": "Error loading payment information."
+    }
+  },
+  "purchase": {
+    "title": "Purchase Submission Pack",
+    "subtitle": "Choose the pack that best fits your needs",
+    "submissions": "submissions",
+    "perSubmission": "per submission",
+    "select": "Select",
+    "selected": "Selected",
+    "orderSummary": "Order Summary",
+    "proceedToPayment": "Proceed to Payment",
+    "selectPackPrompt": "Please select a pack to continue with your purchase.",
+    "packFeatures": {
+      "multiPlatform": "Multi-platform support",
+      "autoCalculations": "Automated calculations",
+      "taxReports": "Tax report generation",
+      "emailSupport": "Email support",
+      "bulkProcessing": "Bulk processing",
+      "prioritySupport": "Priority support",
+      "extendedRetention": "Extended data retention",
+      "manualReview": "Manual accountant review",
+      "consultationAccess": "Direct consultation access",
+      "customReporting": "Custom report formatting"
+    }
+  },
+  "checkout": {
+    "title": "Secure Checkout",
+    "subtitle": "Complete your purchase securely",
+    "secureCheckout": "Secure Checkout",
+    "orderSummary": "Order Summary",
+    "total": "Total",
+    "vatIncluded": "VAT included",
+    "paymentDetails": "Payment Details",
+    "testMode": "Test Mode",
+    "testModeDescription": "This is a test environment. Use the test card details or enter any other card to simulate a failed payment.",
+    "fillTestCard": "Fill Test Card Details",
+    "cardNumber": "Card Number",
+    "expiryMonth": "Month",
+    "expiryYear": "Year",
+    "cvv": "CVV",
+    "cardHolderName": "Cardholder Name",
+    "cardHolderNamePlaceholder": "John Doe",
+    "payNow": "Pay Now",
+    "processing": "Processing...",
+    "paymentFailed": "Payment failed. Please check your card details and try again.",
+    "paymentError": "An error occurred while processing your payment. Please try again."
+  },
+  "success": {
+    "title": "Payment Successful!",
+    "subtitle": "Thank you for your purchase. Your submission pack is now active.",
+    "paymentDetails": "Payment Details",
+    "paid": "PAID",
+    "paymentId": "Payment ID",
+    "paymentDate": "Payment Date",
+    "congratulations": "🎉 Congratulations!",
+    "submissionsAdded": "{{count}} submissions have been added to your account.",
+    "premiumActivated": "Premium features activated!",
+    "goToDashboard": "Go to Dashboard",
+    "viewProfile": "View Profile",
+    "autoRedirect": "You will be automatically redirected to the dashboard in {{seconds}} seconds.",
+    "filesUploadedSuccessfully": "Files uploaded successfully",
+    "fileDeletedSuccessfully": "File deleted successfully",
+    "templateDownloaded": "Template downloaded",
+    "templateDownloadDescription": "Use this template to format your manual trades",
+    "registrationSuccessful": "Registration successful!",
+    "checkEmailConfirmation": "Please check your email to confirm your account.",
+    "loginSuccessful": "Login successful!",
+    "welcomeBack": "Welcome back, {{email}}!",
+    "emailVerifiedSuccessfully": "Email verified successfully"
+  },
   "footer": {
     "copyright": "2025 IRSimples. All rights reserved."
   },
@@ -54,6 +203,7 @@
     "login": "Login",
     "register": "Sign Up",
     "logout": "Logout",
+    "profile": "Profile",
     "backToDashboard": "Back to Dashboard"
   },
   "common": {
@@ -112,6 +262,7 @@
   "submission": {
     "details": "Submission Details",
     "calculationCompleted": "Tax calculation completed successfully",
+    "premiumDescription": "This submission includes personalized manual review from certified accountants.",
     "summary": "Summary",
     "results": "Results",
     "taxCalculationResults": "Tax Calculation Results",
@@ -169,7 +320,6 @@
     "step2Description": "Upload trade files from your broker platforms and optionally add your base IRS document",
     "submissionLabel": "Submission:",
     "taxSubmissions": "Tax Submissions",
-    "investmentPlatforms": "Investment Platforms",
     "investmentPlatformsDescription": "Upload trade files from your investment platforms",
     "addNewPlatform": "Add New Platform",
     "brokersAvailable": "brokers available",
@@ -179,9 +329,6 @@
     "step3Title": "Step 3: Review & Submit",
     "step3Description": "Review your submission details and files before calculating taxes",
     "summary": "Summary",
-    "submissionSummary": "Submission Summary",
-    "submissionType": "Submission Type",
-    "year": "Year",
     "fiscalNumber": "Fiscal Number",
     "investmentPlatformsCount": "Investment Platforms",
     "tradeFilesDescription": "Trade files from your broker platforms",
@@ -293,17 +440,6 @@
     "verificationTokenRequired": "Verification token is required",
     "failedToVerifyEmail": "Failed to verify email"
   },
-  "success": {
-    "filesUploadedSuccessfully": "Files uploaded successfully",
-    "fileDeletedSuccessfully": "File deleted successfully",
-    "templateDownloaded": "Template downloaded",
-    "templateDownloadDescription": "Use this template to format your manual trades",
-    "registrationSuccessful": "Registration successful!",
-    "checkEmailConfirmation": "Please check your email to confirm your account.",
-    "loginSuccessful": "Login successful!",
-    "welcomeBack": "Welcome back, {{email}}!",
-    "emailVerifiedSuccessfully": "Email verified successfully"
-  },
   "verifyPage": {
     "verifyingEmail": "Verifying your email...",
     "pleaseWaitVerifying": "Please wait while we verify your account.",
@@ -333,5 +469,41 @@
     "uploadManualTransactionsDescription": "Upload manual transaction files using our template format, or download the template to get started.",
     "uploadManualTransactionsDescriptionLong": "Upload manual transaction files using our template format, or download the template to get started. This step is optional - you can skip it if you don't have manual transactions to add.",
     "uploadedAt": "Uploaded {{date}}"
+  },
+  "verifyAccount": {
+    "title": "Verify Your Account",
+    "description": "Please verify your email address before proceeding to your dashboard",
+    "emailSentTo": "We sent a verification email to:",
+    "nextSteps": "Next Steps:",
+    "checkInbox": "Check your email inbox",
+    "clickLink": "Click the verification link",
+    "returnRefresh": "Return here and refresh the page",
+    "emailSentSuccess": "Verification email sent successfully!",
+    "resendEmail": "Resend Verification Email",
+    "sending": "Sending...",
+    "verifiedEmail": "I've Verified My Email",
+    "didntReceive": "Didn't receive the email? Check your spam folder or try resending.",
+    "whyVerification": "Why do we need verification?",
+    "verificationReason": "Email verification helps us ensure the security of your tax data and enables us to send you important updates about your submissions.",
+    "loading": "Loading..."
+  },
+  "modal": {
+    "tierSelection": {
+      "title": "Choose Submission Type",
+      "description": "Select how you want your tax submission to be processed.",
+      "loadingOptions": "Loading options...",
+      "premium": {
+        "title": "Premium Submission",
+        "manualReview": "Personalized manual review from certified accountants",
+        "priorityProcessing": "Priority processing",
+        "expertVerification": "Expert verification"
+      },
+      "standard": {
+        "title": "Standard Submission",
+        "automatedCalculation": "Automated tax calculation",
+        "fastProcessing": "Fast processing",
+        "reliableResults": "Reliable results"
+      }
+    }
   }
 }

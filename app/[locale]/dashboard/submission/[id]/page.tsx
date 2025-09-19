@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Building2, Upload, CheckCircle, AlertCircle, Download, ExternalLink, ChevronDown, ChevronRight } from "lucide-react"
+import { FileText, Building2, Upload, CheckCircle, AlertCircle, Download, ExternalLink, ChevronDown, ChevronRight, Crown } from "lucide-react"
 import { Navbar } from "@/components/navbar"
 import { Platform, UploadedFile, SubmissionResponse, SubmissionStatus, SubmissionResults, StockTrade } from "@/lib/types/submission"
 import { toast } from "@/lib/hooks/use-toast"
@@ -77,7 +77,7 @@ export default function SubmissionDetails() {
     })
   }
 
-  const fetchSubmissionDetails = async () => {
+  const fetchSubmissionDetails = useCallback(async () => {
     if (!id || typeof id !== 'string') {
       setState(prev => ({ 
         ...prev, 
@@ -159,7 +159,9 @@ export default function SubmissionDetails() {
       
       toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", errorMessage)
     }
-  }
+  // Don't include 't' to avoid infinite loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, getValidAccessToken]) // Don't include 't' to avoid infinite loops
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -167,7 +169,7 @@ export default function SubmissionDetails() {
     } else if (!authLoading && !isAuthenticated) {
       router.push('/')
     }
-  }, [authLoading, isAuthenticated])
+  }, [authLoading, isAuthenticated, fetchSubmissionDetails, router])
 
   const getStatusColor = (status: SubmissionStatus) => {
     switch (status) {
@@ -297,6 +299,12 @@ export default function SubmissionDetails() {
           <div className="flex items-center gap-4 mb-2">
             <div className={`w-4 h-4 rounded-full ${getStatusColor(state.submission.status)}`}></div>
             <h1 className="text-3xl font-bold">{state.submission.title}</h1>
+            {state.submission.tier === 'PREMIUM' && (
+              <div className="flex items-center gap-2 bg-gradient-to-r from-yellow-100 to-orange-100 border border-yellow-300 px-3 py-1 rounded-full">
+                <Crown className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm font-medium text-yellow-700">Premium Submission</span>
+              </div>
+            )}
           </div>
           
           <p className="text-muted-foreground">
@@ -304,6 +312,11 @@ export default function SubmissionDetails() {
             {state.submission.status === SubmissionStatus.PROCESSING && "Tax calculation in progress"}
             {state.submission.status === SubmissionStatus.DRAFT && "Submission in draft mode"}
             {state.submission.status === SubmissionStatus.FAILED && "Tax calculation failed - under manual review"}
+            {state.submission.tier === 'PREMIUM' && (
+              <span className="block mt-1 text-yellow-600">
+                {t?.t('submission.premiumDescription') || 'This submission includes personalized manual review from certified accountants.'}
+              </span>
+            )}
           </p>
         </div>
 

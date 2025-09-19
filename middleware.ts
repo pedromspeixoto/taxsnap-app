@@ -86,6 +86,8 @@ const publicApiRoutes = [
   'POST /api/auth/refresh',
   'POST /api/users',
   'POST /api/users/verify',
+  'GET /api/packs',
+  'POST /api/users/resend-verification',
 ];
 
 // Helper function to check if a route matches the request

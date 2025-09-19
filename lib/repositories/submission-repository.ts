@@ -6,7 +6,8 @@ import {
   UpdateSubmissionRequest,
   SubmissionUpdate,
   GetSubmissionsQuery,
-  SubmissionStatus 
+  SubmissionStatus,
+  SubmissionTier
 } from '../types/submission';
 
 type PrismaSubmissionWithFiles = PrismaSubmission & {
@@ -29,6 +30,7 @@ function mapPrismaSubmissionToSubmission(prismaSubmission: PrismaSubmissionWithF
     id: prismaSubmission.id,
     userId: prismaSubmission.userId,
     status: prismaSubmission.status as SubmissionStatus,
+    tier: prismaSubmission.tier as SubmissionTier,
     title: prismaSubmission.title,
     baseIrsPath: prismaSubmission.baseIrsPath || undefined,
     submissionType: prismaSubmission.submissionType || undefined,
@@ -46,8 +48,10 @@ class PrismaSubmissionRepository implements SubmissionRepository {
     const submission = await prisma.submission.create({
       data: {
         userId: data.userId,
+        userPackId: data.userPackId,
         title: data.title,
         status: SubmissionStatus.DRAFT,
+        tier: data.tier || 'STANDARD', // Default to STANDARD if not specified
         baseIrsPath: data.baseIrsPath,
         submissionType: data.submissionType,
         fiscalNumber: data.fiscalNumber,

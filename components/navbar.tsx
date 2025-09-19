@@ -82,6 +82,11 @@ export function Navbar({
           {isAuthenticated && user ? (
             <>
               <span className="text-sm text-muted-foreground hidden md:inline">{user.email}</span>
+              <Link href={createPath('dashboard/profile')}>
+                <Button variant="ghost" size="sm">
+                  <span className="hidden sm:inline">{t?.t('nav.profile') || 'Profile'}</span>
+                </Button>
+              </Link>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t?.t('nav.logout') || 'Logout'}</span>
