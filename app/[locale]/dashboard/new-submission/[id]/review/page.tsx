@@ -155,7 +155,9 @@ export default function Step3ReviewSubmission() {
       
       toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", errorMessage)
     }
-  }, [id, getValidAccessToken, t])
+    // t is intentionally omitted from deps to prevent infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, getValidAccessToken])
 
   const handleBack = () => {
     window.location.href = createPath(`dashboard/new-submission/${id}/brokers`)
@@ -176,7 +178,9 @@ export default function Step3ReviewSubmission() {
       
       return () => clearTimeout(timer)
     }
-  }, [authLoading, isAuthenticated, fetchSubmission, createPath])
+    // fetchSubmission and createPath are intentionally omitted to prevent infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, fetchSubmission, isAuthenticated])
 
   // Additional effect to handle authentication state changes during component lifecycle
   useEffect(() => {
