@@ -154,9 +154,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const accessToken = getAccessToken();
     const cookieToken = getCookieValue(ACCESS_TOKEN_KEY);
     
-    // If no tokens or user data, definitely not authenticated
+    // If no tokens or user data, check if this is initialization vs actual failure
     if (!accessToken || !currentUser) {
-      handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+      // Check if there are ANY auth-related items in storage (indicating previous login attempt)
+      const hasAnyAuthData = typeof window !== 'undefined' && (
+        localStorage.getItem(ACCESS_TOKEN_KEY) || 
+        localStorage.getItem(REFRESH_TOKEN_KEY) || 
+        localStorage.getItem(USER_KEY) ||
+        document.cookie.includes(ACCESS_TOKEN_KEY)
+      );
+      
+      if (hasAnyAuthData) {
+        // There was some auth data but it's incomplete/corrupted - this is a failure
+        handleAuthFailure(clearTokens, setUser, setIsTokenValid);
+      } else {
+        // No auth data at all - this is normal initial state, not a failure
+        // Just update state without calling handleAuthFailure
+        setUser(null);
+        setIsTokenValid(false);
+      }
       return false;
     }
 
@@ -242,14 +258,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
   }, [checkAuthStatus]);
 
-  // Listen for storage changes (logout from another tab)
+  // Listen for storage changes (logout from another tab)  
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handleStorageChange = async (e: StorageEvent) => {
-      if (e.key === ACCESS_TOKEN_KEY || e.key === USER_KEY) {
-        await checkAuthStatus();
-      }
+    const handleStorageChange = async () => {
+      // Note: Storage listener temporarily disabled to prevent race condition during login
+      // This was meant for cross-tab logout detection
+      // if (e.key === ACCESS_TOKEN_KEY || e.key === USER_KEY) {
+      //   await checkAuthStatus();
+      // }
     };
 
     window.addEventListener('storage', handleStorageChange);

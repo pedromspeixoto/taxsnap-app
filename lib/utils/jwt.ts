@@ -27,7 +27,7 @@ export class JWTService {
     this.refreshTokenSecret = new TextEncoder().encode(
       process.env.JWT_REFRESH_SECRET || 'your-refresh-token-secret-change-this'
     );
-    this.accessTokenExpiry = process.env.JWT_ACCESS_EXPIRY || '30s'; // Temporarily set to 30 seconds for testing
+    this.accessTokenExpiry = process.env.JWT_ACCESS_EXPIRY || '15m'; // 15 minutes to match cookie expiry
     this.refreshTokenExpiry = process.env.JWT_REFRESH_EXPIRY || '7d';
   }
 
