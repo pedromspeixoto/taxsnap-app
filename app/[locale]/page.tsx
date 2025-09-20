@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle, TrendingUp, Shield, Clock, Users, FileText } from "lucide-react"
+import { CheckCircle, TrendingUp, Shield, Clock, Users, FileText, Check, Crown } from "lucide-react"
 import { AuthDialog } from "@/components/auth-dialog"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { Navbar } from "@/components/navbar"
@@ -42,7 +42,7 @@ export default function LandingPage({ params }: LandingPageProps) {
   useEffect(() => {
     // Only redirect if hydrated, not loading, and user is authenticated
     if (isHydrated && !isLoading && isAuthenticated && user) {
-      // Add a small delay to ensure auth state is stable
+      // Add a longer delay to allow other components (like auth dialog) to handle redirects first
       const timer = setTimeout(() => {
         const targetPath = user.verified ? `/${locale}/dashboard` : `/${locale}/verify-account`
         
@@ -56,7 +56,7 @@ export default function LandingPage({ params }: LandingPageProps) {
             window.location.href = targetPath
           }
         }
-      }, 100)
+      }, 300)
       
       return () => clearTimeout(timer)
     }
@@ -204,6 +204,120 @@ export default function LandingPage({ params }: LandingPageProps) {
                 <div className="bg-background p-3 rounded text-center">And More...</div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">{t.t('pricing.title')}</h2>
+            <p className="text-xl text-muted-foreground">{t.t('pricing.subtitle')}</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Free Starter Pack */}
+            <Card className="taxsnap-card-hover relative">
+              <CardHeader>
+                <CardTitle className="text-lg">{t.t('pricing.freeStarter.name')}</CardTitle>
+                <p className="text-muted-foreground text-sm">{t.t('pricing.freeStarter.description')}</p>
+                <div className="text-2xl font-bold text-primary">{t.t('pricing.freeStarter.price')}</div>
+                <p className="text-sm text-muted-foreground">{t.t('pricing.freeStarter.submissions')}</p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-6">
+                  {(t.t('pricing.freeStarter.features') as unknown as string[]).map((feature: string, index: number) => (
+                    <li key={index} className="flex items-center text-sm">
+                      <Check className="w-4 h-4 text-primary mr-2" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <AuthDialog mode="register" t={t}>
+                  <Button className="w-full">{t.t('pricing.freeStarter.cta')}</Button>
+                </AuthDialog>
+              </CardContent>
+            </Card>
+
+            {/* Small Pack */}
+            <Card className="taxsnap-card-hover">
+              <CardHeader>
+                <CardTitle className="text-lg">{t.t('pricing.small.name')}</CardTitle>
+                <p className="text-muted-foreground text-sm">{t.t('pricing.small.description')}</p>
+                <div className="text-2xl font-bold text-primary">{t.t('pricing.small.price')}</div>
+                <p className="text-sm text-muted-foreground">
+                  {t.t('pricing.small.submissions')} • {t.t('pricing.small.pricePerSubmission')}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-6">
+                  {(t.t('pricing.small.features') as unknown as string[]).map((feature: string, index: number) => (
+                    <li key={index} className="flex items-center text-sm">
+                      <Check className="w-4 h-4 text-primary mr-2" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <AuthDialog mode="register" t={t}>
+                  <Button variant="outline" className="w-full">{t.t('pricing.small.cta')}</Button>
+                </AuthDialog>
+              </CardContent>
+            </Card>
+
+            {/* Large Pack */}
+            <Card className="taxsnap-card-hover">
+              <CardHeader>
+                <CardTitle className="text-lg">{t.t('pricing.large.name')}</CardTitle>
+                <p className="text-muted-foreground text-sm">{t.t('pricing.large.description')}</p>
+                <div className="text-2xl font-bold text-primary">{t.t('pricing.large.price')}</div>
+                <p className="text-sm text-muted-foreground">
+                  {t.t('pricing.large.submissions')} • {t.t('pricing.large.pricePerSubmission')}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-6">
+                  {(t.t('pricing.large.features') as unknown as string[]).map((feature: string, index: number) => (
+                    <li key={index} className="flex items-center text-sm">
+                      <Check className="w-4 h-4 text-primary mr-2" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <AuthDialog mode="register" t={t}>
+                  <Button variant="outline" className="w-full">{t.t('pricing.large.cta')}</Button>
+                </AuthDialog>
+              </CardContent>
+            </Card>
+
+            {/* Premium Package */}
+            <Card className="taxsnap-card-hover relative border-primary">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-primary text-primary-foreground">
+                  <Crown className="w-3 h-3 mr-1" />
+                  {t.t('pricing.premium.highlight')}
+                </Badge>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg">{t.t('pricing.premium.name')}</CardTitle>
+                <p className="text-muted-foreground text-sm">{t.t('pricing.premium.description')}</p>
+                <div className="text-2xl font-bold text-primary">{t.t('pricing.premium.price')}</div>
+                <p className="text-sm text-muted-foreground">{t.t('pricing.premium.submissions')}</p>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 mb-6">
+                  {(t.t('pricing.premium.features') as unknown as string[]).map((feature: string, index: number) => (
+                    <li key={index} className="flex items-center text-sm">
+                      <Check className="w-4 h-4 text-primary mr-2" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <AuthDialog mode="register" t={t}>
+                  <Button className="w-full">{t.t('pricing.premium.cta')}</Button>
+                </AuthDialog>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ChevronDown } from "lucide-react"
 import { locales, localeNames, localeFlags } from "@/lib/i18n"
@@ -44,10 +45,12 @@ export function LanguageSwitcher({ currentLocale, className = "" }: LanguageSwit
         className="flex items-center gap-2 min-w-[100px]"
         disabled={isPending}
       >
-        <img
+        <Image
           src={`https://flagcdn.com/w20/${localeFlags[currentLocale]}.png`}
           alt={`${localeNames[currentLocale]} flag`}
-          className="w-4 h-3 object-cover"
+          width={16}
+          height={12}
+          className="object-cover"
         />
         <span className="hidden sm:inline">{localeNames[currentLocale]}</span>
         <span className="sm:hidden">{currentLocale.toUpperCase()}</span>
@@ -73,10 +76,12 @@ export function LanguageSwitcher({ currentLocale, className = "" }: LanguageSwit
                 }`}
                 disabled={isPending}
               >
-                <img
+                <Image
                   src={`https://flagcdn.com/w20/${localeFlags[locale]}.png`}
                   alt={`${localeNames[locale]} flag`}
-                  className="w-4 h-3 object-cover"
+                  width={16}
+                  height={12}
+                  className="object-cover"
                 />
                 <span>{localeNames[locale]}</span>
                 {locale === currentLocale && (

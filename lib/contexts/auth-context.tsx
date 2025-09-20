@@ -163,7 +163,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if cookies were cleared by middleware (tokens exist in localStorage but not in cookies)
     // This indicates the middleware found the tokens invalid - try to refresh before clearing
     if (accessToken && !cookieToken) {
-      console.log('Cookies cleared by middleware, attempting token refresh');
       const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
       if (refreshToken) {
         try {
@@ -180,13 +179,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return true;
         } catch {
           // Refresh failed, now clear auth state
-          console.log('Token refresh failed, clearing auth state');
           handleAuthFailure(clearTokens, setUser, setIsTokenValid);
           return false;
         }
       } else {
         // No refresh token, clear auth state
-        console.log('No refresh token available, clearing auth state');
         handleAuthFailure(clearTokens, setUser, setIsTokenValid);
         return false;
       }

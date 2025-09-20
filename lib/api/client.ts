@@ -12,6 +12,14 @@ import {
   RegisterRequest,
   ClientUser
 } from '../types/user';
+import type { 
+  Pack, 
+  CreatePaymentRequest, 
+  CreatePaymentResponse, 
+  ProcessPaymentRequest,
+  PaymentResponse,
+  UserPaymentSummary
+} from '../types/payment';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
@@ -105,10 +113,10 @@ export class ApiClient {
     });
   }
 
-  async resendVerification(email: string): Promise<MessageResponse> {
+  async resendVerification(email: string, locale?: string): Promise<MessageResponse> {
     return this.request('/users/resend-verification', {
       method: 'POST',
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, locale }),
     });
   }
 
@@ -189,10 +197,10 @@ export class ApiClient {
   }
 
   // Submission methods
-  async createSubmission(title: string, submissionType: string, fiscalNumber: string, year: number, accessToken: string): Promise<SubmissionResponse> {
+  async createSubmission(title: string, submissionType: string, fiscalNumber: string, year: number, isPremium: boolean, accessToken: string): Promise<SubmissionResponse> {
     return this.request('/submissions', {
       method: 'POST',
-      body: JSON.stringify({ title, submissionType, fiscalNumber, year }),
+      body: JSON.stringify({ title, submissionType, fiscalNumber, year, isPremium }),
     }, accessToken);
   }
 
@@ -236,11 +244,56 @@ export class ApiClient {
   }
 
   async calculateTaxes(
-    submissionId: string, 
+    submissionId: string,
     accessToken: string
   ): Promise<CalculateTaxesResponse> {
     return this.request(`/submissions/${submissionId}/calculate-taxes`, {
       method: 'POST',
+    }, accessToken);
+  }
+
+  // Payment-related methods
+  async getPacks(purchaseOnly: boolean = false): Promise<Pack[]> {
+    const params = purchaseOnly ? '?purchase_only=true' : '';
+    return this.request(`/packs${params}`);
+  }
+
+  async createPayment(
+    request: CreatePaymentRequest,
+    accessToken: string
+  ): Promise<CreatePaymentResponse> {
+    return this.request('/payments', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    }, accessToken);
+  }
+
+  async getPayment(paymentId: string, accessToken: string): Promise<PaymentResponse> {
+    return this.request(`/payments/${paymentId}`, {
+      method: 'GET',
+    }, accessToken);
+  }
+
+  async processPayment(
+    paymentId: string,
+    request: ProcessPaymentRequest,
+    accessToken: string
+  ): Promise<PaymentResponse> {
+    return this.request(`/payments/${paymentId}/process`, {
+      method: 'POST',
+      body: JSON.stringify(request),
+    }, accessToken);
+  }
+
+  async getUserPaymentSummary(accessToken: string): Promise<UserPaymentSummary> {
+    return this.request('/users/me/payment-summary', {
+      method: 'GET',
+    }, accessToken);
+  }
+
+  async getUserPaymentHistory(accessToken: string): Promise<UserPaymentSummary> {
+    return this.request('/users/me/payment-history', {
+      method: 'GET',
     }, accessToken);
   }
 }

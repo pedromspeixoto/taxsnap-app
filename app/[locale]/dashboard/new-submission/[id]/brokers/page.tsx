@@ -175,7 +175,7 @@ export default function Step2PlatformsAndIRS() {
     } catch (error) {
       console.error('Error refreshing submission:', error)
     }
-  }, [id, getValidAccessToken, t])
+  }, [id, getValidAccessToken])
 
   const addPlatform = (platform: Platform) => {
     setState(prev => ({
@@ -341,6 +341,8 @@ export default function Step2PlatformsAndIRS() {
     } else if (!authLoading && !isAuthenticated) {
       window.location.href = createPath('')
     }
+  // createPath is not a dependency of the useEffect and creates an infinite loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, isAuthenticated,fetchSubmission])
 
   // Loading state

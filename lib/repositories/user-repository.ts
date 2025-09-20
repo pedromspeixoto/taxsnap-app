@@ -25,6 +25,7 @@ function mapPrismaUserToUser(prismaUser: PrismaUser): User {
     verificationUrl: prismaUser.verificationUrl || undefined,
     createdAt: prismaUser.createdAt,
     updatedAt: prismaUser.updatedAt,
+    deletedAt: prismaUser.deletedAt || undefined,
   };
 }
 

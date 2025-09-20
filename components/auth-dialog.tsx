@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useAuth } from "@/lib/contexts/auth-context"
-import { apiClient } from "@/lib/api/client"
+import { loginAction, registerAction } from "@/app/actions/auth-actions"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/lib/hooks/use-toast"
 import {
@@ -35,7 +35,7 @@ export function AuthDialog({ mode, children, t }: AuthDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { setAuthData } = useAuth()
-  const { createPath } = useLocalizedNavigation()
+  const { createPath, currentLocale } = useLocalizedNavigation()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,14 +43,25 @@ export function AuthDialog({ mode, children, t }: AuthDialogProps) {
 
     try {
       if (mode === "register") {
-        // Make API call directly - no state management here
-        await apiClient.register({ email, password })
+        const result = await registerAction({ email, password, locale: currentLocale })
+        
+        if (result.error) {
+          toast.error(t?.t('errors.authenticationFailed2') || "Registration failed", result.error)
+          return
+        }
+
         toast.success(t?.t('success.registrationSuccessful') || "Registration successful!", t?.t('success.checkEmailConfirmation') || "Please check your email to confirm your account.")
         router.push(createPath(`verify-account?email=${encodeURIComponent(email)}`))
       } else {
-        // Make API call directly - then use AuthContext for state management
-        const authResponse = await apiClient.login({ email, password })
-        const user = setAuthData(authResponse)
+        const result = await loginAction({ email, password })
+        
+        if (result.error || !result.authResponse) {
+          toast.error(t?.t('errors.authenticationFailed2') || "Authentication failed", result.error || 'Login failed')
+          return
+        }
+
+        // Use AuthContext for state management
+        const user = setAuthData(result.authResponse)
 
         const welcomeMessage = t?.t('success.welcomeBack')?.replace('{{email}}', user.email) || `Welcome back, ${user.email}!`
         toast.success(t?.t('success.loginSuccessful') || "Login successful!", welcomeMessage)

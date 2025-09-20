@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { apiClient } from '@/lib/api/client'
 import { SubmissionResponse, SubmissionResults } from '@/lib/types/submission'
+import { Broker } from '@/lib/types/broker'
 import { submissionService } from '@/lib/services/submission-service'
 
 // Action state types
@@ -26,6 +27,10 @@ export interface GetSubmissionResultsActionState extends ActionState {
 // Get submissions list action state
 export interface GetSubmissionsActionState extends ActionState {
   submissions?: SubmissionResponse[]
+}
+
+export interface GetBrokersActionState extends ActionState {
+  brokers?: Broker[]
 }
 
 // Get submission by ID
@@ -164,6 +169,7 @@ export async function createOrUpdateSubmissionAction(
     const fiscalNumber = formData.get('fiscalNumber') as string
     const submissionId = formData.get('submissionId') as string
     const accessToken = formData.get('accessToken') as string
+    const isPremium = formData.get('isPremium') === 'true'
 
     // Validation
     if (!submissionName.trim()) {
@@ -181,6 +187,7 @@ export async function createOrUpdateSubmissionAction(
         submissionType,
         fiscalNumber || '123456789',
         submissionYear,
+        isPremium,
         accessToken
       )
       
@@ -394,6 +401,30 @@ export async function downloadManualLogTemplateAction(
     return { 
       success: true, 
       message: 'https://storage.googleapis.com/taxsnap-public-data/templates/manual_log_template.csv' 
+    }
+  }
+}
+
+// Get available brokers
+export async function getBrokersAction(
+  accessToken: string
+): Promise<GetBrokersActionState> {
+  try {
+    if (!accessToken) {
+      return { error: 'Not authenticated' }
+    }
+
+    const response = await apiClient.getBrokers(accessToken)
+
+    return { 
+      success: true, 
+      brokers: response.brokers
+    }
+
+  } catch (error) {
+    console.error('[ACTION] getBrokersAction:', error)
+    return { 
+      error: error instanceof Error ? error.message : 'Failed to fetch brokers'
     }
   }
 } 

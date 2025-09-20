@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, FileText, Search, ChevronLeft, ChevronRight } from "lucide-react"
-import Link from "next/link"
+import { Plus, FileText, Search, ChevronLeft, ChevronRight, Crown } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
 import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
@@ -16,6 +16,8 @@ import { SubmissionResponse, SubmissionStatus } from "@/lib/types/submission"
 import { formatDate } from "@/lib/utils/date"
 import { toast } from "@/lib/hooks/use-toast"
 import { getSubmissionsAction } from "@/app/actions/submission-actions"
+import { TierSelectionModal } from "@/components/submissions/TierSelectionModal"
+import Link from "next/link"
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs"
 import { Suspense } from "react"
 
@@ -40,6 +42,7 @@ export default function Dashboard() {
 function DashboardContent() {
   const { getValidAccessToken, isAuthenticated, isLoading: authLoading } = useAuth()
   const { createPath, currentLocale } = useLocalizedNavigation()
+  const router = useRouter()
   const [t, setT] = useState<TranslationHelper | null>(null)
 
   // Load translations
@@ -48,9 +51,11 @@ function DashboardContent() {
       setT(new TranslationHelper(messages))
     })
   }, [currentLocale])
-  const [{ q, status, page }, setQuery] = useQueryStates({
+
+  const [{ q, status, tier, page }, setQuery] = useQueryStates({
     q: parseAsString.withDefault(""),
     status: parseAsString.withDefault("all"),
+    tier: parseAsString.withDefault("all"),
     page: parseAsInteger.withDefault(1),
   })
   const itemsPerPage = 5
@@ -61,7 +66,7 @@ function DashboardContent() {
     error: null
   })
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }))
 
@@ -97,13 +102,15 @@ function DashboardContent() {
       
       toast.error(t?.t('errors.errorLoadingSubmissions') || "Error loading submissions", errorMessage)
     }
-  }
+  // Don't include 't' to avoid infinite loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getValidAccessToken])
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       fetchSubmissions()
     }
-  }, [authLoading, isAuthenticated])
+  }, [authLoading, isAuthenticated, fetchSubmissions])
 
   const getStatusColor = (status: SubmissionStatus) => {
     switch (status) {
@@ -166,7 +173,10 @@ function DashboardContent() {
   const filteredSubmissions = state.submissions.filter((submission: SubmissionResponse) => {
     const matchesSearch = submission.title.toLowerCase().includes(q.toLowerCase())
     const matchesStatus = status === "all" || submission.status === status
-    return matchesSearch && matchesStatus
+    const matchesTier = tier === "all" || 
+      (tier === "premium" && submission.tier === "PREMIUM") ||
+      (tier === "standard" && submission.tier === "STANDARD")
+    return matchesSearch && matchesStatus && matchesTier
   })
 
   const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage)
@@ -182,6 +192,15 @@ function DashboardContent() {
     setQuery({ status: value, page: 1 })
   }
 
+  const handleTierChange = (value: string) => {
+    setQuery({ tier: value, page: 1 })
+  }
+
+  const handleNewSubmission = (tier: 'PREMIUM' | 'STANDARD') => {
+    // Navigate to new submission with tier parameter
+    router.push(createPath(`dashboard/new-submission/new?tier=${tier.toLowerCase()}`))
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -192,12 +211,12 @@ function DashboardContent() {
             <h1 className="text-3xl font-bold">{t?.t('dashboard.title') || 'Dashboard'}</h1>
             <p className="text-muted-foreground">{t?.t('dashboard.subtitle') || 'Manage your tax submissions and track progress'}</p>
           </div>
-          <Link href={createPath("dashboard/new-submission/new")}>
+          <TierSelectionModal onTierSelect={handleNewSubmission} t={t}>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               {t?.t('dashboard.newSubmission') || 'New Submission'}
             </Button>
-          </Link>
+          </TierSelectionModal>
         </div>
 
         {/* Search and Filter Bar */}
@@ -223,6 +242,21 @@ function DashboardContent() {
                   <SelectItem value={SubmissionStatus.PROCESSING}>{t?.t('dashboard.processing') || 'Processing'}</SelectItem>
                   <SelectItem value={SubmissionStatus.DRAFT}>{t?.t('dashboard.draft') || 'Draft'}</SelectItem>
                   <SelectItem value={SubmissionStatus.FAILED}>{t?.t('dashboard.failed') || 'Failed'}</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={tier} onValueChange={handleTierChange}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Filter by tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t?.t('dashboard.allTiers') || 'All Tiers'}</SelectItem>
+                  <SelectItem value="premium">
+                    <div className="flex items-center gap-2">
+                      <Crown className="w-4 h-4 text-yellow-500" />
+                      Premium
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="standard">Standard</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -274,12 +308,12 @@ function DashboardContent() {
                   {q || status !== "all" ? (t?.t('dashboard.noSubmissions') || "No submissions found") : (t?.t('dashboard.noSubmissions') || "No submissions yet")}
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  {q || status !== "all" 
+                  {q || status !== "all" || tier !== "all"
                     ? (t?.t('dashboard.adjustFilter') || "Try adjusting your search or filter criteria")
                     : (t?.t('dashboard.createFirst') || "Create your first tax submission to get started")
                   }
                 </p>
-                {!q && status === "all" && (
+                {!q && status === "all" && tier === "all" && (
                   <Link href={createPath("dashboard/new-submission/new")}>
                     <Button>
                       <Plus className="w-4 h-4 mr-2" />
@@ -298,7 +332,14 @@ function DashboardContent() {
                     >
                       <div className="flex items-center space-x-4">
                         <div className={`w-3 h-3 rounded-full ${getStatusColor(submission.status)}`}></div>
-                        <h3 className="font-semibold">{submission.title}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{submission.title}</h3>
+                          {submission.tier === 'PREMIUM' && (
+                            <div title="Premium Submission">
+                              <Crown className="w-4 h-4 text-yellow-500" />
+                            </div>
+                          )}
+                        </div>
                         <Badge className={`${getStatusBadgeClass(submission.status)} border`}>
                           {submission.status.toLowerCase()}
                         </Badge>

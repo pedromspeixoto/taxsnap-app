@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { useFormStatus } from "react-dom"
 import { Button } from "@/components/ui/button"
@@ -18,8 +18,13 @@ import { toast } from "@/lib/hooks/use-toast"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { useRouter } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Crown } from "lucide-react"
+
 import { SubmissionWarning } from "@/components/submissions"
 import { createOrUpdateSubmissionAction, getSubmissionAction } from "@/app/actions/submission-actions"
+
+// Simple checkbox component
+// Checkbox component removed - tier selection now handled by modal
 
 // Types for component state
 interface ComponentState {
@@ -27,6 +32,7 @@ interface ComponentState {
   isLoading: boolean
   error: string | null
 }
+
 
 // Submit button component that uses useFormStatus
 function SubmitButton({ disabled, t }: { disabled: boolean, t: TranslationHelper | null }) {
@@ -77,12 +83,15 @@ export default function Step1SubmissionName() {
   const [submissionYear, setSubmissionYear] = useState(new Date().getFullYear())
   const [submissionType, setSubmissionType] = useState("pl_average_weighted")
   const [fiscalNumber, setFiscalNumber] = useState("")
+  const [isPremium, setIsPremium] = useState(false)
+
 
   // Simple form submission handler
   const handleFormSubmit = async (formData: FormData) => {
     try {
       const accessToken = await getValidAccessToken()
       formData.append('accessToken', accessToken)
+      // isPremium value is now handled by hidden input fields in the form
       
       const result = await createOrUpdateSubmissionAction({}, formData)
       
@@ -99,13 +108,31 @@ export default function Step1SubmissionName() {
     }
   }
 
-  const fetchSubmission = async () => {
+
+  const fetchSubmission = useCallback(async () => {
     if (!id || typeof id !== 'string') {
       setState(prev => ({ 
         ...prev, 
         error: t?.t('errors.invalidSubmissionId') || "Invalid submission ID", 
         isLoading: false 
       }))
+      return
+    }
+
+    // Handle new submissions - extract tier from URL params
+    if (id === 'new') {
+      setState(prev => ({ ...prev, isLoading: false }))
+      
+      // Read tier from URL parameters
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const tierParam = urlParams.get('tier')
+        if (tierParam === 'premium') {
+          setIsPremium(true)
+        } else if (tierParam === 'standard') {
+          setIsPremium(false)
+        }
+      }
       return
     }
 
@@ -137,6 +164,7 @@ export default function Step1SubmissionName() {
         setSubmissionYear(result.submission.year || new Date().getFullYear())
         setSubmissionType(result.submission.submissionType || "pl_average_weighted")
         setFiscalNumber(result.submission.fiscalNumber || "")
+        setIsPremium(result.submission.tier === 'PREMIUM')
       }
     } catch (error) {
       console.error('Error fetching submission:', error)
@@ -150,7 +178,9 @@ export default function Step1SubmissionName() {
       
       toast.error(t?.t('errors.errorLoadingSubmission') || "Error loading submission", errorMessage)
     }
-  }
+  // Don't include 't' to avoid infinite loops
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, getValidAccessToken])
 
   // Effects
   useEffect(() => {
@@ -159,7 +189,7 @@ export default function Step1SubmissionName() {
     } else if (!authLoading && !isAuthenticated) {
       window.location.href = '/'
     }
-  }, [authLoading, isAuthenticated])
+  }, [authLoading, isAuthenticated, fetchSubmission])
 
   // Loading state
   if (authLoading || state.isLoading) {
@@ -206,7 +236,7 @@ export default function Step1SubmissionName() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+      <Navbar showBackButton={true} backButtonHref="/dashboard" />
 
       <div className="container mx-auto px-4 py-8">
         <ProgressIndicator currentStep={1} />
@@ -230,9 +260,62 @@ export default function Step1SubmissionName() {
             
             {/* Submission Details */}
             <Card className="mb-8 shadow-sm">
+              {/* Show selected tier (for premium submissions) */}
+              {isPremium && (
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 border border-yellow-300">
+                        <Crown className="w-4 h-4 text-yellow-600" />
+                      </div>
+                      <input type="hidden" name="isPremium" value="true" />
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-lg">{t?.t('modal.tierSelection.premium.title') || 'Premium Submission'}</span>
+                        <div className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">
+                          Premium
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-center text-sm text-muted-foreground">
+                      <p>{t?.t('modal.tierSelection.premium.manualReview') || 'This submission will include personalized manual review from our certified accountants.'}</p>
+                      <p className="text-xs mt-1 text-yellow-700">
+                        • {t?.t('modal.tierSelection.premium.priorityProcessing') || 'Priority processing'} • {t?.t('modal.tierSelection.premium.manualVerification') || 'Manual verification'} • {t?.t('modal.tierSelection.premium.expertReview') || 'Expert review'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+
+              {/* Show selected tier (for standard submissions) */}
+              {!isPremium && (
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-300" />
+                      <input type="hidden" name="isPremium" value="false" />
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-lg">{t?.t('modal.tierSelection.standard.title') || 'Standard Submission'}</span>
+                        <div className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                          Standard
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-center text-sm text-muted-foreground">
+                      <p>{t?.t('modal.tierSelection.standard.description') || 'This submission will be processed as standard.'}</p>
+                      <p className="text-xs mt-1 text-blue-700">
+                        • {t?.t('modal.tierSelection.standard.automatedCalculation') || 'Automated tax calculation'} • {t?.t('modal.tierSelection.standard.fastProcessing') || 'Fast processing'} • {t?.t('modal.tierSelection.standard.reliableResults') || 'Reliable results'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+              
+              {/* Divider */}
+              <div className="mx-6 border-t border-gray-200 dark:border-gray-700"></div>
+              
               {/* Submission Name */}
               <CardContent>
-                <div className="space-y-2 mb-4">
+                <div className="space-y-2">
                   <Label htmlFor="submissionName">{t?.t('newSubmission.name') || 'Name'}</Label>
                   <Input
                     id="submissionName"
@@ -255,9 +338,10 @@ export default function Step1SubmissionName() {
                   <Input
                     id="submissionYear"
                     name="submissionYear"
+                    type="number"
                     placeholder="e.g., 2024"
-                    value={submissionYear}
-                    onChange={(e) => setSubmissionYear(Number(e.target.value) )}
+                    value={submissionYear.toString()}
+                    onChange={(e) => setSubmissionYear(Number(e.target.value))}
                   />
                   <p className="text-sm text-muted-foreground">
                     {t?.t('newSubmission.referenceYear') || 'The reference year for the submission'}
@@ -276,8 +360,8 @@ export default function Step1SubmissionName() {
                       <SelectValue placeholder="Select a submission type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pl_average_weighted">Average Weighted</SelectItem>
-                      <SelectItem value="pl_detailed">Detailed</SelectItem>
+                      <SelectItem value="pl_average_weighted">{t?.t('newSubmission.averageWeighted') || 'Average Weighted'}</SelectItem>
+                      <SelectItem value="pl_detailed">{t?.t('newSubmission.detailed') || 'Detailed'}</SelectItem>
                     </SelectContent>
                   </Select>
                   <input type="hidden" name="submissionType" value={submissionType} />
@@ -302,6 +386,7 @@ export default function Step1SubmissionName() {
                   </p>
                 </div>
               </CardContent>
+
             </Card>
 
             <SubmissionWarning />

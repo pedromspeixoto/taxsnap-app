@@ -10,15 +10,26 @@ import { Mail, CheckCircle, Clock, RefreshCw } from "lucide-react"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { Navbar } from "@/components/navbar"
 import { Logo } from "@/components/ui/logo"
+import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { resendVerificationAction } from "@/app/actions/auth-actions"
+import { toast } from "@/lib/hooks/use-toast"
 
 function VerifyAccountContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, isAuthenticated, isLoading } = useAuth()
-  const { createPath } = useLocalizedNavigation()
+  const { createPath, currentLocale } = useLocalizedNavigation()
   const [isResending, setIsResending] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [userEmail, setUserEmail] = useState("")
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  // Load translations
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
 
   useEffect(() => {
     // Get email from URL params (from registration) or from authenticated user
@@ -45,17 +56,22 @@ function VerifyAccountContent() {
     setIsResending(true)
 
     try {
-      // TODO: Implement actual resend verification API call
-      // await resendVerification(userEmail)
+      const result = await resendVerificationAction(userEmail, currentLocale)
       
-      // Simulate API call for now
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      if (result.error) {
+        console.error('Failed to resend verification email:', result.error)
+        toast.error(t?.t('verifyAccount.errorResending') || "Failed to resend verification email", result.error)
+        return
+      }
       
       setEmailSent(true)
+      toast.success(t?.t('verifyAccount.emailSentSuccess') || "Verification email sent successfully!")
       // Reset the success message after 5 seconds
       setTimeout(() => setEmailSent(false), 5000)
     } catch (error) {
       console.error('Failed to resend verification email:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to resend verification email'
+      toast.error(t?.t('verifyAccount.errorResending') || "Failed to resend verification email", errorMessage)
     } finally {
       setIsResending(false)
     }
@@ -80,13 +96,13 @@ function VerifyAccountContent() {
               <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-8 h-8 text-yellow-600" />
               </div>
-              <CardTitle className="text-2xl">Verify Your Account</CardTitle>
-              <CardDescription>Please verify your email address before proceeding to your dashboard</CardDescription>
+              <CardTitle className="text-2xl">{t?.t('verifyAccount.title') || 'Verify Your Account'}</CardTitle>
+              <CardDescription>{t?.t('verifyAccount.description') || 'Please verify your email address before proceeding to your dashboard'}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Email Info */}
               <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-2">We sent a verification email to:</p>
+                <p className="text-sm text-muted-foreground mb-2">{t?.t('verifyAccount.emailSentTo') || 'We sent a verification email to:'}</p>
                 <Badge variant="outline" className="px-3 py-1">
                   {userEmail}
                 </Badge>
@@ -96,12 +112,12 @@ function VerifyAccountContent() {
               <div className="bg-muted/50 rounded-lg p-4">
                 <h3 className="font-semibold mb-2 flex items-center">
                   <CheckCircle className="w-4 h-4 text-primary mr-2" />
-                  Next Steps:
+                  {t?.t('verifyAccount.nextSteps') || 'Next Steps:'}
                 </h3>
                 <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                  <li>Check your email inbox</li>
-                  <li>Click the verification link</li>
-                  <li>Return here and refresh the page</li>
+                  <li>{t?.t('verifyAccount.checkInbox') || 'Check your email inbox'}</li>
+                  <li>{t?.t('verifyAccount.clickLink') || 'Click the verification link'}</li>
+                  <li>{t?.t('verifyAccount.returnRefresh') || 'Return here and refresh the page'}</li>
                 </ol>
               </div>
 
@@ -110,7 +126,7 @@ function VerifyAccountContent() {
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                    <p className="text-sm text-green-800">Verification email sent successfully!</p>
+                    <p className="text-sm text-green-800">{t?.t('verifyAccount.emailSentSuccess') || 'Verification email sent successfully!'}</p>
                   </div>
                 </div>
               )}
@@ -121,26 +137,26 @@ function VerifyAccountContent() {
                   {isResending ? (
                     <>
                       <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      Sending...
+                      {t?.t('verifyAccount.sending') || 'Sending...'}
                     </>
                   ) : (
                     <>
                       <Mail className="w-4 h-4 mr-2" />
-                      Resend Verification Email
+                      {t?.t('verifyAccount.resendEmail') || 'Resend Verification Email'}
                     </>
                   )}
                 </Button>
 
                 <Button onClick={handleCheckVerification} className="w-full">
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  I&apos;ve Verified My Email
+                  {t?.t('verifyAccount.verifiedEmail') || "I've Verified My Email"}
                 </Button>
               </div>
 
               {/* Help Text */}
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">
-                  Didn&apos;t receive the email? Check your spam folder or try resending.
+                  {t?.t('verifyAccount.didntReceive') || "Didn't receive the email? Check your spam folder or try resending."}
                 </p>
               </div>
             </CardContent>
@@ -152,10 +168,9 @@ function VerifyAccountContent() {
               <div className="flex items-start">
                 <Clock className="w-5 h-5 text-blue-600 mr-2 mt-0.5" />
                 <div className="text-left">
-                  <p className="text-sm font-medium text-blue-900">Why do we need verification?</p>
+                  <p className="text-sm font-medium text-blue-900">{t?.t('verifyAccount.whyVerification') || 'Why do we need verification?'}</p>
                   <p className="text-xs text-blue-700 mt-1">
-                    Email verification helps us ensure the security of your tax data and enables us to send you
-                    important updates about your submissions.
+                    {t?.t('verifyAccount.verificationReason') || 'Email verification helps us ensure the security of your tax data and enables us to send you important updates about your submissions.'}
                   </p>
                 </div>
               </div>
@@ -167,16 +182,29 @@ function VerifyAccountContent() {
   )
 }
 
+function LoadingFallback() {
+  const { currentLocale } = useLocalizedNavigation()
+  const [t, setT] = useState<TranslationHelper | null>(null)
+
+  useEffect(() => {
+    getTranslations(currentLocale).then(messages => {
+      setT(new TranslationHelper(messages))
+    })
+  }, [currentLocale])
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <Logo size="lg" showText={false} className="justify-center" />
+        <p className="text-muted-foreground">{t?.t('verifyAccount.loading') || 'Loading...'}</p>
+      </div>
+    </div>
+  )
+}
+
 export default function VerifyAccount() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Logo size="lg" showText={false} className="justify-center" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<LoadingFallback />}>
       <VerifyAccountContent />
     </Suspense>
   )

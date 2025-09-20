@@ -32,6 +32,11 @@ function VerifyContent() {
       return;
     }
 
+    // Prevent double verification - only run if we're still in loading state
+    if (status !== 'loading') {
+      return;
+    }
+
     // Use server action instead of direct API call
     verifyEmailAction(token)
       .then((result) => {
@@ -46,7 +51,11 @@ function VerifyContent() {
           setStatus('success');
           const welcomeMessage = t?.t('verifyPage.welcomeEmailVerified')?.replace('{{email}}', user.email) || `Welcome ${user.email}! Your email has been successfully verified.`;
           setMessage(welcomeMessage);
-          // Note: Redirect will be handled by the useEffect that monitors auth state
+          
+          // Redirect after showing success message briefly
+          setTimeout(() => {
+            router.push(createPath('dashboard'));
+          }, 1500);
         } else {
           setStatus('error');
           setMessage(t?.t('verifyPage.verificationFailedNoAuth') || 'Verification failed - no authentication data received');
@@ -56,7 +65,8 @@ function VerifyContent() {
         setStatus('error');
         setMessage(error instanceof Error ? error.message : (t?.t('verifyPage.errorDuringVerification') || 'An error occurred during verification'));
       });
-  }, [searchParams, router, setAuthData, t]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, setAuthData, status, router]);
 
   // Monitor authentication state and redirect when ready
   useEffect(() => {
@@ -68,7 +78,8 @@ function VerifyContent() {
       
       return () => clearTimeout(timer);
     }
-  }, [status, isHydrated, isAuthenticated, router, createPath]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, isHydrated, isAuthenticated, router]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
