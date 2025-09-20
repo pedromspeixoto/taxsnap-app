@@ -125,7 +125,14 @@
       "remaining": "restantes",
       "noActiveSubscriptions": "Não tens pacotes de submissão ativos.",
       "purchaseFirstPack": "Comprar o Primeiro Pacote",
-      "errorLoading": "Erro ao carregar informações de pagamento."
+      "errorLoading": "Erro ao carregar informações de pagamento.",
+      "activeSubscriptions": "Pacotes Ativos",
+      "allSubscriptions": "Todos os Pacotes",
+      "getStartedByPurchasingYourFirstSubmissionPack": "Comece a comprar o seu primeiro pacote de submissões",
+      "unknownPack": "Pacote Desconhecido",
+      "used": "utilizados",
+      "noDescriptionAvailable": "Nenhuma descrição disponível",
+      "zero": "0.00"
     }
   },
   "purchase": {
@@ -149,7 +156,9 @@
       "manualReview": "Revisão manual por contabilista",
       "consultationAccess": "Acesso direto a consultoria",
       "customReporting": "Formatação personalizada de relatórios"
-    }
+    },
+    "noPacksAvailable": "Nenhum pacote disponível para compra no momento.",
+    "chooseYourPack": "Escolhe o teu Pacote"
   },
   "checkout": {
     "title": "Checkout Seguro",
@@ -208,7 +217,9 @@
   },
   "common": {
     "loading": "A carregar...",
-    "redirecting": "A redirecionar..."
+    "redirecting": "A redirecionar...",
+    "retry": "Tentar Novamente",
+    "back": "Voltar"
   },
   "auth": {
     "login": {
@@ -257,7 +268,8 @@
     "submissionsFound": "{{count}} submissões encontradas",
     "pageOfPages": "Página {{current}} de {{total}}",
     "viewResults": "Ver Resultados",
-    "continueEditing": "Continuar Edição"
+    "continueEditing": "Continuar Edição",
+    "allTiers": "Todos os Tiers"
   },
   "submission": {
     "details": "Detalhes da Submissão",
@@ -340,7 +352,9 @@
     "calculateTaxes": "Calcular Impostos",
     "files": "ficheiros",
     "step3": "Passo 3: Rever",
-    "reviewCalculate": "Rever e calcular os seus impostos"
+    "reviewCalculate": "Rever e calcular os seus impostos",
+    "averageWeighted": "Média Ponderada",
+    "detailed": "Detalhada"
   },
   "verification": {
     "emailVerification": "Verificação de Email",
@@ -445,6 +459,7 @@
     "pleaseWaitVerifying": "Por favor aguarde enquanto verificamos a sua conta.",
     "emailVerifiedSuccessfully": "Email Verificado com Sucesso!",
     "redirectingToDashboard": "A redirecioná-lo para o seu painel em alguns segundos...",
+    "goToDashboard": "Ir para o Painel Agora",
     "verificationFailed": "Verificação Falhada",
     "backToHome": "Voltar ao Início",
     "verificationTokenMissing": "Token de verificação em falta",
@@ -494,12 +509,14 @@
       "loadingOptions": "Carregando opções...",
       "premium": {
         "title": "Submissão Premium",
+        "description": "Esta submissão incluirá revisão manual personalizada de contabilistas certificados.",
         "manualReview": "Revisão manual personalizada de contabilistas certificados",
         "priorityProcessing": "Processamento prioritário",
         "expertVerification": "Verificação especializada"
       },
       "standard": {
         "title": "Submissão Padrão",
+        "description": "Esta submissão será processada como padrão.",
         "automatedCalculation": "Cálculo fiscal automatizado",
         "fastProcessing": "Processamento rápido",
         "reliableResults": "Resultados confiáveis"

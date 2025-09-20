@@ -236,7 +236,7 @@ export default function Step1SubmissionName() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar showBackButton={true} backButtonText="Back to Dashboard" backButtonHref="/dashboard" />
+      <Navbar showBackButton={true} backButtonHref="/dashboard" />
 
       <div className="container mx-auto px-4 py-8">
         <ProgressIndicator currentStep={1} />
@@ -270,16 +270,16 @@ export default function Step1SubmissionName() {
                       </div>
                       <input type="hidden" name="isPremium" value="true" />
                       <div className="flex items-center space-x-2">
-                        <span className="font-medium text-lg">Premium Submission Selected</span>
+                        <span className="font-medium text-lg">{t?.t('modal.tierSelection.premium.title') || 'Premium Submission'}</span>
                         <div className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">
                           Premium
                         </div>
                       </div>
                     </div>
                     <div className="text-center text-sm text-muted-foreground">
-                      <p>This submission will include personalized manual review from our certified accountants.</p>
+                      <p>{t?.t('modal.tierSelection.premium.manualReview') || 'This submission will include personalized manual review from our certified accountants.'}</p>
                       <p className="text-xs mt-1 text-yellow-700">
-                        • Priority processing • Manual verification • Expert review
+                        • {t?.t('modal.tierSelection.premium.priorityProcessing') || 'Priority processing'} • {t?.t('modal.tierSelection.premium.manualVerification') || 'Manual verification'} • {t?.t('modal.tierSelection.premium.expertReview') || 'Expert review'}
                       </p>
                     </div>
                   </div>
@@ -294,16 +294,16 @@ export default function Step1SubmissionName() {
                       <div className="w-6 h-6 rounded-full bg-blue-100 border border-blue-300" />
                       <input type="hidden" name="isPremium" value="false" />
                       <div className="flex items-center space-x-2">
-                        <span className="font-medium text-lg">Standard Submission Selected</span>
+                        <span className="font-medium text-lg">{t?.t('modal.tierSelection.standard.title') || 'Standard Submission'}</span>
                         <div className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
                           Standard
                         </div>
                       </div>
                     </div>
                     <div className="text-center text-sm text-muted-foreground">
-                      <p>This submission will be processed as standard.</p>
+                      <p>{t?.t('modal.tierSelection.standard.description') || 'This submission will be processed as standard.'}</p>
                       <p className="text-xs mt-1 text-blue-700">
-                        • Automated tax calculation • Fast processing • Reliable results
+                        • {t?.t('modal.tierSelection.standard.automatedCalculation') || 'Automated tax calculation'} • {t?.t('modal.tierSelection.standard.fastProcessing') || 'Fast processing'} • {t?.t('modal.tierSelection.standard.reliableResults') || 'Reliable results'}
                       </p>
                     </div>
                   </div>
@@ -360,8 +360,8 @@ export default function Step1SubmissionName() {
                       <SelectValue placeholder="Select a submission type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pl_average_weighted">Average Weighted</SelectItem>
-                      <SelectItem value="pl_detailed">Detailed</SelectItem>
+                      <SelectItem value="pl_average_weighted">{t?.t('newSubmission.averageWeighted') || 'Average Weighted'}</SelectItem>
+                      <SelectItem value="pl_detailed">{t?.t('newSubmission.detailed') || 'Detailed'}</SelectItem>
                     </SelectContent>
                   </Select>
                   <input type="hidden" name="submissionType" value={submissionType} />

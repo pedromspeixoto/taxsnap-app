@@ -51,6 +51,7 @@ function DashboardContent() {
       setT(new TranslationHelper(messages))
     })
   }, [currentLocale])
+
   const [{ q, status, tier, page }, setQuery] = useQueryStates({
     q: parseAsString.withDefault(""),
     status: parseAsString.withDefault("all"),
@@ -248,7 +249,7 @@ function DashboardContent() {
                   <SelectValue placeholder="Filter by tier" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Tiers</SelectItem>
+                  <SelectItem value="all">{t?.t('dashboard.allTiers') || 'All Tiers'}</SelectItem>
                   <SelectItem value="premium">
                     <div className="flex items-center gap-2">
                       <Crown className="w-4 h-4 text-yellow-500" />

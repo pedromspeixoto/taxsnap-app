@@ -279,10 +279,7 @@ export default function PurchasePage({ params }: PurchasePageProps) {
                       <div className="inline-flex items-center justify-center w-16 h-16 bg-muted/50 rounded-full mb-4">
                         <CreditCard className="w-8 h-8 text-muted-foreground" />
                       </div>
-                      <h3 className="font-semibold text-lg mb-2">Choose Your Pack</h3>
-                      <p className="text-muted-foreground">
-                        {t.t('purchase.selectPackPrompt')}
-                      </p>
+                      <h3 className="font-semibold text-lg mb-2">{t.t('purchase.selectPackPrompt') || 'Choose Your Pack'}</h3>
                     </div>
                   </CardContent>
                 </Card>
@@ -291,9 +288,9 @@ export default function PurchasePage({ params }: PurchasePageProps) {
           ) : (
             <Card className="border-destructive/50">
               <CardContent className="text-center py-16">
-                <h3 className="font-semibold text-lg mb-2">No Packs Available</h3>
+                <h3 className="font-semibold text-lg mb-2">{t.t('purchase.noPacksAvailable') || 'No Packs Available'}</h3>
                 <p className="text-muted-foreground">
-                  There are no packs available for purchase at the moment.
+                  {t.t('purchase.noPacksAvailable') || 'There are no packs available for purchase at the moment.'}
                 </p>
               </CardContent>
             </Card>

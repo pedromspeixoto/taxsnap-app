@@ -42,7 +42,7 @@ export default function LandingPage({ params }: LandingPageProps) {
   useEffect(() => {
     // Only redirect if hydrated, not loading, and user is authenticated
     if (isHydrated && !isLoading && isAuthenticated && user) {
-      // Add a small delay to ensure auth state is stable
+      // Add a longer delay to allow other components (like auth dialog) to handle redirects first
       const timer = setTimeout(() => {
         const targetPath = user.verified ? `/${locale}/dashboard` : `/${locale}/verify-account`
         
@@ -56,7 +56,7 @@ export default function LandingPage({ params }: LandingPageProps) {
             window.location.href = targetPath
           }
         }
-      }, 100)
+      }, 300)
       
       return () => clearTimeout(timer)
     }

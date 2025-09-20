@@ -66,7 +66,7 @@ function VerifyContent() {
         setMessage(error instanceof Error ? error.message : (t?.t('verifyPage.errorDuringVerification') || 'An error occurred during verification'));
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, setAuthData, status]);
+  }, [searchParams, setAuthData, status, router]);
 
   // Monitor authentication state and redirect when ready
   useEffect(() => {
@@ -78,7 +78,8 @@ function VerifyContent() {
       
       return () => clearTimeout(timer);
     }
-  }, [status, isHydrated, isAuthenticated, router, createPath]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, isHydrated, isAuthenticated, router]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">

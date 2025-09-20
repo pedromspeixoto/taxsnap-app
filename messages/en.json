@@ -125,7 +125,14 @@
       "remaining": "remaining",
       "noActiveSubscriptions": "You don't have any active submission packs.",
       "purchaseFirstPack": "Purchase Your First Pack",
-      "errorLoading": "Error loading payment information."
+      "errorLoading": "Error loading payment information.",
+      "activeSubscriptions": "Active Subscriptions",
+      "allSubscriptions": "All Subscriptions",
+      "getStartedByPurchasingYourFirstSubmissionPack": "Get started by purchasing your first submission pack",
+      "unknownPack": "Unknown Pack",
+      "used": "used",
+      "noDescriptionAvailable": "No description available",
+      "zero": "0.00"
     }
   },
   "purchase": {
@@ -149,7 +156,9 @@
       "manualReview": "Manual accountant review",
       "consultationAccess": "Direct consultation access",
       "customReporting": "Custom report formatting"
-    }
+    },
+    "noPacksAvailable": "No packs available for purchase at the moment.",
+    "chooseYourPack": "Choose Your Pack"
   },
   "checkout": {
     "title": "Secure Checkout",
@@ -208,7 +217,9 @@
   },
   "common": {
     "loading": "Loading...",
-    "redirecting": "Redirecting..."
+    "redirecting": "Redirecting...",
+    "retry": "Retry",
+    "back": "Back"
   },
   "auth": {
     "login": {
@@ -257,7 +268,8 @@
     "submissionsFound": "{{count}} submissions found",
     "pageOfPages": "Page {{current}} of {{total}}",
     "viewResults": "View Results",
-    "continueEditing": "Continue Editing"
+    "continueEditing": "Continue Editing",
+    "allTiers": "All Tiers"
   },
   "submission": {
     "details": "Submission Details",
@@ -340,7 +352,9 @@
     "calculateTaxes": "Calculate Taxes",
     "files": "files",
     "step3": "Step 3: Review",
-    "reviewCalculate": "Review and calculate your taxes"
+    "reviewCalculate": "Review and calculate your taxes",
+    "averageWeighted": "Average Weighted",
+    "detailed": "Detailed"
   },
   "verification": {
     "emailVerification": "Email Verification",
@@ -445,6 +459,7 @@
     "pleaseWaitVerifying": "Please wait while we verify your account.",
     "emailVerifiedSuccessfully": "Email Verified Successfully!",
     "redirectingToDashboard": "Redirecting you to your dashboard in a few seconds...",
+    "goToDashboard": "Go to Dashboard Now",
     "verificationFailed": "Verification Failed",
     "backToHome": "Back to Home",
     "verificationTokenMissing": "Verification token is missing",
@@ -494,12 +509,14 @@
       "loadingOptions": "Loading options...",
       "premium": {
         "title": "Premium Submission",
+        "description": "This submission will include personalized manual review from our certified accountants.",
         "manualReview": "Personalized manual review from certified accountants",
         "priorityProcessing": "Priority processing",
         "expertVerification": "Expert verification"
       },
       "standard": {
         "title": "Standard Submission",
+        "description": "This submission will be processed as standard.",
         "automatedCalculation": "Automated tax calculation",
         "fastProcessing": "Fast processing",
         "reliableResults": "Reliable results"

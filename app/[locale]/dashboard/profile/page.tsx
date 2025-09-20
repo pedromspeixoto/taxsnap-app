@@ -199,8 +199,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="active">Active Subscriptions</SelectItem>
-                            <SelectItem value="all">All Subscriptions</SelectItem>
+                            <SelectItem value="active">{t.t('profile.paymentSummary.activeSubscriptions')}</SelectItem>
+                            <SelectItem value="all">{t.t('profile.paymentSummary.allSubscriptions')}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -221,18 +221,18 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                                       }`} />
                                       <div>
                                         <div className="font-semibold flex items-center space-x-2 text-lg">
-                                          <span>{subscription.pack?.name || 'Unknown Pack'}</span>
+                                          <span>{subscription.pack?.name || t.t('profile.paymentSummary.unknownPack')}</span>
                                           {subscription.isPremium && (
                                             <Crown className="w-5 h-5 text-yellow-500" />
                                           )}
                                           {viewMode === 'all' && !subscription.isActive && (
                                             <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                                              Used
+                                              {t.t('profile.paymentSummary.used')}
                                             </span>
                                           )}
                                         </div>
                                         <div className="text-muted-foreground mt-1">
-                                          {subscription.pack?.description || 'No description available'}
+                                          {subscription.pack?.description || t.t('profile.paymentSummary.noDescriptionAvailable')}
                                         </div>
                                       </div>
                                     </div>
@@ -245,11 +245,11 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                                       </div>
                                       {viewMode === 'all' && subscription.submissionsUsed !== undefined && (
                                         <div className="text-xs text-muted-foreground">
-                                          {subscription.submissionsUsed} used
+                                          {subscription.submissionsUsed} {t.t('profile.paymentSummary.used')}
                                         </div>
                                       )}
                                       <div className="text-xs text-muted-foreground mt-1">
-                                        €{subscription.pack?.price.toFixed(2) || '0.00'}
+                                        €{subscription.pack?.price.toFixed(2) || t.t('profile.paymentSummary.zero')}
                                       </div>
                                     </div>
                                   </div>
@@ -266,11 +266,11 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                             </div>
                             <h4 className="font-semibold mb-2">{t.t('profile.paymentSummary.noActiveSubscriptions')}</h4>
                             <p className="text-muted-foreground mb-4">
-                              Get started by purchasing your first submission pack
+                              {t.t('profile.paymentSummary.getStartedByPurchasingYourFirstSubmissionPack')}
                             </p>
                             <Button onClick={handlePurchasePack} size="lg">
                               <CreditCard className="w-4 h-4 mr-2" />
-                              {t.t('profile.paymentSummary.purchaseFirstPack')}
+                              {t.t('profile.paymentSummary.purchaseFirstPack') || 'Purchase Your First Pack'}
                             </Button>
                           </CardContent>
                         </Card>
@@ -280,10 +280,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     <Card className="border-destructive/50">
                       <CardContent className="text-center py-12">
                         <p className="text-muted-foreground mb-4">
-                          {t.t('profile.paymentSummary.errorLoading')}
+                          {t.t('profile.paymentSummary.errorLoading') || 'Error loading payment information.'}
                         </p>
                         <Button variant="outline" onClick={loadPaymentSummary}>
-                          {t.t('common.retry')}
+                          {t.t('common.retry') || 'Retry'}
                         </Button>
                       </CardContent>
                     </Card>
