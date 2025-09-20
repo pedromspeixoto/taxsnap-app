@@ -1,42 +1,42 @@
 {
   "hero": {
     "badge": "Gestão Fiscal Profissional",
-    "title": "Simplifique as Suas Declarações Fiscais",
-    "subtitle": "Fotografe as suas transações. Declare os seus impostos. IRSimples.",
-    "cta": "Começar Gratuitamente"
+    "title": "Simplifique as suas Declarações Fiscais",
+    "subtitle": "Exporte as suas transações dos brokers. Declare facilmente os seus impostos com o IRSimples.",
+    "cta": "Comece Gratuitamente"
   },
   "advantages": {
-    "title": "Porquê Escolher o IRSimples?",
+    "title": "Porquê escolher o IRSimples?",
     "multiPlatform": {
       "title": "Suporte Multi-Plataforma",
-      "description": "Suporte para todas as principais plataformas de investimento incluindo Interactive Brokers, Trading 212, Revolut, e outras."
+      "description": "Suporte para as principais plataformas de investimento incluindo, Trading 212, Degiro, e outras. Novas corretoras vão ser adicionadas brevemente."
     },
     "secure": {
-      "title": "Seguro e Conforme",
-      "description": "Segurança ao nível bancário com total conformidade com regulamentações fiscais e padrões de proteção de dados."
+      "title": "Seguro e Privado",
+      "description": "Os seus dados estão protegidos em servidores europeus e são utilizados apenas quando estritamente necessário."
     },
     "saveTime": {
       "title": "Poupe Tempo",
-      "description": "O processamento e cálculos automatizados reduzem o trabalho manual de horas para minutos."
+      "description": "O cálculo automático de mais-valias reduz o trabalho manual de horas para apenas minutos."
     }
   },
   "offer": {
     "title": "O Que Oferecemos",
     "autoProcessing": {
       "title": "Processamento Automático de Ficheiros",
-      "description": "Carregue ficheiros CSV/Excel de qualquer corretora e obtenha processamento instantâneo"
+      "description": "Carregue diretamente os ficheiros CSV/Excel do seu broker e obtenha de imediato os resultados anuais de mais-valias e menos-valias."
     },
     "transactionManagement": {
       "title": "Gestão de Transações",
-      "description": "Revise, edite e organize todas as suas transações num só lugar"
+      "description": "Consulte, num formato organizado, todas as suas mais-valias e menos-valias realizadas num só lugar."
     },
     "taxReports": {
       "title": "Geração de Relatórios Fiscais",
-      "description": "Gere relatórios fiscais conformes para a sua jurisdição"
+      "description": "Gere o relatório fiscal para o IRS (Anexo J) relativo a brokers internacionais"
     },
     "historicalTracking": {
-      "title": "Rastreamento Histórico",
-      "description": "Mantenha registo de todas as submissões passadas e alterações"
+      "title": "Acompanhamento Histórico",
+      "description": "Acompanhe, ao longo do tempo, todo o histórico das suas mais-valias e impostos calculados"
     },
     "supportedPlatforms": "Plataformas Suportadas"
   },
@@ -244,7 +244,7 @@
     }
   },
   "dashboard": {
-    "title": "Painel",
+    "title": "Dashboard",
     "subtitle": "Gerir as suas submissões fiscais e acompanhar o progresso",
     "newSubmission": "Nova Submissão",
     "searchPlaceholder": "Procurar por nome ou número de transações...",
@@ -297,7 +297,7 @@
     "amount": "Montante",
     "showDetails": "Mostrar Detalhes",
     "hideDetails": "Ocultar Detalhes",
-    "backToDashboard": "Voltar ao Painel",
+    "backToDashboard": "Voltar ao Dashboard",
     "downloadReports": "Descarregar Relatórios",
     "generatedReports": "Relatórios fiscais e documentos gerados"
   },
@@ -319,14 +319,14 @@
     "referenceYear": "O ano de referência para a submissão",
     "submissionType": "O tipo de submissão a ser processada (Ponderada ou Detalhada)",
     "fiscalIdOptional": "O número de identificação fiscal da submissão (opcional)",
-    "nameHelper": "Este nome ajudará a identificar a sua submissão no painel",
+    "nameHelper": "Este nome ajudará a identificar a sua submissão no Dashboard",
     "submissionSummary": "Resumo da Submissão",
     "investmentPlatforms": "Plataformas de Investimento",
     "tradeFiles": "Ficheiros de negociação das suas plataformas de corretagem",
     "step2": "Passo 2: Carregar Ficheiros",
     "uploadBrokerFiles": "Carregar ficheiros de exportação da corretora e formulários IRS",
     "brokerFiles": "Ficheiros da Corretora",
-    "irsFiles": "Ficheiros IRS (Opcional)",
+    "irsFiles": "Ficheiro IRS Base (Opcional)",
     "nextReview": "Seguinte: Rever e Calcular",
     "step2Title": "Passo 2: Ficheiros da Corretora e Documento IRS",
     "step2Description": "Carregar ficheiros de negociação das suas plataformas de corretagem e opcionalmente adicionar o seu documento IRS base",
@@ -361,7 +361,7 @@
     "verifying": "A verificar o seu email...",
     "success": "Email verificado com sucesso!",
     "error": "Verificação falhada",
-    "redirecting": "A redirecionar para o painel...",
+    "redirecting": "A redirecionar para o Dashboard...",
     "tokenMissing": "Token de verificação em falta",
     "accountVerification": "Verificação da Conta",
     "checkEmail": "Verifique o seu email",
@@ -392,17 +392,17 @@
       "chooseBroker": "Escolha uma plataforma de corretora...",
       "addMoreFiles": "Adicionar Mais Ficheiros",
       "uploadTradeFiles": "Carregar Ficheiros de Negociação",
-      "downloadTemplate": "Descarregar Modelo",
+      "downloadTemplate": "Descarregar Template",
       "removePlatform": "Remover Plataforma",
       "dragDropFiles": "Arraste e largue ficheiros aqui ou clique para navegar",
-      "supportedFormats": "Suporta ficheiros CSV, Excel e PDF",
+      "supportedFormats": "Suporta ficheiros CSV e Excel",
       "selectFiles": "Seleccionar Ficheiros"
     },
     "irsUpload": {
       "irsFiles": "Ficheiros IRS",
       "optional": "(Opcional)",
       "dragDropUpload": "Arraste e largue os seus ficheiros IRS aqui ou clique para carregar",
-      "supportedFormats": "Suporta ficheiros PDF, CSV e Excel (.pdf, .csv, .xlsx, .xls)",
+      "supportedFormats": "Suporta ficheiros CSV e Excel (.csv, .xlsx)",
       "uploadFiles": "Carregar Ficheiros"
     },
     "taxFieldInfo": {
@@ -468,16 +468,16 @@
     "errorDuringVerification": "Ocorreu um erro durante a verificação"
   },
   "manualTransactions": {
-    "downloadCsvTemplate": "Descarregar Modelo CSV",
-    "getCsvTemplate": "Obtenha o modelo CSV com o formato necessário",
-    "getCsvTemplateForManual": "Obtenha o modelo CSV com o formato necessário para transações manuais",
-    "requiredColumns": "Colunas obrigatórias: Data, Símbolo, Quantidade, Preço, Tipo de Transação, Taxas, Bolsa",
-    "template": "Modelo",
+    "downloadCsvTemplate": "Descarregar Tempalte Excel",
+    "getCsvTemplate": "Obtenha o template Excel com o formato necessário",
+    "getCsvTemplateForManual": "Obtenha o template Excel com o formato necessário para transações manuais",
+    "requiredColumns": "Colunas obrigatórias: Transaction Type, Action, ISIN, Ticker, Name, Quantity, Price, Trade Currency, Exchange Rate, Total Fees, Dividend per Share, Dividend Withholding Tax per Share, Dividend Withholding Tax Currency",
+    "template": "Template",
     "manualTransactionFiles": "Ficheiros de Transações Manuais",
     "manualTransactionFilesCount": "Ficheiros de Transações Manuais ({{count}})",
     "addMoreManualFiles": "Adicionar Mais Ficheiros Manuais",
     "uploadManualTransactionFiles": "Carregar Ficheiros de Transações Manuais",
-    "csvFilesSupported": "Apenas ficheiros CSV suportados - Use o modelo acima para o formato correto",
+    "csvFilesSupported": "Apenas ficheiros Excel suportados - Use o modelo acima para o formato correto",
     "optionalStep": "Este passo é opcional. As transações manuais podem complementar os dados das suas corretoras.",
     "skipManualTransactions": "Ignorar transações manuais e prosseguir para o processamento",
     "manualTransactionsOptional": "Transações Manuais (Opcional)",
