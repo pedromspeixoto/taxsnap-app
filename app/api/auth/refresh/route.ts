@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify refresh token and generate new access token
-    const newAccessToken = jwtService.refreshAccessToken(body.refreshToken);
+    const newAccessToken = await jwtService.refreshAccessToken(body.refreshToken);
     
     return ok({ accessToken: newAccessToken });
   } catch (error) {

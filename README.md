@@ -1,509 +1,160 @@
-# Taxsnap - Trade Tracking & Tax Filing Platform
+# IRSimples
 
-**Snap your trades. File your taxes.**
+Professional tax submissions from your brokerage exports.
 
-A modern Next.js application with JWT authentication for tracking trades and filing taxes.
+## Tech stack
+- Next.js App Router (RSC + Client Components where needed)
+- TypeScript, Tailwind CSS, Radix UI
+- Prisma ORM (PostgreSQL)
+- Auth: JWT (access/refresh) + Next middleware
+- Emails: Nodemailer (SMTP)
+- State in URL: `nuqs`
+- Server Actions for form flows
 
-## 🚀 Features
+## Key conventions
+- App Router with `page.tsx` routes
+- Prefer named exports for components (pages export default)
+- Minimize `'use client'`; keep interactive parts in small client components
+- Use Server Actions for mutations and `fetch` in server when possible
+- Use URL search params for shareable state via `nuqs`
 
-### 🔐 Authentication System
-- **JWT-based authentication** with access and refresh tokens
-- **User registration** with email verification
-- **Secure login/logout** functionality
-- **Password management** (set/change password)
-- **Protected routes** with middleware
-- **Automatic token refresh** for seamless user experience
-- **Server-side and client-side** authentication support
+## Features
+- Email/password auth with verification link
+- Protected dashboard behind middleware
+- Submission wizard (create → upload broker files → review → calculate)
+- Dashboard filters with URL state (`q`, `status`, `page`) powered by `nuqs`
 
-### 🎨 Frontend
-- **Modern UI** built with Tailwind CSS and Radix UI components
-- **Dark theme** support with theme provider
-- **Responsive design** for all devices
-- **Authentication dialogs** with real-time validation
-- **Global auth state management** with React Context
-
-### 🛡️ Security
-- **HTTP-only cookies** for server-side authentication
-- **JWT token validation** on protected routes
-- **Automatic token refresh** with secure refresh tokens
-- **CSRF protection** through proper token handling
-
-## 📋 Prerequisites
-
-Before you begin, ensure you have the following installed:
-- **Node.js** (version 18 or higher)
-- **npm** or **yarn** package manager
-- **PostgreSQL** database (for production use)
-
-## 🛠️ Installation & Setup
-
-### 1. Clone the Repository
-```bash
-git clone <your-repository-url>
-cd taxsnap/frontend
+## Project layout (high-level)
+```
+app/
+  api/                 # API routes (Next API)
+  actions/             # Server Actions ("use server")
+  (root)/              # App pages (dashboard, verify, wizard)
+  layout.tsx           # Root providers + NuqsAdapter
+components/            # Reusable UI (named exports)
+lib/
+  api/                 # ApiClient (pure HTTP)
+  contexts/            # AuthProvider (client)
+  repositories/        # Prisma access
+  services/            # Business services (auth, email, submission)
+  utils/               # JWT utils, seed, etc.
+prisma/                # Prisma schema
 ```
 
-### 2. Install Dependencies
-```bash
-npm install
-```
+## Environment variables
+Create `.env.local` for local/dev; set equivalent variables in Vercel for production.
 
-### 3. Environment Configuration
-Create a `.env.local` file in the root directory:
+Required
+- `DATABASE_URL` (e.g. `postgresql://postgres:password@localhost:5432/irsimples`)
+- `NEXT_PUBLIC_BASE_URL` (e.g. `http://localhost:3000` or your Vercel domain)
+- `JWT_ACCESS_SECRET` (strong secret)
+- `JWT_REFRESH_SECRET` (strong secret)
 
-```env
-# Database
-DATABASE_URL="postgresql://username:password@localhost:5432/taxsnap"
+Optional (defaults exist)
+- `JWT_ACCESS_EXPIRY` (default: `30s` in dev; configure e.g. `15m`)
+- `JWT_REFRESH_EXPIRY` (default: `7d`)
 
-# JWT Configuration
-JWT_ACCESS_SECRET="your-super-secret-access-token-key-change-this-in-production"
-JWT_REFRESH_SECRET="your-super-secret-refresh-token-key-change-this-in-production"
-JWT_ACCESS_EXPIRY="15m"
-JWT_REFRESH_EXPIRY="7d"
+SMTP (for email verification)
+- `SMTP_HOST`
+- `SMTP_PORT` (e.g. 465)
+- `SMTP_USER`
+- `SMTP_PASS`
 
-# App Configuration
-NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+## Local development
+- Run Postgres + Adminer (optional):
+  ```bash
+  npm run db:start
+  # opens Postgres on 5432 and Adminer on 8081
+  ```
+- Sync database and generate client:
+  ```bash
+  npm run db:sync
+  # or: npx prisma generate && npx prisma db push
+  ```
+- Seed basic data (optional):
+  ```bash
+  npm run db:seed
+  ```
+- Start the app:
+  ```bash
+  npm run dev
+  ```
+- Health check: GET `/api/health`
 
-# SMTP Configuration
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT=465
-SMTP_USER="your-email@gmail.com"
-SMTP_PASS="your-password"
-SMTP_SECURE=true
-SMTP_SENDER="your-email@gmail.com"
-```
-
-**⚠️ Important**: Change the JWT secrets to strong, unique values in production!
-
-### 4. Database Setup
-```bash
-# Start the database (using Docker)
-npm run db:start
-
-# Generate Prisma client
-npx prisma generate
-
-# Run database migrations
-npx prisma db push
-
-# (Optional) Seed the database
-npm run db:seed
-```
-
-### 5. Start the Development Server
-```bash
-npm run dev
-```
-
-The application will be available at [http://localhost:3000](http://localhost:3000)
-
-## ��️ Architecture
-
-### System Architecture Overview
-
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        UI["🖥️ Next.js Frontend<br/>React Components"]
-        Auth["🔐 Auth Context<br/>Global State"]
-    end
-    
-    subgraph "API Layer"
-        API["🌐 Next.js API Routes<br/>/api/*"]
-        MW["🛡️ Middleware<br/>Route Protection"]
-    end
-    
-    subgraph "Business Layer"
-        SVC["⚙️ Services<br/>Business Logic"]
-        REPO["📦 Repositories<br/>Data Access"]
-    end
-    
-    subgraph "Data Layer"
-        DB["🗄️ PostgreSQL<br/>Database"]
-        PRISMA["🔧 Prisma ORM<br/>Schema & Queries"]
-    end
-    
-    subgraph "External"
-        EMAIL["📧 Email Service<br/>Verification"]
-    end
-    
-    UI --> Auth
-    Auth --> API
-    API --> MW
-    MW --> SVC
-    SVC --> REPO
-    REPO --> PRISMA
-    PRISMA --> DB
-    SVC --> EMAIL
-    
-    style UI fill:#e3f2fd
-    style Auth fill:#f3e5f5  
-    style API fill:#e8f5e8
-    style MW fill:#fff3e0
-    style SVC fill:#fce4ec
-    style REPO fill:#f1f8e9
-    style DB fill:#e1f5fe
-    style PRISMA fill:#f9fbe7
-    style EMAIL fill:#fff8e1
-```
-
-### Data Flow & Type System
-
-```mermaid
-graph LR
-    subgraph "Database Layer"
-        PRISMA_USER["🗄️ Prisma User<br/>(Generated Type)"]
-    end
-    
-    subgraph "Repository Layer"  
-        REPO_USER["📦 Repository User<br/>(string dates)"]
-    end
-    
-    subgraph "Service Layer"
-        SVC_USER["⚙️ Service User<br/>(string dates)"]  
-    end
-    
-    subgraph "API Layer"
-        USER_RESPONSE["🌐 UserResponse<br/>(Date objects)"]
-        AUTH_RESPONSE["🔐 AuthResponse<br/>(Date objects)"]
-    end
-    
-    subgraph "Client Layer"
-        CLIENT_USER["📱 ClientUser<br/>(string dates)"]
-        CONTEXT["⚛️ Auth Context<br/>(ClientUser)"]
-    end
-    
-    PRISMA_USER --> REPO_USER
-    REPO_USER --> SVC_USER  
-    SVC_USER --> USER_RESPONSE
-    USER_RESPONSE --> AUTH_RESPONSE
-    AUTH_RESPONSE --> CLIENT_USER
-    CLIENT_USER --> CONTEXT
-    
-    style PRISMA_USER fill:#e1f5fe
-    style REPO_USER fill:#f3e5f5
-    style SVC_USER fill:#f3e5f5  
-    style USER_RESPONSE fill:#e8f5e8
-    style AUTH_RESPONSE fill:#fff3e0
-    style CLIENT_USER fill:#fce4ec
-    style CONTEXT fill:#fce4ec
-```
-
-### JWT Authentication Flow
-
-```mermaid
-graph TD
-    A["👤 User Login"] --> B["🔍 API Validates Credentials"]
-    B --> C["🔑 Generate JWT Tokens"]
-    C --> D["💾 Store in LocalStorage + Context"]
-    D --> E["🚪 Access Protected Routes"]
-    E --> F["⏰ Token Expires?"]
-    F -->|Yes| G["🔄 Auto Refresh Token"]
-    F -->|No| H["✅ Continue Request"]
-    G --> I["✓ Valid Refresh Token?"]
-    I -->|Yes| J["🆕 Generate New Access Token"]
-    I -->|No| K["🚪 Redirect to Login"]
-    J --> H
-    
-    style A fill:#e3f2fd
-    style B fill:#e8f5e8
-    style C fill:#fff3e0
-    style D fill:#fce4ec
-    style E fill:#f1f8e9
-    style G fill:#fff8e1
-    style K fill:#ffebee
-```
-
-### Authentication Architecture
-
-Clean separation of concerns for authentication state management:
-
-```mermaid
-graph TB
-    subgraph "React Components/Pages"
-        Login["🔐 Login Page<br/>- Makes API calls<br/>- Handles user input<br/>- Uses setAuthData()"]
-        Dashboard["📊 Dashboard<br/>- Makes API calls<br/>- Uses withAuth() for protected calls<br/>- Uses clearAuth()"]
-        Verify["✅ Verify Page<br/>- Makes API calls<br/>- Uses setAuthData()"]
-    end
-    
-    subgraph "Pure State Management"
-        AuthContext["⚛️ AuthContext<br/>✅ Token storage/retrieval<br/>✅ User state management<br/>✅ NO API calls<br/>✅ withAuth() helper"]
-    end
-    
-    subgraph "Pure HTTP Client"
-        ApiClient["🌐 ApiClient<br/>✅ HTTP requests only<br/>✅ No authentication logic<br/>✅ Stateless"]
-    end
-    
-    subgraph "Storage"
-        LocalStorage["💾 LocalStorage<br/>- Access tokens<br/>- Refresh tokens<br/>- User data"]
-    end
-    
-    subgraph "Server"  
-        API["🚀 API Routes<br/>- Authentication endpoints<br/>- Protected resources"]
-    end
-    
-    Login --> |"apiClient.login()"| ApiClient
-    Login --> |"setAuthData(authResponse)"| AuthContext
-    
-    Dashboard --> |"withAuth(token => apiClient.call())"| AuthContext
-    Dashboard --> |"clearAuth()"| AuthContext
-    
-    Verify --> |"apiClient.verify()"| ApiClient  
-    Verify --> |"setAuthData(authResponse)"| AuthContext
-    
-    AuthContext --> |"Manages tokens"| LocalStorage
-    AuthContext -.->|"Auto refresh"| ApiClient
-    
-    ApiClient --> |"Pure HTTP"| API
-    
-    style Login fill:#e8f5e8
-    style Dashboard fill:#e8f5e8
-    style Verify fill:#e8f5e8
-    style AuthContext fill:#e3f2fd
-    style ApiClient fill:#fff3e0
-    style LocalStorage fill:#f3e5f5
-```
-
-**Key Principles:**
-- **Components** handle business logic and make API calls directly
-- **AuthContext** provides pure state management (no API calls)
-- **ApiClient** is a stateless HTTP client with no authentication logic
-- **Clear separation** of concerns for better maintainability and testing
-
-### Project Structure
-```
-taxsnap/frontend/
-├── app/                    # Next.js App Router
-│   ├── api/               # API Routes
-│   │   ├── auth/         # Authentication endpoints
-│   │   │   ├── login/    # POST /api/auth/login
-│   │   │   └── refresh/  # POST /api/auth/refresh
-│   │   ├── users/        # User management endpoints
-│   │   │   ├── register/ # POST /api/users/register
-│   │   │   ├── verify/   # POST /api/users/verify
-│   │   │   └── [userId]/ # User CRUD operations
-│   │   └── health/       # Health check endpoint
-│   ├── components/       # App-specific components
-│   ├── dashboard/        # Protected dashboard pages
-│   ├── verify-account/   # Account verification page
-│   ├── layout.tsx        # Root layout
-│   ├── page.tsx          # Home page
-│   └── globals.css       # Global styles
-├── lib/                   # Core application logic
-│   ├── api/              # API client & utilities
-│   │   ├── client.ts     # Main API client
-│   │   ├── errors.ts     # Custom error classes
-│   │   └── utils.ts      # API utilities
-│   ├── contexts/         # React contexts
-│   │   ├── auth-context.tsx # Authentication state
-│   │   └── theme-provider.tsx # Theme management
-│   ├── hooks/            # Custom React hooks
-│   ├── repositories/     # Data access layer
-│   │   ├── prisma.ts     # Prisma client setup
-│   │   └── user-repository.ts # User data access
-│   ├── services/         # Business logic layer
-│   │   ├── jwt-service.ts # JWT token management
-│   │   ├── user-service.ts # User business logic
-│   │   └── email-service.ts # Email notifications
-│   ├── types/            # TypeScript type definitions
-│   │   └── user.ts       # User-related types
-│   ├── utils/            # Utility functions
-│   │   ├── auth.ts       # Auth utilities
-│   │   └── seed.ts       # Database seeding
-│   └── generated/        # Generated files (Prisma)
-├── components/           # Shared UI components
-│   ├── ui/              # Base UI components (shadcn/ui)
-│   └── auth-dialog.tsx  # Authentication modal
-├── prisma/              # Database schema & migrations
-│   └── schema.prisma    # Database schema
-├── public/              # Static assets
-├── middleware.ts        # Next.js middleware for route protection
-├── docker-compose.yml   # Docker services (PostgreSQL)
-├── Dockerfile          # Container configuration
-└── package.json        # Dependencies & scripts
-```
-
-## 🔌 API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh access token
-
-### User Management
-- `POST /api/users/register` - User registration (email + password)
-- `POST /api/users/verify` - Email verification
-- `POST /api/users/resend-verification` - Resend verification email
-- `GET /api/users/[userId]` - Get user details
-- `PUT /api/users/[userId]` - Update user
-- `DELETE /api/users/[userId]` - Delete user
-- `POST /api/users/[userId]/password` - Set password
-- `PUT /api/users/[userId]/password` - Change password
-
-### Health Check
-- `GET /api/health` - Service health status
-
-### Request/Response Examples
-
-#### Registration Request
-```json
-POST /api/users/register
-{
-  "email": "user@example.com",
-  "password": "securepassword123"
-}
-```
-
-#### Login Request
-```json
-POST /api/auth/login
-{
-  "email": "user@example.com",
-  "password": "securepassword123"
-}
-```
-
-#### Login Response
-```json
-{
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "verified": true,
-    "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2024-01-01T00:00:00Z"
-  },
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
-}
-```
-
-## 🧪 Testing the Authentication
-
-### 1. User Registration
-1. Click "Sign Up" in the navigation
-2. Enter your email address and password
-3. Check your email for verification link
-4. Click the verification link to activate your account
-
-### 2. User Login
-1. Click "Login" in the navigation
-2. Enter your email and password
-3. You'll be redirected to the dashboard if verified
-4. Unverified users are redirected to the verification page
-
-### 3. Protected Routes
-- Try accessing `/dashboard` without logging in
-- You should be redirected to the home page
-- After login, you can access protected areas
-
-### 4. Token Management
-- Tokens are automatically refreshed every 15 minutes
-- If refresh fails, you'll be logged out automatically
-- Logout clears all tokens and redirects to home
-
-## 🛡️ Security Considerations
-
-### JWT Configuration
-- **Access tokens** expire in 15 minutes (configurable)
-- **Refresh tokens** expire in 7 days (configurable)
-- Tokens are stored in localStorage for client-side access
-- Server-side middleware validates tokens on protected routes
-
-### Password Security
-- Passwords are hashed using bcrypt with 12 rounds
-- No passwords are stored in plain text
-- Password validation on both client and server
-
-### Route Protection
-- Middleware protects sensitive routes
-- Unverified users can't access dashboard
-- Invalid tokens result in automatic logout
-
-### Type Safety
-- Strict TypeScript configuration
-- Separate type definitions for different layers
-- Runtime validation for API requests/responses
-
-## 🔧 Available Scripts
-
-```bash
-# Development
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-
-# Database
-npm run db:start     # Start PostgreSQL with Docker
-npm run db:stop      # Stop database containers
-npm run db:seed      # Seed database with sample data
-
-# Development Tools
-npm run postinstall  # Generate Prisma client (runs automatically)
-```
-
-## 🚀 Deployment
-
-### Environment Variables for Production
-Make sure to set these environment variables in your production environment:
-
-**Database**
-- `DATABASE_URL` - Your production database connection string
-
-**JWT Configuration**
-- `JWT_ACCESS_SECRET` - Strong secret for access tokens
-- `JWT_REFRESH_SECRET` - Strong secret for refresh tokens
-
-**App Configuration**
-- `NEXT_PUBLIC_BASE_URL` - Your production domain
-
-**SMTP Configuration (Email Service)**
-- `SMTP_HOST` - SMTP server hostname (e.g., smtp.gmail.com)
-- `SMTP_PORT` - SMTP server port (e.g., 465 for SSL)
-- `SMTP_USER` - SMTP authentication username
-- `SMTP_PASS` - SMTP authentication password
-
-### Build Commands
+## Production build
 ```bash
 npm run build
 npm run start
 ```
+The app uses `output: 'standalone'` for Docker/Vercel optimized output.
 
-## 🤝 Contributing
+## Vercel deployment
+- Deployed via Vercel GitHub integration
+- Set Environment Variables in Vercel Project settings
+- Configure a Postgres (e.g., Vercel Postgres or external) and set `DATABASE_URL`
+- SMTP variables required for verification emails
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Submit a pull request
+## Authentication overview
+- `lib/services/auth-service.ts` issues access/refresh tokens via `jose`
+- `middleware.ts` protects `/dashboard` and all `/api` except a small public set
+- Client state is managed by `AuthProvider` (tokens in localStorage + cookies for middleware)
+- Access token refresh handled by `/api/auth/refresh`
 
-## 📝 License
+## Server Actions
+- `app/actions/*` contains actions for submissions and auth verification
+- Pages call actions directly and pass tokens via form data when needed
 
-This project is licensed under the MIT License.
+## URL state with nuqs
+- `app/(root)/dashboard/page.tsx` uses `useQueryStates` for:
+  - `q`: search query
+  - `status`: submission status filter (`all` or enum value)
+  - `page`: pagination index
+- `NuqsAdapter` is mounted in `app/layout.tsx`
+- Page content wrapped to satisfy Suspense/CSR constraints
 
-## 🆘 Troubleshooting
+## API surface (selected)
+- Auth
+  - `POST /api/auth/login`
+  - `POST /api/auth/refresh`
+- Users
+  - `POST /api/users` (register)
+  - `POST /api/users/verify`
+  - `POST /api/users/:userId/resend-verification`
+  - `GET/PUT/DELETE /api/users/:userId`
+- Submissions
+  - `GET/POST /api/submissions`
+  - `GET/PUT /api/submissions/:id`
+  - `PUT /api/submissions/:id/status`
+  - `GET/POST /api/submissions/:id/results`
+  - `DELETE /api/submissions/:id/files` (body `{ broker_id }`)
+  - `DELETE /api/submissions/:id/files/:fileId`
+  - `POST /api/submissions/:id/calculate-taxes`
+- Brokers
+  - `GET /api/brokers`
+  - `GET /api/brokers/manual_template`
+  - `POST /api/brokers/upload`
+- Health
+  - `GET /api/health`
 
-### Common Issues
+## Scripts
+- `dev`: next dev (Turbopack)
+- `build`: next build
+- `start`: run standalone server output
+- `lint`: next lint
+- `db:start`: docker-compose Postgres+Adminer, then prisma generate/push and seed
+- `db:sync`: prisma generate + db push
+- `db:seed`: prisma generate + db push + run `lib/utils/seed.ts`
+- `db:studio`: Prisma Studio
 
-**JWT Token Errors**
-- Ensure JWT secrets are set in environment variables
-- Check that tokens haven't expired
-- Verify middleware configuration
+## Security
+- Middleware enforces auth on `/dashboard` and private APIs
+- JWT signing via `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`
+- Rotate secrets and tune expiries for production
 
-**Database Connection Issues**
-- Ensure PostgreSQL is running
-- Check DATABASE_URL format
-- Run `npx prisma db push` to sync schema
+## Notes & tips
+- Update JWT expiries in env for production (defaults are dev-friendly)
+- `NEXT_PUBLIC_BASE_URL` should match your deployment URL on Vercel
+- The email sender address is set in `EmailServiceImpl` (`suporte@meuirs.pt`)
 
-**Build Errors**
-- Clear `.next` directory: `rm -rf .next`
-- Reinstall dependencies: `rm -rf node_modules && npm install`
-- Check TypeScript errors: `npm run lint`
-
-**Type Confusion**
-- Review the Data Flow diagram above
-- Use `ClientUser` for client-side state
-- Use `UserResponse` for API responses
-- Use repository `User` interface for data access
-
-For more help, please open an issue in the repository.
+## License
+MIT

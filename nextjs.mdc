@@ -1,0 +1,41 @@
+---
+description: This rule explains Next.js conventions and best practices for fullstack development.
+globs: **/*.js,**/*.jsx,**/*.ts,**/*.tsx
+alwaysApply: false
+---
+
+# Next.js rules
+
+- Use the App Router structure with `page.tsx` files in route directories.
+- Client components must be explicitly marked with `'use client'` at the top of the file.
+- Use kebab-case for directory names (e.g., `components/auth-form`) and PascalCase for component files.
+- Prefer named exports over default exports, i.e. `export function Button() { /* ... */ }` instead of `export default function Button() { /* ... */ }`.
+- Minimize `'use client'` directives:
+  - Keep most components as React Server Components (RSC)
+  - Only use client components when you need interactivity and wrap in `Suspense` with fallback UI
+  - Create small client component wrappers around interactive elements
+- Avoid unnecessary `useState` and `useEffect` when possible:
+  - Use server components for data fetching
+  - Use React Server Actions for form handling
+  - Use URL search params for shareable state
+- Use `nuqs` for URL search param state management
+- **CRITICAL: Internationalization (i18n) is MANDATORY**:
+  - ALL user-facing text MUST support Portuguese (PT) and English (EN) translations
+  - NEVER hardcode strings in components - always use translation keys
+  - Use `TranslationHelper` from `@/lib/utils/get-translations` for client components
+  - Add translation keys to both `messages/en.json` and `messages/pt.json` files
+  - Format: `t?.t('section.key')` with fallback: `t?.t('modal.title') || 'Default Text'`
+  - When creating new UI components, IMMEDIATELY add corresponding translation keys
+  - Translation keys should be descriptive and nested (e.g., `modal.tierSelection.title`, `modal.tierSelection.description`)
+  - **WARNING: Avoid infinite loops with useEffect and translations**: 
+    - DO NOT include translation helper `t` in useEffect dependencies unless absolutely necessary
+    - `TranslationHelper` instances may be recreated on each render, causing infinite loops
+    - Wrap translation-dependent functions in `useCallback` with stable dependencies
+    - If you must use `t` in useEffect, ensure it's stable or use `useCallback` pattern
+- **Server Actions Pattern**: 
+  - Use server actions for all data fetching and mutations instead of direct `apiClient` calls
+  - Create server actions in `app/actions/` directory with proper TypeScript interfaces
+  - Client components should call server actions, not direct API endpoints
+  - Follow the pattern: client component (`'use client'`) + server actions + `useAuth` context
+  - Handle errors in server actions and return structured results with `error` and `success` fields
+  - Use toast notifications for user feedback in client components

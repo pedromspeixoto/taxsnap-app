@@ -1,4 +1,5 @@
 import { EmailServiceImpl } from './email-service';
+import { paymentService } from './payment-service';
 import { userRepository } from '../repositories/user-repository';
 import { 
   RegisterUserRequest, 
@@ -25,7 +26,7 @@ export interface UserService {
   // Registration and verification
   registerUser(request: RegisterUserRequest): Promise<UserResponse>;
   verifyUser(token: string): Promise<AuthResponse>;
-  resendVerification(email: string): Promise<MessageResponse>;
+  resendVerification(email: string, locale?: string): Promise<MessageResponse>;
 
   // Password management
   setPassword(userId: string, request: SetPasswordRequest): Promise<MessageResponse>;
@@ -62,8 +63,10 @@ export class UserServiceImpl implements UserService {
     return url.replace(/\/$/, '');
   }
 
-  private createVerificationUrl(token: string): string {
-    const url = `${this.baseUrl}/verify?token=${token}`;
+  private createVerificationUrl(token: string, locale?: string): string {
+    // Use provided locale or default to 'pt' (Portuguese)
+    const userLocale = locale || 'pt';
+    const url = `${this.baseUrl}/${userLocale}/verify?token=${token}`;
     
     // Log the URL for debugging (remove in production)
     console.log('Generated verification URL:', url);
@@ -91,7 +94,7 @@ export class UserServiceImpl implements UserService {
     const verificationToken = await generateSecureToken();
 
     // Create verification URL
-    const verificationUrl = this.createVerificationUrl(verificationToken);
+    const verificationUrl = this.createVerificationUrl(verificationToken, request.locale);
 
     // Create new user and send verification email (in the same transaction - if one fails, the other should be rolled back)
     const user = await userRepository.create({
@@ -106,6 +109,15 @@ export class UserServiceImpl implements UserService {
     } catch (error) {
       console.error('Error sending verification email', error);
       // Continue with user creation even if email sending fails
+    }
+
+    // Assign free pack to new user
+    try {
+      await paymentService.assignFreePackToUser(user.id);
+      console.log('Free pack assigned to new user', { userId: user.id });
+    } catch (error) {
+      console.error('Error assigning free pack to user', error);
+      // Continue even if free pack assignment fails - user can still use the service
     }
 
     console.log('user registered successfully', { userId: user.id, email: user.email });
@@ -125,10 +137,14 @@ export class UserServiceImpl implements UserService {
     // Find user by verification token
     const user = await userRepository.getByVerificationToken(token);
     if (!user) {
+      // Check if user exists but is already verified (token was cleared)
+      // This could happen with double verification attempts
+      console.log('Token not found - checking if user might already be verified');
       throw new InvalidVerificationTokenError();
     }
 
     if (user.verified) {
+      console.log('User is already verified', { userId: user.id, email: user.email });
       throw new UserAlreadyVerifiedError();
     }
 
@@ -165,7 +181,7 @@ export class UserServiceImpl implements UserService {
     };
   }
 
-  async resendVerification(email: string): Promise<MessageResponse> {
+  async resendVerification(email: string, locale?: string): Promise<MessageResponse> {
     console.log('userService.resendVerification', { email });
 
     // Find user by email
@@ -180,7 +196,7 @@ export class UserServiceImpl implements UserService {
 
     // Generate new verification token
     const verificationToken = await generateSecureToken();
-    const verificationUrl = this.createVerificationUrl(verificationToken);
+    const verificationUrl = this.createVerificationUrl(verificationToken, locale || 'pt');
 
     // Update user with new token
     await userRepository.updateVerificationToken(user.id, verificationToken, verificationUrl);

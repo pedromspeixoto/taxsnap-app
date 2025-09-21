@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../repositories/prisma';
+import { seedPacks } from './seed-packs';
 
 export async function seedUsers() {
   try {
@@ -20,9 +21,8 @@ export async function seedUsers() {
       data: {
         email,
         password: hashedPassword,
+        role: 'ADMIN', // Set as admin user
         verified: true, // Already verified
-        verificationToken: null,
-        verificationUrl: null,
       },
     });
 
@@ -42,6 +42,7 @@ export async function runSeed() {
     console.log('🌱 Starting database seed...');
     
     await seedUsers();
+    await seedPacks();
     
     console.log('✅ Database seed completed successfully!');
   } catch (error) {

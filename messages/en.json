@@ -1,0 +1,526 @@
+{
+  "hero": {
+    "badge": "Professional Tax Management",
+    "title": "Simplify Your Tax Submissions",
+    "subtitle": "Snap your trades. File your taxes. IRSimples.",
+    "cta": "Get Started for Free"
+  },
+  "advantages": {
+    "title": "Why Choose IRSimples?",
+    "multiPlatform": {
+      "title": "Multi-Platform Support",
+      "description": "Support for all major investment platforms including Degiro, Trading 212 and more comming up."
+    },
+    "secure": {
+      "title": "Secure & Compliant",
+      "description": "Your data is protected on European servers and used strictly on a need-to-use basis."
+    },
+    "saveTime": {
+      "title": "Save Time",
+      "description": "Automated processing and calculations reduce manual work from hours to minutes."
+    }
+  },
+  "offer": {
+    "title": "What We Offer",
+    "autoProcessing": {
+      "title": "Automated File Processing",
+      "description": "Upload CSV/Excel files from your broker directly and get instant yearly P&L results."
+    },
+    "transactionManagement": {
+      "title": "Transaction Management",
+      "description": "Review in an organized format all your realized gains/losses in one place."
+    },
+    "taxReports": {
+      "title": "Tax Report Generation",
+      "description": "Generate Portuguese IRS tax report (annex J) for international brokers."
+    },
+    "historicalTracking": {
+      "title": "Historical Tracking",
+      "description": "Keep track of all your historical tax calculations overtime."
+    },
+    "supportedPlatforms": "Supported Platforms"
+  },
+  "about": {
+    "title": "About IRSimples",
+    "description": "IRSimples was founded by a team of tax professionals and software engineers who experienced firsthand the complexity of managing investment taxes across multiple platforms. Our mission is to democratize professional-grade tax management tools for individual investors.",
+    "activeUsers": "Active Users",
+    "processedSubmissions": "Processed Submissions",
+    "uptimeGuarantee": "Uptime Guarantee"
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that works best for you",
+    "freeStarter": {
+      "name": "Free Starter",
+      "description": "Perfect for trying out our service",
+      "submissions": "3 submissions included",
+      "price": "Free",
+      "features": [
+        "Multi-platform support",
+        "Automated calculations",
+        "Tax report generation",
+        "Email support"
+      ],
+      "cta": "Get Started Free"
+    },
+    "small": {
+      "name": "Small Pack",
+      "description": "Great value for multiple submissions",
+      "price": "€8",
+      "submissions": "5 submissions",
+      "pricePerSubmission": "€1.60 per submission",
+      "features": [
+        "Everything in Free Starter",
+        "Bulk processing",
+        "Historical data export"
+      ],
+      "cta": "Purchase Pack"
+    },
+    "large": {
+      "name": "Large Pack",
+      "description": "Best value for frequent users",
+      "price": "€16",
+      "submissions": "10 submissions",
+      "pricePerSubmission": "€1.60 per submission",
+      "features": [
+        "Everything in Small Pack",
+        "Priority support",
+        "Extended data retention"
+      ],
+      "cta": "Purchase Pack"
+    },
+    "premium": {
+      "name": "Premium Package",
+      "description": "Professional-grade service with expert support",
+      "price": "€39",
+      "submissions": "10 submissions",
+      "highlight": "Plus Manual Review",
+      "features": [
+        "Everything in Large Pack",
+        "Personalized accountant review",
+        "Direct consultation access",
+        "Custom report formatting"
+      ],
+      "cta": "Go Premium"
+    }
+  },
+  "profile": {
+    "title": "User Profile",
+    "subtitle": "Manage your account and subscription details",
+    "userInfo": {
+      "title": "Account Information",
+      "email": "Email Address",
+      "memberSince": "Member Since",
+      "accountStatus": "Account Status",
+      "verified": "Verified",
+      "unverified": "Unverified"
+    },
+    "paymentSummary": {
+      "title": "Submission Packs",
+      "purchasePack": "Purchase Pack",
+      "availableSubmissions": "Available",
+      "usedSubmissions": "Used",
+      "totalSpent": "Total Spent",
+      "premiumAccess": "Premium",
+      "remaining": "remaining",
+      "noActiveSubscriptions": "You don't have any active submission packs.",
+      "purchaseFirstPack": "Purchase Your First Pack",
+      "errorLoading": "Error loading payment information.",
+      "activeSubscriptions": "Active Subscriptions",
+      "allSubscriptions": "All Subscriptions",
+      "getStartedByPurchasingYourFirstSubmissionPack": "Get started by purchasing your first submission pack",
+      "unknownPack": "Unknown Pack",
+      "used": "used",
+      "noDescriptionAvailable": "No description available",
+      "zero": "0.00"
+    }
+  },
+  "purchase": {
+    "title": "Purchase Submission Pack",
+    "subtitle": "Choose the pack that best fits your needs",
+    "submissions": "submissions",
+    "perSubmission": "per submission",
+    "select": "Select",
+    "selected": "Selected",
+    "orderSummary": "Order Summary",
+    "proceedToPayment": "Proceed to Payment",
+    "selectPackPrompt": "Please select a pack to continue with your purchase.",
+    "packFeatures": {
+      "multiPlatform": "Multi-platform support",
+      "autoCalculations": "Automated calculations",
+      "taxReports": "Tax report generation",
+      "emailSupport": "Email support",
+      "bulkProcessing": "Bulk processing",
+      "prioritySupport": "Priority support",
+      "extendedRetention": "Extended data retention",
+      "manualReview": "Manual accountant review",
+      "consultationAccess": "Direct consultation access",
+      "customReporting": "Custom report formatting"
+    },
+    "noPacksAvailable": "No packs available for purchase at the moment.",
+    "chooseYourPack": "Choose Your Pack"
+  },
+  "checkout": {
+    "title": "Secure Checkout",
+    "subtitle": "Complete your purchase securely",
+    "secureCheckout": "Secure Checkout",
+    "orderSummary": "Order Summary",
+    "total": "Total",
+    "vatIncluded": "VAT included",
+    "paymentDetails": "Payment Details",
+    "testMode": "Test Mode",
+    "testModeDescription": "This is a test environment. Use the test card details or enter any other card to simulate a failed payment.",
+    "fillTestCard": "Fill Test Card Details",
+    "cardNumber": "Card Number",
+    "expiryMonth": "Month",
+    "expiryYear": "Year",
+    "cvv": "CVV",
+    "cardHolderName": "Cardholder Name",
+    "cardHolderNamePlaceholder": "John Doe",
+    "payNow": "Pay Now",
+    "processing": "Processing...",
+    "paymentFailed": "Payment failed. Please check your card details and try again.",
+    "paymentError": "An error occurred while processing your payment. Please try again."
+  },
+  "success": {
+    "title": "Payment Successful!",
+    "subtitle": "Thank you for your purchase. Your submission pack is now active.",
+    "paymentDetails": "Payment Details",
+    "paid": "PAID",
+    "paymentId": "Payment ID",
+    "paymentDate": "Payment Date",
+    "congratulations": "🎉 Congratulations!",
+    "submissionsAdded": "{{count}} submissions have been added to your account.",
+    "premiumActivated": "Premium features activated!",
+    "goToDashboard": "Go to Dashboard",
+    "viewProfile": "View Profile",
+    "autoRedirect": "You will be automatically redirected to the dashboard in {{seconds}} seconds.",
+    "filesUploadedSuccessfully": "Files uploaded successfully",
+    "fileDeletedSuccessfully": "File deleted successfully",
+    "templateDownloaded": "Template downloaded",
+    "templateDownloadDescription": "Use this template to format your manual trades",
+    "registrationSuccessful": "Registration successful!",
+    "checkEmailConfirmation": "Please check your email to confirm your account.",
+    "loginSuccessful": "Login successful!",
+    "welcomeBack": "Welcome back, {{email}}!",
+    "emailVerifiedSuccessfully": "Email verified successfully"
+  },
+  "footer": {
+    "copyright": "2025 IRSimples. All rights reserved."
+  },
+  "nav": {
+    "login": "Login",
+    "register": "Sign Up",
+    "logout": "Logout",
+    "profile": "Profile",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "common": {
+    "loading": "Loading...",
+    "redirecting": "Redirecting...",
+    "retry": "Retry",
+    "back": "Back"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "description": "Enter your credentials to access your account",
+      "welcomeBack": "Welcome back",
+      "subtitle": "Sign in to your IRSimples account",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "signIn": "Sign In"
+    },
+    "register": {
+      "title": "Create Account",
+      "description": "Create a new account to get started",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "signUp": "Sign Up"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Manage your tax submissions and track progress",
+    "newSubmission": "New Submission",
+    "searchPlaceholder": "Search by name or transaction count...",
+    "filterByStatus": "Filter by status",
+    "allStatus": "All Status",
+    "completed": "Completed",
+    "processing": "Processing",
+    "draft": "Draft",
+    "failed": "Failed",
+    "noSubmissions": "No submissions found",
+    "adjustFilter": "Try adjusting your search or filter criteria",
+    "createFirst": "Create your first tax submission to get started",
+    "createFirstSubmission": "Create First Submission",
+    "submissionName": "Submission Name",
+    "transactions": "transactions",
+    "createdOn": "Created on",
+    "previous": "Previous",
+    "next": "Next",
+    "showingResults": "Showing {{start}}-{{end}} of {{total}} submissions",
+    "taxSubmissions": "Tax Submissions",
+    "submissionsFound": "{{count}} submissions found",
+    "pageOfPages": "Page {{current}} of {{total}}",
+    "viewResults": "View Results",
+    "continueEditing": "Continue Editing",
+    "allTiers": "All Tiers"
+  },
+  "submission": {
+    "details": "Submission Details",
+    "calculationCompleted": "Tax calculation completed successfully",
+    "premiumDescription": "This submission includes personalized manual review from certified accountants.",
+    "summary": "Summary",
+    "results": "Results",
+    "taxCalculationResults": "Tax Calculation Results",
+    "summaryOfCalculations": "Summary of your tax calculations",
+    "totalStocksPL": "Total Stocks P&L",
+    "totalDividends": "Total Dividends (Gross)",
+    "dividendTaxes": "Dividend Taxes",
+    "totalAcquisition": "Total Acquisition",
+    "totalRealized": "Total Realized", 
+    "tradeExpenses": "Trade Expenses",
+    "stockSummary": "Stock Summary",
+    "stockOverview": "Overview of stock transactions and P&L",
+    "dividendsByCountry": "Dividends by Country",
+    "totalDividendsByCountry": "Total dividends received by country",
+    "ticker": "Ticker",
+    "trades": "trades",
+    "profit": "Profit",
+    "loss": "Loss",
+    "country": "Country",
+    "amount": "Amount",
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+    "backToDashboard": "Back to Dashboard",
+    "downloadReports": "Download Reports",
+    "generatedReports": "Generated tax reports and documents"
+  },
+  "newSubmission": {
+    "step1": "Step 1: Submission Details",
+    "submissionName": "Submission Name",
+    "submissionNamePlaceholder": "Enter submission name",
+    "taxYear": "Tax Year",
+    "selectTaxYear": "Select tax year",
+    "processing": "Processing...",
+    "nextUploadFiles": "Next: Upload Files",
+    "errorLoading": "Error loading submission",
+    "tryAgain": "Try Again",
+    "fillDetails": "Fill in the details of your submission",
+    "name": "Name",
+    "year": "Year",
+    "type": "Type",
+    "fiscalIdNumber": "Fiscal Identification Number",
+    "referenceYear": "The reference year for the submission",
+    "submissionType": "The type of submission to be processed (Weighted or Detailed)",
+    "fiscalIdOptional": "The fiscal identification number of the submission (optional)",
+    "nameHelper": "This name will help you identify your submission in your dashboard",
+    "submissionSummary": "Submission Summary",
+    "investmentPlatforms": "Investment Platforms",
+    "tradeFiles": "Trade files from your broker platforms",
+    "step2": "Step 2: Upload Files",
+    "uploadBrokerFiles": "Upload broker export files and IRS forms",
+    "brokerFiles": "Broker Files",
+    "irsFiles": "IRS Base File (Optional)",
+    "nextReview": "Next: Review & Calculate",
+    "step2Title": "Step 2: Broker Files & IRS Document",
+    "step2Description": "Upload trade files from your broker platforms and optionally add your base IRS document",
+    "submissionLabel": "Submission:",
+    "taxSubmissions": "Tax Submissions",
+    "investmentPlatformsDescription": "Upload trade files from your investment platforms",
+    "addNewPlatform": "Add New Platform",
+    "brokersAvailable": "brokers available",
+    "baseIrsOptional": "Base IRS file is optional - you can skip this if you don't have one or you do not want to include it",
+    "backSubmissionName": "Back: Submission Name",
+    "nextPreviewSubmit": "Next: Preview & Submit",
+    "step3Title": "Step 3: Review & Submit",
+    "step3Description": "Review your submission details and files before calculating taxes",
+    "summary": "Summary",
+    "fiscalNumber": "Fiscal Number",
+    "investmentPlatformsCount": "Investment Platforms",
+    "tradeFilesDescription": "Trade files from your broker platforms",
+    "beforeSubmitting": "Before submitting:",
+    "ensureFilesComplete": "Ensure all trade files are complete and accurate",
+    "doubleCheckDetails": "Double-check your submission details",
+    "processMayTakeTime": "This process may take a few minutes to complete",
+    "backUploadFiles": "Back: Upload Files",
+    "calculateTaxes": "Calculate Taxes",
+    "files": "files",
+    "step3": "Step 3: Review",
+    "reviewCalculate": "Review and calculate your taxes",
+    "averageWeighted": "Average Weighted",
+    "detailed": "Detailed"
+  },
+  "verification": {
+    "emailVerification": "Email Verification",
+    "verifying": "Verifying your email...",
+    "success": "Email verified successfully!",
+    "error": "Verification failed",
+    "redirecting": "Redirecting to dashboard...",
+    "tokenMissing": "Verification token is missing",
+    "accountVerification": "Account Verification",
+    "checkEmail": "Check your email",
+    "verificationSent": "We've sent a verification link to:",
+    "clickLink": "Click the link in the email to verify your account.",
+    "resendEmail": "Resend verification email",
+    "emailSent": "Verification email sent!",
+    "newEmailSent": "A new verification email has been sent.",
+    "verifyFirst": "Please verify your email address to access your account.",
+    "sendingEmail": "Sending email..."
+  },
+  "components": {
+    "progress": {
+      "submissionName": "Submission Name",
+      "brokerFilesAndIRS": "Broker Files & IRS",
+      "reviewAndSubmit": "Review & Submit"
+    },
+    "warning": {
+      "notesToConsider": "Notes to consider on the report:",
+      "fifoLogic": "P&L calculation is based on a FIFO logic according to the Portuguese Law",
+      "exchangeRates": "Some brokers exports do not share exchange rates nor the final transaction value in the account currency (EUR). In those cases we use the average exchange rate of the transaction day. This may cause minor fluctuation on values compared with the PDF financial reports from each broker at the end of the year",
+      "portugueseDividends": "Reported dividends for tax purposes exclude portuguese dividends, as taxes for these are already fully retained by the broker"
+    },
+    "fileList": {
+      "uploadedFiles": "Uploaded Files"
+    },
+    "brokerPlatforms": {
+      "chooseBroker": "Choose a broker platform...",
+      "addMoreFiles": "Add More Files",
+      "uploadTradeFiles": "Upload Trade Files",
+      "downloadTemplate": "Download Template",
+      "removePlatform": "Remove Platform",
+      "dragDropFiles": "Drag and drop files here or click to browse",
+      "supportedFormats": "Supports CSV and Excel files",
+      "selectFiles": "Select Files"
+    },
+    "irsUpload": {
+      "irsFiles": "IRS Files",
+      "optional": "(Optional)",
+      "dragDropUpload": "Drag and drop your IRS files here or click to upload",
+      "supportedFormats": "Supports CSV, and Excel files (.csv, .xlsx)",
+      "uploadFiles": "Upload Files"
+    },
+    "taxFieldInfo": {
+      "learnMore": "Learn More",
+      "gotIt": "Got it",
+      "learnMoreAbout": "Learn more about",
+      "fields": {
+        "totalStocksPL": {
+          "title": "Total Stocks P&L",
+          "description": "This represents your total profit or loss from stock trading. A positive value means you made a profit, but capital gains taxes must be paid on profitable trades. Losses can be used to offset gains for tax purposes."
+        },
+        "totalDividendsGross": {
+          "title": "Total Dividends (Gross)",
+          "description": "This is the total amount of dividends you received before any taxes were deducted. Dividends are subject to income tax and may also have withholding taxes from foreign countries."
+        },
+        "dividendTaxes": {
+          "title": "Dividend Taxes",
+          "description": "This shows the total amount of taxes withheld from your dividends by foreign countries. These withholding taxes can often be claimed as tax credits to reduce your domestic tax liability."
+        },
+        "totalAcquisition": {
+          "title": "Total Acquisition",
+          "description": "This is the total amount you spent purchasing stocks during the tax year. This includes the purchase price of shares but excludes trading fees and commissions."
+        },
+        "totalRealized": {
+          "title": "Total Realized",
+          "description": "This is the total amount you received from selling stocks during the tax year. This is the gross proceeds from your stock sales before deducting the original purchase price and expenses."
+        },
+        "tradeExpenses": {
+          "title": "Trade Expenses",
+          "description": "These are the fees and commissions you paid for buying and selling stocks. These expenses can be deducted from your capital gains to reduce your taxable amount."
+        }
+      }
+    }
+  },
+  "errors": {
+    "navigationError": "Navigation Error",
+    "authenticationFailed": "Authentication failed. Please try again.",
+    "errorLoadingSubmission": "Error loading submission",
+    "missingSubmissionId": "Missing submission ID",
+    "errorUploadingFiles": "Error uploading broker files",
+    "errorDeletingFile": "Error deleting file",
+    "errorDownloadingTemplate": "Error downloading template",
+    "errorCalculatingTaxes": "Error calculating taxes",
+    "failedToSubmit": "Failed to submit. Please try again.",
+    "errorLoadingSubmissions": "Error loading submissions",
+    "authenticationFailed2": "Authentication failed",
+    "invalidSubmissionId": "Invalid submission ID",
+    "submissionNotFound": "Submission not found",
+    "verificationTokenRequired": "Verification token is required",
+    "failedToVerifyEmail": "Failed to verify email"
+  },
+  "verifyPage": {
+    "verifyingEmail": "Verifying your email...",
+    "pleaseWaitVerifying": "Please wait while we verify your account.",
+    "emailVerifiedSuccessfully": "Email Verified Successfully!",
+    "redirectingToDashboard": "Redirecting you to your dashboard in a few seconds...",
+    "goToDashboard": "Go to Dashboard Now",
+    "verificationFailed": "Verification Failed",
+    "backToHome": "Back to Home",
+    "verificationTokenMissing": "Verification token is missing",
+    "welcomeEmailVerified": "Welcome {{email}}! Your email has been successfully verified.",
+    "verificationFailedNoAuth": "Verification failed - no authentication data received",
+    "errorDuringVerification": "An error occurred during verification"
+  },
+  "manualTransactions": {
+    "downloadCsvTemplate": "Download Excel Template",
+    "getCsvTemplate": "Get the Excel template with the required format",
+    "getCsvTemplateForManual": "Get the Excel template with the required format for manual transactions",
+    "requiredColumns": "Required columns: Transaction Type, Action, ISIN, Ticker, Name, Quantity, Price, Trade Currency, Exchange Rate, Total Fees, Dividend per Share, Dividend Withholding Tax per Share, Dividend Withholding Tax Currency",
+    "template": "Template",
+    "manualTransactionFiles": "Manual Transaction Files",
+    "manualTransactionFilesCount": "Manual Transaction Files ({{count}})",
+    "addMoreManualFiles": "Add More Manual Files",
+    "uploadManualTransactionFiles": "Upload Manual Transaction Files",
+    "csvFilesSupported": "Only Excel files supported - Use the template above for correct format",
+    "optionalStep": "This step is optional. Manual transactions can supplement data from your brokers.",
+    "skipManualTransactions": "Skip manual transactions and proceed to processing",
+    "manualTransactionsOptional": "Manual Transactions (Optional)",
+    "uploadManualTransactionsDescription": "Upload manual transaction files using our template format, or download the template to get started.",
+    "uploadManualTransactionsDescriptionLong": "Upload manual transaction files using our template format, or download the template to get started. This step is optional - you can skip it if you don't have manual transactions to add.",
+    "uploadedAt": "Uploaded {{date}}"
+  },
+  "verifyAccount": {
+    "title": "Verify Your Account",
+    "description": "Please verify your email address before proceeding to your dashboard",
+    "emailSentTo": "We sent a verification email to:",
+    "nextSteps": "Next Steps:",
+    "checkInbox": "Check your email inbox",
+    "clickLink": "Click the verification link",
+    "returnRefresh": "Return here and refresh the page",
+    "emailSentSuccess": "Verification email sent successfully!",
+    "resendEmail": "Resend Verification Email",
+    "sending": "Sending...",
+    "verifiedEmail": "I've Verified My Email",
+    "didntReceive": "Didn't receive the email? Check your spam folder or try resending.",
+    "whyVerification": "Why do we need verification?",
+    "verificationReason": "Email verification helps us ensure the security of your tax data and enables us to send you important updates about your submissions.",
+    "loading": "Loading..."
+  },
+  "modal": {
+    "tierSelection": {
+      "title": "Choose Submission Type",
+      "description": "Select how you want your tax submission to be processed.",
+      "loadingOptions": "Loading options...",
+      "premium": {
+        "title": "Premium Submission",
+        "description": "This submission will include personalized manual review from our certified accountants.",
+        "manualReview": "Personalized manual review from certified accountants",
+        "priorityProcessing": "Priority processing",
+        "expertVerification": "Expert verification"
+      },
+      "standard": {
+        "title": "Standard Submission",
+        "description": "This submission will be processed as standard.",
+        "automatedCalculation": "Automated tax calculation",
+        "fastProcessing": "Fast processing",
+        "reliableResults": "Reliable results"
+      }
+    }
+  }
+}

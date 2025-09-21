@@ -1,27 +1,10 @@
 import { prisma } from './prisma';
 import type { User as PrismaUser } from '../generated/prisma';
+import { User, UserCreateRequest } from '../types/user';
 
-// Define the interface to match what the service expects
-export interface User {
-  id: string;
-  email: string;
-  password?: string;
-  verified: boolean;
-  verificationToken?: string;
-  verificationUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateUserData {
-  email: string;
-  verificationToken: string;
-  verificationUrl: string;
-  password: string;
-}
 
 export interface UserRepository {
-  create(data: CreateUserData): Promise<User>;
+  create(data: UserCreateRequest): Promise<User>;
   getById(id: string): Promise<User | null>;
   getByEmail(email: string): Promise<User | null>;
   getByVerificationToken(token: string): Promise<User | null>;
@@ -40,13 +23,14 @@ function mapPrismaUserToUser(prismaUser: PrismaUser): User {
     verified: prismaUser.verified,
     verificationToken: prismaUser.verificationToken || undefined,
     verificationUrl: prismaUser.verificationUrl || undefined,
-    createdAt: prismaUser.createdAt.toISOString(),
-    updatedAt: prismaUser.updatedAt.toISOString(),
+    createdAt: prismaUser.createdAt,
+    updatedAt: prismaUser.updatedAt,
+    deletedAt: prismaUser.deletedAt || undefined,
   };
 }
 
 class PrismaUserRepository implements UserRepository {
-  async create(data: CreateUserData): Promise<User> {
+  async create(data: UserCreateRequest): Promise<User> {
     const user = await prisma.user.create({
       data: {
         email: data.email,

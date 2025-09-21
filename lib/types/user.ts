@@ -1,3 +1,5 @@
+import { UserPack, Payment } from './payment';
+
 // User model types
 export interface User {
   id: string;
@@ -9,12 +11,15 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
+  packs?: UserPack[];
+  payments?: Payment[];
 }
 
 // Request types
 export interface RegisterUserRequest {
   email: string;
   password: string;
+  locale?: string;
 }
 
 export interface UpdateUserRequest {
@@ -45,6 +50,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
+  locale?: string;
 }
 
 // Client-side user interface (with string dates for localStorage)
@@ -86,7 +92,7 @@ export interface UserUpdate {
 
 export interface UserCreateRequest {
   email: string;
-  password?: string;
+  password: string;
   verificationToken?: string;
   verificationUrl?: string;
 } 

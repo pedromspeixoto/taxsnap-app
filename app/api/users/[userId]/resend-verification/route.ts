@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
       return badRequest('Invalid email format');
     }
 
-    const result = await userService.resendVerification(body.email);
+    // Extract locale from body, default to 'pt' if not provided
+    const locale = body.locale && typeof body.locale === 'string' ? body.locale : 'pt';
+
+    const result = await userService.resendVerification(body.email, locale);
     return ok(result);
   } catch (error) {
     return handleError(error);
