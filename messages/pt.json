@@ -1,9 +1,9 @@
 {
   "hero": {
     "badge": "Gestão Fiscal Profissional",
-    "title": "Simplifique as suas Declarações Fiscais",
+    "title": "Investe em Ações ? Use o IRSimples e Simplifique as suas Declarações Fiscais em Portugal",
     "subtitle": "Exporte as suas transações dos brokers. Declare facilmente os seus impostos com o IRSimples.",
-    "cta": "Comece Gratuitamente"
+    "cta": "Grátis para começar"
   },
   "advantages": {
     "title": "Porquê escolher o IRSimples?",
@@ -238,10 +238,10 @@
       "selectFiles": "Seleccionar Ficheiros"
     },
     "irsUpload": {
-      "irsFiles": "Ficheiros IRS",
+      "irsFiles": "Ficheiro IRS Base",
       "optional": "(Opcional)",
       "dragDropUpload": "Arraste e largue os seus ficheiros IRS aqui ou clique para carregar",
-      "supportedFormats": "Suporta ficheiros CSV e Excel (.csv, .xlsx)",
+      "supportedFormats": "Suporta apenas ficheiros .xml exportados a partir do Portal da Finanças em Portugal",
       "uploadFiles": "Carregar Ficheiros"
     },
     "taxFieldInfo": {
