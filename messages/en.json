@@ -1,7 +1,7 @@
 {
   "hero": {
     "badge": "Professional Tax Management",
-    "title": "Simplify Your Tax Submissions",
+    "title": "Do you invest in stocks ? Use IRSimples and Simplify Your Portuguese Tax Submissions",
     "subtitle": "Snap your trades. File your taxes. IRSimples.",
     "cta": "Get Started for Free"
   },
@@ -399,10 +399,10 @@
       "selectFiles": "Select Files"
     },
     "irsUpload": {
-      "irsFiles": "IRS Files",
+      "irsFiles": "IRS Base File",
       "optional": "(Optional)",
-      "dragDropUpload": "Drag and drop your IRS files here or click to upload",
-      "supportedFormats": "Supports CSV, and Excel files (.csv, .xlsx)",
+      "dragDropUpload": "Drag and drop your IRS base file here or click to upload",
+      "supportedFormats": "Supports only .xml exported from Portal das Finanças in Portugal",
       "uploadFiles": "Upload Files"
     },
     "taxFieldInfo": {
