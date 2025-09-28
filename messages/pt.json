@@ -1,7 +1,8 @@
 {
   "hero": {
     "badge": "Gestão Fiscal Profissional",
-    "title": "Investe em Ações ? Use o IRSimples e Simplifique as suas Declarações Fiscais em Portugal",
+    "titlePart1": "Investe em Ações ? ",
+    "titlePart2": "Use o IRSimples e Simplifique as suas Declarações Fiscais em Portugal",
     "subtitle": "Exporte as suas transações dos brokers. Declare facilmente os seus impostos com o IRSimples.",
     "cta": "Grátis para começar"
   },
@@ -43,7 +44,7 @@
   "about": {
     "title": "Sobre o IRSimples",
     "description": "O IRSimples foi fundado por uma equipa de profissionais fiscais e engenheiros de software que experienciaram em primeira mão a complexidade de gerir impostos de investimento através de múltiplas plataformas. A nossa missão é democratizar ferramentas de gestão fiscal de nível profissional para investidores individuais.",
-    "activeUsers": "Utilizadores Ativos",
+    "accountantsNumber": "Contabilistas especializados",
     "processedSubmissions": "Submissões Processadas",
     "uptimeGuarantee": "Garantia de Disponibilidade"
   },
@@ -332,8 +333,8 @@
     "step2Description": "Carregar ficheiros de negociação das suas plataformas de corretagem e opcionalmente adicionar o seu documento IRS base",
     "submissionLabel": "Submissão:",
     "taxSubmissions": "Submissões Fiscais",
-    "investmentPlatformsDescription": "Carregar ficheiros de negociação das suas plataformas de investimento",
-    "addNewPlatform": "Adicionar Nova Plataforma",
+    "investmentPlatformsDescription": "Carregar ficheiros das suas plataformas de investimento",
+    "addNewPlatform": "Adicionar Nova Corretora",
     "brokersAvailable": "corretoras disponíveis",
     "baseIrsOptional": "O ficheiro IRS base é opcional - pode ignorar se não tiver um",
     "backSubmissionName": "Voltar: Nome da Submissão",
@@ -354,7 +355,8 @@
     "step3": "Passo 3: Rever",
     "reviewCalculate": "Rever e calcular os seus impostos",
     "averageWeighted": "Média Ponderada",
-    "detailed": "Detalhada"
+    "detailed": "Detalhada",
+    "selectBroker": "Selecionar Corretora"
   },
   "verification": {
     "emailVerification": "Verificação de Email",
@@ -403,7 +405,8 @@
       "optional": "(Opcional)",
       "dragDropUpload": "Arraste e largue os seus ficheiros IRS aqui ou clique para carregar",
       "supportedFormats": "Suporta apenas ficheiros .xml exportados a partir do Portal da Finanças em Portugal",
-      "uploadFiles": "Carregar Ficheiros"
+      "uploadFiles": "Carregar Ficheiros",
+      "onlyOneFileAllowed":"(apenas um ficheiro permitido)"
     },
     "taxFieldInfo": {
       "learnMore": "Saber Mais",
