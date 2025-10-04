@@ -97,7 +97,7 @@ export default function LandingPage({ params }: LandingPageProps) {
             {t.t('hero.badge')}
           </Badge>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            {t.t('hero.title').split(' ').slice(0, 2).join(' ')} <span className="text-primary">{t.t('hero.title').split(' ').slice(2).join(' ')}</span>
+            {t.t('hero.titlePart1')} <span className="text-primary">{t.t('hero.titlePart2')}</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             {t.t('hero.subtitle')}
@@ -196,11 +196,11 @@ export default function LandingPage({ params }: LandingPageProps) {
             <div className="bg-muted/50 rounded-lg p-8">
               <h3 className="text-xl font-semibold mb-4">{t.t('offer.supportedPlatforms')}</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-background p-3 rounded text-center">Interactive Brokers</div>
+                <div className="bg-background p-3 rounded text-center">Degiro</div>
                 <div className="bg-background p-3 rounded text-center">Trading 212</div>
-                <div className="bg-background p-3 rounded text-center">Revolut</div>
-                <div className="bg-background p-3 rounded text-center">DEGIRO</div>
-                <div className="bg-background p-3 rounded text-center">TradeRepublic</div>
+                <div className="bg-background p-3 rounded text-center">Manual log of trades</div>
+                <div className="bg-background p-3 rounded text-center">Interactive Brokers (upcomming)</div>
+                <div className="bg-background p-3 rounded text-center">Revolut (upcomming)</div>
                 <div className="bg-background p-3 rounded text-center">And More...</div>
               </div>
             </div>
@@ -333,8 +333,8 @@ export default function LandingPage({ params }: LandingPageProps) {
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
                 <Users className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="font-semibold mb-2">10,000+</h3>
-                <p className="text-muted-foreground">{t.t('about.activeUsers')}</p>
+                <h3 className="font-semibold mb-2">+10</h3>
+                <p className="text-muted-foreground">{t.t('about.accountantsNumber')}</p>
               </div>
               <div className="text-center">
                 <FileText className="w-12 h-12 text-primary mx-auto mb-4" />
