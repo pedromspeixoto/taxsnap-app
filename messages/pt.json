@@ -393,7 +393,7 @@
     "brokerPlatforms": {
       "chooseBroker": "Escolha uma plataforma de corretora...",
       "addMoreFiles": "Adicionar Mais Ficheiros",
-      "uploadTradeFiles": "Carregar Ficheiros de Negociação",
+      "uploadTradeFiles": "Carregar Ficheiros",
       "downloadTemplate": "Descarregar Template",
       "removePlatform": "Remover Plataforma",
       "dragDropFiles": "Arraste e largue ficheiros aqui ou clique para navegar",
