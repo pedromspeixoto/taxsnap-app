@@ -1,7 +1,8 @@
 {
   "hero": {
     "badge": "Professional Tax Management",
-    "title": "Do you invest in stocks ? Use IRSimples and Simplify Your Portuguese Tax Submissions",
+    "titlePart1": "Do you invest in stocks ? ",
+    "titlePart2": "Use IRSimples and Simplify Your Portuguese Tax Submissions",
     "subtitle": "Snap your trades. File your taxes. IRSimples.",
     "cta": "Get Started for Free"
   },
@@ -43,7 +44,7 @@
   "about": {
     "title": "About IRSimples",
     "description": "IRSimples was founded by a team of tax professionals and software engineers who experienced firsthand the complexity of managing investment taxes across multiple platforms. Our mission is to democratize professional-grade tax management tools for individual investors.",
-    "activeUsers": "Active Users",
+    "accountantsNumber": "Specialized Accountants",
     "processedSubmissions": "Processed Submissions",
     "uptimeGuarantee": "Uptime Guarantee"
   },
@@ -321,7 +322,7 @@
     "fiscalIdOptional": "The fiscal identification number of the submission (optional)",
     "nameHelper": "This name will help you identify your submission in your dashboard",
     "submissionSummary": "Submission Summary",
-    "investmentPlatforms": "Investment Platforms",
+    "investmentPlatforms": "Investment Brokers",
     "tradeFiles": "Trade files from your broker platforms",
     "step2": "Step 2: Upload Files",
     "uploadBrokerFiles": "Upload broker export files and IRS forms",
@@ -332,8 +333,8 @@
     "step2Description": "Upload trade files from your broker platforms and optionally add your base IRS document",
     "submissionLabel": "Submission:",
     "taxSubmissions": "Tax Submissions",
-    "investmentPlatformsDescription": "Upload trade files from your investment platforms",
-    "addNewPlatform": "Add New Platform",
+    "investmentPlatformsDescription": "Upload trade files from your investment brokers",
+    "addNewPlatform": "Add New Broker",
     "brokersAvailable": "brokers available",
     "baseIrsOptional": "Base IRS file is optional - you can skip this if you don't have one or you do not want to include it",
     "backSubmissionName": "Back: Submission Name",
@@ -342,11 +343,11 @@
     "step3Description": "Review your submission details and files before calculating taxes",
     "summary": "Summary",
     "fiscalNumber": "Fiscal Number",
-    "investmentPlatformsCount": "Investment Platforms",
+    "investmentPlatformsCount": "Investment Brokers",
     "tradeFilesDescription": "Trade files from your broker platforms",
     "beforeSubmitting": "Before submitting:",
     "ensureFilesComplete": "Ensure all trade files are complete and accurate",
-    "doubleCheckDetails": "Double-check your submission details",
+    "doubleCheckDetails": "It is mandatory to have all trades from all previous years since the creation of your broker account",
     "processMayTakeTime": "This process may take a few minutes to complete",
     "backUploadFiles": "Back: Upload Files",
     "calculateTaxes": "Calculate Taxes",
@@ -354,7 +355,8 @@
     "step3": "Step 3: Review",
     "reviewCalculate": "Review and calculate your taxes",
     "averageWeighted": "Average Weighted",
-    "detailed": "Detailed"
+    "detailed": "Detailed",
+    "selectBroker": "Select Broker"
   },
   "verification": {
     "emailVerification": "Email Verification",
@@ -403,7 +405,8 @@
       "optional": "(Optional)",
       "dragDropUpload": "Drag and drop your IRS base file here or click to upload",
       "supportedFormats": "Supports only .xml exported from Portal das Finanças in Portugal",
-      "uploadFiles": "Upload Files"
+      "uploadFiles": "Upload Files",
+      "onlyOneFileAllowed":"(Only one file allowed)"
     },
     "taxFieldInfo": {
       "learnMore": "Learn More",

@@ -84,8 +84,8 @@ export default function IrsFileUpload({
       <p className={`text-muted-foreground text-center ${
         size === "large" ? "text-sm" : "text-xs"
       }`}>
-        {t?.t('components.irsUpload.supportedFormats') || 'Supports PDF, CSV, and Excel files (.pdf, .csv, .xlsx, .xls)'}{size === "large" && ". These will be validated automatically."}
-        {singleFile && " (Only one file allowed)"}
+        {t?.t('components.irsUpload.supportedFormats') || 'Supports only .xml exported from Portal das Finanças in Portugal'}
+        {singleFile && t?.t('components.irsUpload.onlyOneFileAllowed') || ' (Only one file allowed)'}
       </p>
     </div>
   )
