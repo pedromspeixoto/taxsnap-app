@@ -347,7 +347,7 @@
     "tradeFilesDescription": "Trade files from your broker platforms",
     "beforeSubmitting": "Before submitting:",
     "ensureFilesComplete": "Ensure all trade files are complete and accurate",
-    "doubleCheckDetails": "Double-check your submission details",
+    "doubleCheckDetails": "It is mandatory to have all trades from all previous years since the creation of your broker account",
     "processMayTakeTime": "This process may take a few minutes to complete",
     "backUploadFiles": "Back: Upload Files",
     "calculateTaxes": "Calculate Taxes",
