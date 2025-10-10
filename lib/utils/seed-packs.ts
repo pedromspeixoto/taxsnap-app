@@ -1,4 +1,3 @@
-import prisma from '../repositories/prisma';
 import { DatabasePricingService } from '../config/pricing';
 
 export async function seedPacks() {
