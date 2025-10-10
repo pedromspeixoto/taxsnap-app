@@ -156,7 +156,7 @@ export default function BrokerPlatforms({
         <Card className="p-8">
           <div className="flex items-center justify-center space-x-2">
             <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-muted-foreground">Loading available brokers...</span>
+            <span className="text-muted-foreground">{t?.t('components.brokerPlatforms.loadingBrokers') || "Loading available brokers..."}</span>
           </div>
         </Card>
       </div>

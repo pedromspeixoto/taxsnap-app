@@ -12,8 +12,23 @@ interface Personalization {
     };
 }
 
+interface ContactFormData {
+    userEmail: string;
+    userId: string;
+    subject: string;
+    category: string;
+    message: string;
+    attachments: Array<{
+        filename: string;
+        content: string;
+        contentType: string;
+        size: number;
+    }>;
+}
+
 export interface EmailService {
     sendVerificationEmail(email: string, verificationUrl: string): Promise<void>;
+    sendContactFormEmail(data: ContactFormData): Promise<void>;
 }
 
 export class EmailServiceImpl implements EmailService {
@@ -67,6 +82,53 @@ export class EmailServiceImpl implements EmailService {
         });
 
         await this.sendSingleEmail(email, 'MeuIRS - Email Verification', TEMPLATE_VERIFICATION_ID, personalization, htmlTemplate);
+    }
+
+    async sendContactFormEmail(data: ContactFormData): Promise<void> {
+        const { userEmail, userId, subject, category, message, attachments } = data;
+
+        // Load HTML template from local file
+        const templatePath = join(process.cwd(), 'lib', 'services', 'emails', 'contact-form.html');
+        let htmlTemplate = readFileSync(templatePath, 'utf-8');
+
+        // Build attachment section HTML if there are attachments
+        const attachmentSection = attachments.length > 0 ? `
+        <div class="attachments">
+            <div class="label">Attachments (${attachments.length}):</div>
+            ${attachments.map(att => `
+            <div class="attachment-item">
+                <span>${att.filename}</span>
+                <span>${(att.size / 1024 / 1024).toFixed(2)} MB</span>
+            </div>
+            `).join('')}
+        </div>
+        ` : '';
+
+        // Replace template variables with actual values
+        htmlTemplate = htmlTemplate.replace(/{{ userEmail }}/g, userEmail);
+        htmlTemplate = htmlTemplate.replace(/{{ userId }}/g, userId);
+        htmlTemplate = htmlTemplate.replace(/{{ category }}/g, category.charAt(0).toUpperCase() + category.slice(1));
+        htmlTemplate = htmlTemplate.replace(/{{ subject }}/g, subject);
+        htmlTemplate = htmlTemplate.replace(/{{ message }}/g, message);
+        htmlTemplate = htmlTemplate.replace(/{{ attachmentSection }}/g, attachmentSection);
+
+        // Prepare attachments for nodemailer
+        const emailAttachments = attachments.map(att => ({
+            filename: att.filename,
+            content: att.content,
+            encoding: 'base64' as const,
+            contentType: att.contentType,
+        }));
+
+        // Send email to support
+        await this.transporter.sendMail({
+            from: this.sender,
+            to: "danielbelemduarte@gmail.com", // Send to support email
+            replyTo: userEmail, // Allow easy reply to user
+            subject: `[Contact Form - ${category.toUpperCase()}] ${subject}`,
+            html: htmlTemplate,
+            attachments: emailAttachments,
+        });
     }
 
     private async sendSingleEmail(email: string, subject: string, template: string, personalization: Personalization, htmlContent?: string): Promise<void> {
