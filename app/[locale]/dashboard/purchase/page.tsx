@@ -96,11 +96,11 @@ export default function PurchasePage({ params }: PurchasePageProps) {
       t!.t('purchase.packFeatures.emailSupport')
     ]
 
-    if (pack.price >= 8) {
+    if (pack.price >= 2.99) {
       baseFeatures.push(t!.t('purchase.packFeatures.bulkProcessing'))
     }
 
-    if (pack.price >= 16) {
+    if (pack.price >= 9.99) {
       baseFeatures.push(t!.t('purchase.packFeatures.prioritySupport'))
       baseFeatures.push(t!.t('purchase.packFeatures.extendedRetention'))
     }

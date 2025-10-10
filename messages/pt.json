@@ -64,12 +64,12 @@
       ],
       "cta": "Começar Grátis"
     },
-    "small": {
-      "name": "Pacote Pequeno",
-      "description": "Ótimo valor para múltiplas submissões",
-      "price": "€8",
+    "basic": {
+      "name": "Pacote Básico",
+      "description": "Valor acessível para múltiplas submissões",
+      "price": "€2,99",
       "submissions": "5 submissões",
-      "pricePerSubmission": "€1,60 por submissão",
+      "pricePerSubmission": "€0,60 por submissão",
       "features": [
         "Tudo no plano Gratuito",
         "Processamento em lote",
@@ -77,14 +77,14 @@
       ],
       "cta": "Comprar Pacote"
     },
-    "large": {
-      "name": "Pacote Grande",
-      "description": "Melhor valor para utilizadores frequentes",
-      "price": "€16",
+    "pro": {
+      "name": "Pacote Pro",
+      "description": "Ótimo valor para utilizadores frequentes",
+      "price": "€9,99",
       "submissions": "10 submissões",
-      "pricePerSubmission": "€1,60 por submissão",
+      "pricePerSubmission": "€1,00 por submissão",
       "features": [
-        "Tudo no Pacote Pequeno",
+        "Tudo no Pacote Básico",
         "Suporte prioritário",
         "Retenção de dados estendida"
       ],
@@ -93,11 +93,11 @@
     "premium": {
       "name": "Pacote Premium",
       "description": "Serviço profissional com suporte especializado",
-      "price": "€39",
+      "price": "€49,99",
       "submissions": "10 submissões",
       "highlight": "Mais Revisão Manual",
       "features": [
-        "Tudo no Pacote Grande",
+        "Tudo no Pacote Pro",
         "Revisão personalizada por contabilista",
         "Acesso direto a consultoria",
         "Formatação personalizada de relatórios"

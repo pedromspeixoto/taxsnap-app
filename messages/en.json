@@ -64,12 +64,12 @@
       ],
       "cta": "Get Started Free"
     },
-    "small": {
-      "name": "Small Pack",
-      "description": "Great value for multiple submissions",
-      "price": "€8",
+    "basic": {
+      "name": "Basic Pack",
+      "description": "Affordable value for multiple submissions",
+      "price": "€2.99",
       "submissions": "5 submissions",
-      "pricePerSubmission": "€1.60 per submission",
+      "pricePerSubmission": "€0.60 per submission",
       "features": [
         "Everything in Free Starter",
         "Bulk processing",
@@ -77,14 +77,14 @@
       ],
       "cta": "Purchase Pack"
     },
-    "large": {
-      "name": "Large Pack",
-      "description": "Best value for frequent users",
-      "price": "€16",
+    "pro": {
+      "name": "Pro Pack",
+      "description": "Great value for frequent users",
+      "price": "€9.99",
       "submissions": "10 submissions",
-      "pricePerSubmission": "€1.60 per submission",
+      "pricePerSubmission": "€1.00 per submission",
       "features": [
-        "Everything in Small Pack",
+        "Everything in Basic Pack",
         "Priority support",
         "Extended data retention"
       ],
@@ -93,11 +93,11 @@
     "premium": {
       "name": "Premium Package",
       "description": "Professional-grade service with expert support",
-      "price": "€39",
+      "price": "€49.99",
       "submissions": "10 submissions",
       "highlight": "Plus Manual Review",
       "features": [
-        "Everything in Large Pack",
+        "Everything in Pro Pack",
         "Personalized accountant review",
         "Direct consultation access",
         "Custom report formatting"
