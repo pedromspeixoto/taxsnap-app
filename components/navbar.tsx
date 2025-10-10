@@ -73,18 +73,27 @@ export function Navbar({
               </Button>
             </Link>
           )}
-          {title && (
-            <span className="text-lg font-semibold">{title}</span>
-          )}
+          <span className="text-lg font-semibold">{title}</span>
+          {/* Visual separator */}
+          <div className="h-6 w-px bg-border/60"></div>
+          <div className="flex items-center space-x-2">
+            <Link href={createPath('faq')}>
+              <Button variant="ghost" size="sm">
+                {t?.t('nav.faq') || 'FAQ'}
+              </Button>
+            </Link>
+            {isAuthenticated && (
+              <Link href={createPath('dashboard/contact')}>
+                <Button variant="ghost" size="sm">
+                  {t?.t('nav.contact') || 'Contact Us'}
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Right side */}
         <div className="flex items-center space-x-4">
-          <Link href={createPath('faq')}>
-            <Button variant="ghost" size="sm">
-              {t?.t('nav.faq') || 'FAQ'}
-            </Button>
-          </Link>
           <LanguageSwitcher currentLocale={currentLocale} />
           {isAuthenticated && user ? (
             <>

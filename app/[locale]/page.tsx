@@ -119,7 +119,9 @@ export default function LandingPage({ params }: LandingPageProps) {
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="taxsnap-card-hover">
               <CardHeader>
-                <TrendingUp className="w-10 h-10 text-primary mb-2" />
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <TrendingUp className="w-6 h-6 text-primary" />
+                </div>
                 <CardTitle>{t.t('advantages.multiPlatform.title')}</CardTitle>
               </CardHeader>
               <CardContent>
@@ -130,7 +132,9 @@ export default function LandingPage({ params }: LandingPageProps) {
             </Card>
             <Card className="taxsnap-card-hover">
               <CardHeader>
-                <Shield className="w-10 h-10 text-primary mb-2" />
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-primary" />
+                </div>
                 <CardTitle>{t.t('advantages.secure.title')}</CardTitle>
               </CardHeader>
               <CardContent>
@@ -141,7 +145,9 @@ export default function LandingPage({ params }: LandingPageProps) {
             </Card>
             <Card className="taxsnap-card-hover">
               <CardHeader>
-                <Clock className="w-10 h-10 text-primary mb-2" />
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <Clock className="w-6 h-6 text-primary" />
+                </div>
                 <CardTitle>{t.t('advantages.saveTime.title')}</CardTitle>
               </CardHeader>
               <CardContent>
@@ -162,7 +168,9 @@ export default function LandingPage({ params }: LandingPageProps) {
             <div>
               <ul className="space-y-4">
                 <li className="flex items-start space-x-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{t.t('offer.autoProcessing.title')}</h3>
                     <p className="text-muted-foreground">
@@ -171,21 +179,27 @@ export default function LandingPage({ params }: LandingPageProps) {
                   </div>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{t.t('offer.transactionManagement.title')}</h3>
                     <p className="text-muted-foreground">{t.t('offer.transactionManagement.description')}</p>
                   </div>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{t.t('offer.taxReports.title')}</h3>
                     <p className="text-muted-foreground">{t.t('offer.taxReports.description')}</p>
                   </div>
                 </li>
                 <li className="flex items-start space-x-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5" />
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-primary" />
+                  </div>
                   <div>
                     <h3 className="font-semibold">{t.t('offer.historicalTracking.title')}</h3>
                     <p className="text-muted-foreground">{t.t('offer.historicalTracking.description')}</p>
@@ -229,7 +243,9 @@ export default function LandingPage({ params }: LandingPageProps) {
                 <ul className="space-y-2 mb-6">
                   {(t.t('pricing.freeStarter.features') as unknown as string[]).map((feature: string, index: number) => (
                     <li key={index} className="flex items-center text-sm">
-                      <Check className="w-4 h-4 text-primary mr-2" />
+                      <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
                       {feature}
                     </li>
                   ))}
@@ -240,52 +256,56 @@ export default function LandingPage({ params }: LandingPageProps) {
               </CardContent>
             </Card>
 
-            {/* Small Pack */}
+            {/* Basic Pack */}
             <Card className="taxsnap-card-hover">
               <CardHeader>
-                <CardTitle className="text-lg">{t.t('pricing.small.name')}</CardTitle>
-                <p className="text-muted-foreground text-sm">{t.t('pricing.small.description')}</p>
-                <div className="text-2xl font-bold text-primary">{t.t('pricing.small.price')}</div>
+                <CardTitle className="text-lg">{t.t('pricing.basic.name')}</CardTitle>
+                <p className="text-muted-foreground text-sm">{t.t('pricing.basic.description')}</p>
+                <div className="text-2xl font-bold text-primary">{t.t('pricing.basic.price')}</div>
                 <p className="text-sm text-muted-foreground">
-                  {t.t('pricing.small.submissions')} • {t.t('pricing.small.pricePerSubmission')}
+                  {t.t('pricing.basic.submissions')} • {t.t('pricing.basic.pricePerSubmission')}
                 </p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 mb-6">
-                  {(t.t('pricing.small.features') as unknown as string[]).map((feature: string, index: number) => (
+                  {(t.t('pricing.basic.features') as unknown as string[]).map((feature: string, index: number) => (
                     <li key={index} className="flex items-center text-sm">
-                      <Check className="w-4 h-4 text-primary mr-2" />
+                      <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <AuthDialog mode="register" t={t}>
-                  <Button variant="outline" className="w-full">{t.t('pricing.small.cta')}</Button>
+                  <Button variant="outline" className="w-full">{t.t('pricing.basic.cta')}</Button>
                 </AuthDialog>
               </CardContent>
             </Card>
 
-            {/* Large Pack */}
+            {/* Pro Pack */}
             <Card className="taxsnap-card-hover">
               <CardHeader>
-                <CardTitle className="text-lg">{t.t('pricing.large.name')}</CardTitle>
-                <p className="text-muted-foreground text-sm">{t.t('pricing.large.description')}</p>
-                <div className="text-2xl font-bold text-primary">{t.t('pricing.large.price')}</div>
+                <CardTitle className="text-lg">{t.t('pricing.pro.name')}</CardTitle>
+                <p className="text-muted-foreground text-sm">{t.t('pricing.pro.description')}</p>
+                <div className="text-2xl font-bold text-primary">{t.t('pricing.pro.price')}</div>
                 <p className="text-sm text-muted-foreground">
-                  {t.t('pricing.large.submissions')} • {t.t('pricing.large.pricePerSubmission')}
+                  {t.t('pricing.pro.submissions')} • {t.t('pricing.pro.pricePerSubmission')}
                 </p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 mb-6">
-                  {(t.t('pricing.large.features') as unknown as string[]).map((feature: string, index: number) => (
+                  {(t.t('pricing.pro.features') as unknown as string[]).map((feature: string, index: number) => (
                     <li key={index} className="flex items-center text-sm">
-                      <Check className="w-4 h-4 text-primary mr-2" />
+                      <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <AuthDialog mode="register" t={t}>
-                  <Button variant="outline" className="w-full">{t.t('pricing.large.cta')}</Button>
+                  <Button variant="outline" className="w-full">{t.t('pricing.pro.cta')}</Button>
                 </AuthDialog>
               </CardContent>
             </Card>
@@ -308,7 +328,9 @@ export default function LandingPage({ params }: LandingPageProps) {
                 <ul className="space-y-2 mb-6">
                   {(t.t('pricing.premium.features') as unknown as string[]).map((feature: string, index: number) => (
                     <li key={index} className="flex items-center text-sm">
-                      <Check className="w-4 h-4 text-primary mr-2" />
+                      <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
                       {feature}
                     </li>
                   ))}
@@ -332,17 +354,23 @@ export default function LandingPage({ params }: LandingPageProps) {
             </p>
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <Users className="w-12 h-12 text-primary mx-auto mb-4" />
+                <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-primary" />
+                </div>
                 <h3 className="font-semibold mb-2">+10</h3>
                 <p className="text-muted-foreground">{t.t('about.accountantsNumber')}</p>
               </div>
               <div className="text-center">
-                <FileText className="w-12 h-12 text-primary mx-auto mb-4" />
+                <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-8 h-8 text-primary" />
+                </div>
                 <h3 className="font-semibold mb-2">50,000+</h3>
                 <p className="text-muted-foreground">{t.t('about.processedSubmissions')}</p>
               </div>
               <div className="text-center">
-                <Shield className="w-12 h-12 text-primary mx-auto mb-4" />
+                <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-primary" />
+                </div>
                 <h3 className="font-semibold mb-2">99.9%</h3>
                 <p className="text-muted-foreground">{t.t('about.uptimeGuarantee')}</p>
               </div>

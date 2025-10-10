@@ -64,12 +64,12 @@
       ],
       "cta": "Começar Grátis"
     },
-    "small": {
-      "name": "Pacote Pequeno",
-      "description": "Ótimo valor para múltiplas submissões",
-      "price": "€8",
+    "basic": {
+      "name": "Pacote Básico",
+      "description": "Valor acessível para múltiplas submissões",
+      "price": "€2,99",
       "submissions": "5 submissões",
-      "pricePerSubmission": "€1,60 por submissão",
+      "pricePerSubmission": "€0,60 por submissão",
       "features": [
         "Tudo no plano Gratuito",
         "Processamento em lote",
@@ -77,14 +77,14 @@
       ],
       "cta": "Comprar Pacote"
     },
-    "large": {
-      "name": "Pacote Grande",
-      "description": "Melhor valor para utilizadores frequentes",
-      "price": "€16",
+    "pro": {
+      "name": "Pacote Pro",
+      "description": "Ótimo valor para utilizadores frequentes",
+      "price": "€9,99",
       "submissions": "10 submissões",
-      "pricePerSubmission": "€1,60 por submissão",
+      "pricePerSubmission": "€1,00 por submissão",
       "features": [
-        "Tudo no Pacote Pequeno",
+        "Tudo no Pacote Básico",
         "Suporte prioritário",
         "Retenção de dados estendida"
       ],
@@ -93,11 +93,11 @@
     "premium": {
       "name": "Pacote Premium",
       "description": "Serviço profissional com suporte especializado",
-      "price": "€39",
+      "price": "€49,99",
       "submissions": "10 submissões",
       "highlight": "Mais Revisão Manual",
       "features": [
-        "Tudo no Pacote Grande",
+        "Tudo no Pacote Pro",
         "Revisão personalizada por contabilista",
         "Acesso direto a consultoria",
         "Formatação personalizada de relatórios"
@@ -215,7 +215,8 @@
     "logout": "Sair",
     "profile": "Perfil",
     "backToDashboard": "Voltar ao Painel",
-    "faq": "Questões Frequentes"
+    "faq": "Questões Frequentes",
+    "contact": "Contactos"
   },
   "common": {
     "loading": "A carregar...",
@@ -271,7 +272,10 @@
     "pageOfPages": "Página {{current}} de {{total}}",
     "viewResults": "Ver Resultados",
     "continueEditing": "Continuar Edição",
-    "allTiers": "Todos os Tiers"
+    "allTiers": "Todos os Tiers",
+    "loadingSubmissions": "A carregar submissões...",
+    "errorLoadingSubmissionsTitle": "Erro ao Carregar Submissões",
+    "tryAgain": "Tentar Novamente"
   },
   "submission": {
     "details": "Detalhes da Submissão",
@@ -302,6 +306,15 @@
     "backToDashboard": "Voltar ao Dashboard",
     "downloadReports": "Descarregar Relatórios",
     "generatedReports": "Relatórios fiscais e documentos gerados"
+  },
+  "disclaimer": {
+    "title": "Aviso Legal Importante",
+    "description": "Por favor, leia e reconheça o seguinte antes de prosseguir:",
+    "text1": "As informações, relatórios e cálculos gerados por este website são fornecidos apenas para fins informativos e não constituem aconselhamento financeiro, fiscal ou jurídico. Embora nos esforcemos para garantir a precisão dos resultados, os mesmos podem conter erros ou omissões. Todos os dados gerados devem ser revistos e verificados independentemente pelo utilizador antes da submissão a qualquer autoridade fiscal ou outra entidade.",
+    "text2": "Ao utilizar este website, reconhece e concorda que é totalmente responsável pela precisão, completude e conformidade de qualquer informação submetida e pelas consequências de quaisquer decisões tomadas com base nos resultados fornecidos. Os proprietários e desenvolvedores do website não aceitam qualquer responsabilidade por qualquer perda, dano ou penalidades resultantes da utilização destes relatórios.",
+    "acknowledge": "Compreendo e reconheço o aviso legal",
+    "accept": "Aceitar e Continuar",
+    "cancel": "Cancelar"
   },
   "newSubmission": {
     "step1": "Passo 1: Detalhes da Submissão",
@@ -393,6 +406,7 @@
     },
     "brokerPlatforms": {
       "chooseBroker": "Escolha uma plataforma de corretora...",
+      "loadingBrokers": "A carregar corretoras disponíveis...",
       "addMoreFiles": "Adicionar Mais Ficheiros",
       "uploadTradeFiles": "Carregar Ficheiros",
       "downloadTemplate": "Descarregar Template",
@@ -403,7 +417,7 @@
     },
     "irsUpload": {
       "irsFiles": "Ficheiro IRS Base",
-      "optional": "(Opcional)",
+      "optional": " (Opcional)",
       "dragDropUpload": "Arraste e largue os seus ficheiros IRS aqui ou clique para carregar",
       "supportedFormats": "Suporta apenas ficheiros .xml exportados a partir do Portal da Finanças em Portugal",
       "uploadFiles": "Carregar Ficheiros",
@@ -525,6 +539,38 @@
         "fastProcessing": "Processamento rápido",
         "reliableResults": "Resultados confiáveis"
       }
+    }
+  },
+  "contact": {
+    "title": "Contactos",
+    "subtitle": "Tem alguma questão ou problema? Estamos aqui para ajudar",
+    "form": {
+      "subject": "Assunto",
+      "subjectPlaceholder": "Breve descrição da sua questão",
+      "category": "Categoria",
+      "categoryPlaceholder": "Selecione uma categoria",
+      "message": "Mensagem",
+      "messagePlaceholder": "Por favor, forneça detalhes sobre a sua questão ou problema...",
+      "attachments": "Anexos",
+      "attachmentsHelper": "Pode anexar ficheiros como relatórios ou capturas de ecrã (máx. 10MB por ficheiro)",
+      "submit": "Enviar Mensagem",
+      "submitting": "A enviar...",
+      "categories": {
+        "question": "Questão",
+        "complaint": "Reclamação",
+        "other": "Outro"
+      }
+    },
+    "success": {
+      "title": "Mensagem Enviada com Sucesso!",
+      "description": "Obrigado por nos contactar. Responderemos o mais breve possível."
+    },
+    "errors": {
+      "subjectRequired": "Assunto é obrigatório",
+      "categoryRequired": "Por favor, selecione uma categoria",
+      "messageRequired": "Mensagem é obrigatória",
+      "fileTooLarge": "O tamanho do ficheiro excede o limite de 10MB",
+      "sendFailed": "Falha ao enviar mensagem. Por favor, tente novamente."
     }
   },
   "faq": {

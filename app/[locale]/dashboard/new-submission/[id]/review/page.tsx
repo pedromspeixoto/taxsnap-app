@@ -15,6 +15,7 @@ import { SubmissionResponse } from "@/lib/types/submission"
 import { toast } from "@/lib/hooks/use-toast"
 import { useAuth } from "@/lib/contexts/auth-context"
 import { calculateTaxesAction, getSubmissionAction } from "@/app/actions/submission-actions"
+import { DisclaimerDialog } from "@/components/submissions"
 
 // Types for component state
 interface ComponentState {
@@ -54,6 +55,8 @@ export default function Step3ReviewSubmission() {
   const router = useRouter()
   const { currentLocale, createPath } = useLocalizedNavigation()
   const [t, setT] = useState<TranslationHelper | null>(null)
+  const [showDisclaimer, setShowDisclaimer] = useState(false)
+  const [pendingSubmissionData, setPendingSubmissionData] = useState<FormData | null>(null)
 
   // Load translations
   useEffect(() => {
@@ -62,13 +65,21 @@ export default function Step3ReviewSubmission() {
     })
   }, [currentLocale])
 
-  // Form submission handler
+  // Show disclaimer first, then handle submission
   const handleSubmit = async (formData: FormData) => {
+    setPendingSubmissionData(formData)
+    setShowDisclaimer(true)
+  }
+
+  // Actual submission handler after disclaimer is accepted
+  const handleSubmitAfterDisclaimer = async () => {
+    if (!pendingSubmissionData) return
+    
     try {
       const accessToken = await getValidAccessToken()
-      formData.append('accessToken', accessToken)
+      pendingSubmissionData.append('accessToken', accessToken)
       
-      const result = await calculateTaxesAction({}, formData)
+      const result = await calculateTaxesAction({}, pendingSubmissionData)
       
       if (result.error) {
         toast.error(t?.t('errors.errorCalculatingTaxes') || "Error calculating taxes", result.error)
@@ -92,7 +103,16 @@ export default function Step3ReviewSubmission() {
       
       // For other errors, show a generic error message
       toast.error(t?.t('errors.errorCalculatingTaxes') || "Error", t?.t('errors.failedToSubmit') || "Failed to submit. Please try again.")
+    } finally {
+      setShowDisclaimer(false)
+      setPendingSubmissionData(null)
     }
+  }
+
+  // Handle disclaimer dialog close
+  const handleDisclaimerClose = () => {
+    setShowDisclaimer(false)
+    setPendingSubmissionData(null)
   }
 
   const [state, setState] = useState<ComponentState>({
@@ -384,6 +404,14 @@ export default function Step3ReviewSubmission() {
             </form>
           </div>
         </div>
+
+        {/* Disclaimer Dialog */}
+        <DisclaimerDialog
+          isOpen={showDisclaimer}
+          onClose={handleDisclaimerClose}
+          onAccept={handleSubmitAfterDisclaimer}
+          t={t}
+        />
       </div>
     </div>
   )

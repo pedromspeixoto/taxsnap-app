@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { UserServiceImpl } from '../services/user-service';
 import { AuthServiceImpl } from '../services/auth-service';
 import { SubmissionServiceImpl } from '../services/submission-service';
+import { EmailServiceImpl } from '../services/email-service';
 import {
   ServiceError,
   UserAlreadyExistsError,
@@ -19,6 +20,7 @@ import { NextRequest } from 'next/server';
 export const userService = new UserServiceImpl();
 export const authService = new AuthServiceImpl();
 export const submissionService = new SubmissionServiceImpl();
+export const emailService = new EmailServiceImpl();
 
 // Auth utilities
 export function getAuthenticatedUser(request: NextRequest) {
