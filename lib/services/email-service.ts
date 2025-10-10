@@ -46,10 +46,10 @@ export class EmailServiceImpl implements EmailService {
             },
         });
 
-        this.sender = 'suporte@meuirs.pt';
+        this.sender = process.env.SMTP_USER || 'info@irsimples.pt';
     }
 
-    async sendVerificationEmail(email: string, verificationUrl: string): Promise<void> {
+    async sendVerificationEmail(email: string, verificationUrl: string, locale: string = 'pt'): Promise<void> {
         // Validate the URL before sending
         try {
             new URL(verificationUrl);
@@ -64,9 +64,15 @@ export class EmailServiceImpl implements EmailService {
                 verifyUrl: verificationUrl,
             }
         };
+        
 
         // Load HTML template from local file
-        const templatePath = join(process.cwd(), 'lib', 'services', 'emails', 'email-verification.html');
+        let templatePath = '';
+        if (locale === 'pt') {
+            templatePath = join(process.cwd(), 'lib', 'services', 'emails', 'email-verification-pt.html');
+        } else {
+            templatePath = join(process.cwd(), 'lib', 'services', 'emails', 'email-verification-en.html');
+        }
         let htmlTemplate = readFileSync(templatePath, 'utf-8');
 
         // Replace template variables with actual values
@@ -81,7 +87,11 @@ export class EmailServiceImpl implements EmailService {
             containsPlaceholder: htmlTemplate.includes('{{ verifyUrl }}')
         });
 
-        await this.sendSingleEmail(email, 'MeuIRS - Email Verification', TEMPLATE_VERIFICATION_ID, personalization, htmlTemplate);
+        if (locale === 'pt') {
+            await this.sendSingleEmail(email, 'IRSimples - Verificar o seu email', TEMPLATE_VERIFICATION_ID, personalization, htmlTemplate);
+        } else {
+            await this.sendSingleEmail(email, 'IRSimples - Verify your email', TEMPLATE_VERIFICATION_ID, personalization, htmlTemplate);
+        }
     }
 
     async sendContactFormEmail(data: ContactFormData): Promise<void> {
@@ -123,7 +133,7 @@ export class EmailServiceImpl implements EmailService {
         // Send email to support
         await this.transporter.sendMail({
             from: this.sender,
-            to: "danielbelemduarte@gmail.com", // Send to support email
+            to: this.sender, // Send to support email
             replyTo: userEmail, // Allow easy reply to user
             subject: `[Contact Form - ${category.toUpperCase()}] ${subject}`,
             html: htmlTemplate,

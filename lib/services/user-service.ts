@@ -104,8 +104,13 @@ export class UserServiceImpl implements UserService {
       verificationUrl,
     });
 
+    // If locale is not provided, set it to 'pt'
+    if (!request.locale || typeof request.locale !== 'string') {
+      request.locale = 'pt';
+    }
+
     try {
-      await this.emailService.sendVerificationEmail(user.email, verificationUrl);
+      await this.emailService.sendVerificationEmail(user.email, verificationUrl, request.locale);
     } catch (error) {
       console.error('Error sending verification email', error);
       // Continue with user creation even if email sending fails
@@ -203,7 +208,7 @@ export class UserServiceImpl implements UserService {
 
     // Send verification email
     try {
-      await this.emailService.sendVerificationEmail(user.email, verificationUrl);
+      await this.emailService.sendVerificationEmail(user.email, verificationUrl, locale || 'pt');
     } catch (error) {
       console.error('Error sending verification email', error);
       // Continue anyway - the token has been updated

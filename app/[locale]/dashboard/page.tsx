@@ -271,7 +271,7 @@ function DashboardContent() {
                 <CardTitle>{t?.t('dashboard.taxSubmissions') || 'Tax Submissions'}</CardTitle>
                 <CardDescription>
                   {state.isLoading 
-                    ? "Loading submissions..." 
+                    ? (t?.t('dashboard.loadingSubmissions') || 'Loading submissions...') 
                     : (t?.t('dashboard.submissionsFound')?.replace('{{count}}', String(filteredSubmissions.length)) || `${filteredSubmissions.length} submission${filteredSubmissions.length !== 1 ? 's' : ''} found`)
                   }
                 </CardDescription>
@@ -290,15 +290,15 @@ function DashboardContent() {
             {state.isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading submissions...</p>
+                <p className="text-muted-foreground">{t?.t('dashboard.loadingSubmissions') || 'Loading submissions...'}</p>
               </div>
             ) : state.error ? (
               <div className="text-center py-8">
                 <FileText className="w-12 h-12 text-red-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2 text-red-600">Error Loading Submissions</h3>
+                <h3 className="text-lg font-semibold mb-2 text-red-600">{t?.t('dashboard.errorLoadingSubmissionsTitle') || 'Error Loading Submissions'}</h3>
                 <p className="text-muted-foreground mb-4">{state.error}</p>
                 <Button onClick={fetchSubmissions} variant="outline">
-                  Try Again
+                  {t?.t('dashboard.tryAgain') || 'Try Again'}
                 </Button>
               </div>
             ) : paginatedSubmissions.length === 0 ? (

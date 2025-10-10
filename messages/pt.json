@@ -272,7 +272,10 @@
     "pageOfPages": "Página {{current}} de {{total}}",
     "viewResults": "Ver Resultados",
     "continueEditing": "Continuar Edição",
-    "allTiers": "Todos os Tiers"
+    "allTiers": "Todos os Tiers",
+    "loadingSubmissions": "A carregar submissões...",
+    "errorLoadingSubmissionsTitle": "Erro ao Carregar Submissões",
+    "tryAgain": "Tentar Novamente"
   },
   "submission": {
     "details": "Detalhes da Submissão",
