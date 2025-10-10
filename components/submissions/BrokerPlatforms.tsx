@@ -148,7 +148,7 @@ export default function BrokerPlatforms({
             <div>
               <h2 className="text-2xl font-semibold text-foreground">Investment Platforms</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Upload trade files from your investment platforms
+                {t?.t('newSubmission.investmentPlatformsDescription') || "Upload trade files from your investment brokers"}
               </p>
             </div>
           </div>
@@ -172,7 +172,7 @@ export default function BrokerPlatforms({
             <div>
               <h2 className="text-2xl font-semibold text-foreground">Investment Platforms</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Upload trade files from your investment platforms
+                                {t?.t('newSubmission.investmentPlatformsDescription') || "Upload trade files from your investment brokers"}
               </p>
             </div>
           </div>
@@ -202,9 +202,9 @@ export default function BrokerPlatforms({
       {showTitle && (
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-semibold text-foreground">Investment Platforms</h2>
+            <h2 className="text-2xl font-semibold text-foreground">{t?.t('newSubmission.investmentPlatforms') || "Investment Brokers"}</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Upload trade files from your investment platforms
+              {t?.t('newSubmission.investmentPlatformsDescription') || "Upload trade files from your investment brokers"}
             </p>
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function BrokerPlatforms({
               )}
               
               <p className="text-xs text-muted-foreground text-center">
-                Supports CSV, XLSX, and XLS files
+                {t?.t('components.brokerPlatforms.supportedFormats') || 'Supports CSV and Excel files'}
               </p>
             </CardContent>
           </Card>
@@ -303,7 +303,7 @@ export default function BrokerPlatforms({
                 <Plus className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
               </div>
               <div className="text-center space-y-1">
-                <p className="font-medium text-foreground">Add New Platform</p>
+                <p className="font-medium text-foreground">{t?.t('newSubmission.addNewPlatform') || "Add New Broker"}</p>
                 <p className="text-sm text-muted-foreground">
                   {getAvailableBrokers().length} broker{getAvailableBrokers().length !== 1 ? 's' : ''} available
                 </p>
@@ -318,7 +318,7 @@ export default function BrokerPlatforms({
           <CardHeader className="pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <Plus className="w-5 h-5 text-primary" />
-              Add New Investment Platform
+              {t?.t('newSubmission.addNewPlatform') || "Add New Broker"}
             </CardTitle>
             <CardDescription>
               Choose from {getAvailableBrokers().length} available broker{getAvailableBrokers().length !== 1 ? 's' : ''}
@@ -327,7 +327,7 @@ export default function BrokerPlatforms({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="broker-select" className="text-sm font-medium">
-                Select Broker
+                {t?.t('newSubmission.selectBroker') || "Select Broker"}
               </Label>
               <Select value={selectedBroker} onValueChange={setSelectedBroker}>
                 <SelectTrigger id="broker-select" className="h-12 bg-background">
@@ -353,7 +353,7 @@ export default function BrokerPlatforms({
                 className="flex-1 h-11 font-medium"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Platform
+                {t?.t('newSubmission.addNewPlatform') || "Add New Broker"}
               </Button>
               <Button 
                 type="button"
