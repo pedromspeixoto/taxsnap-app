@@ -62,7 +62,9 @@ export function Navbar({
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Left side */}
         <div className="flex items-center space-x-4">
-          <Logo />
+          <Link href={createPath('')} className="cursor-pointer">
+            <Logo />
+          </Link>
           {showBackButton && (
             <Link href={getBackButtonHref()}>
               <Button variant="ghost" size="sm">
@@ -78,6 +80,11 @@ export function Navbar({
 
         {/* Right side */}
         <div className="flex items-center space-x-4">
+          <Link href={createPath('faq')}>
+            <Button variant="ghost" size="sm">
+              {t?.t('nav.faq') || 'FAQ'}
+            </Button>
+          </Link>
           <LanguageSwitcher currentLocale={currentLocale} />
           {isAuthenticated && user ? (
             <>
