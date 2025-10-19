@@ -1,6 +1,7 @@
 import { SupportedBrokersResponse, UploadBrokerFilesRequest, CalculateTaxesRequest, CalculateTaxesResponse, UploadBrokerFilesResponse } from '../types/broker';
 
 const API_BASE_URL = process.env.PROCESSOR_BASE_URL || 'https://taxsnap-app-661634892388.europe-west1.run.app';
+const PROCESSOR_API_TOKEN = process.env.PROCESSOR_API_TOKEN || '';
 
 export class ProcessorClient {
   private static instance: ProcessorClient;
@@ -17,8 +18,7 @@ export class ProcessorClient {
   // Core request method - pure HTTP client
   private async request<T>(
     endpoint: string, 
-    options: RequestInit = {},
-    accessToken?: string
+    options: RequestInit = {}
   ): Promise<T> {
     const url = `${API_BASE_URL}/${endpoint}`;
     
@@ -31,8 +31,8 @@ export class ProcessorClient {
       headers['Content-Type'] = 'application/json';
     }
 
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
+    if (PROCESSOR_API_TOKEN) {
+      headers.Authorization = `Bearer ${PROCESSOR_API_TOKEN}`;
     }
 
     const config: RequestInit = {

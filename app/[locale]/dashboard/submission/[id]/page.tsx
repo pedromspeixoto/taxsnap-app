@@ -254,7 +254,7 @@ export default function SubmissionDetails() {
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span>Loading submission details...</span>
+              <span>{t?.t('submission.loadingSubmissionDetails') || 'Loading submission details...'}</span>
             </div>
           </div>
         </div>
@@ -273,11 +273,11 @@ export default function SubmissionDetails() {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Error Loading Submission</h2>
+            <h2 className="text-xl font-semibold mb-2">{t?.t('submission.errorLoadingSubmissionTitle') || 'Error Loading Submission'}</h2>
             <p className="text-muted-foreground mb-4">{state.error || (t?.t('errors.submissionNotFound') || "Submission not found")}</p>
             <div className="space-x-2">
               <Button onClick={fetchSubmissionDetails} variant="outline">
-                Try Again
+                {t?.t('dashboard.tryAgain') || 'Try Again'}
               </Button>
             </div>
           </div>
@@ -309,9 +309,9 @@ export default function SubmissionDetails() {
           
           <p className="text-muted-foreground">
             {state.submission.status === SubmissionStatus.COMPLETE && (t?.t('submission.calculationCompleted') || "Tax calculation completed successfully")}
-            {state.submission.status === SubmissionStatus.PROCESSING && "Tax calculation in progress"}
-            {state.submission.status === SubmissionStatus.DRAFT && "Submission in draft mode"}
-            {state.submission.status === SubmissionStatus.FAILED && "Tax calculation failed - under manual review"}
+            {state.submission.status === SubmissionStatus.PROCESSING && (t?.t('submission.calculationInProgress') || "Tax calculation in progress")}
+            {state.submission.status === SubmissionStatus.DRAFT && (t?.t('submission.draftMode') || "Submission in draft mode")}
+            {state.submission.status === SubmissionStatus.FAILED && (t?.t('submission.calculationFailed') || "Tax calculation failed - under manual review")}
             {state.submission.tier === 'PREMIUM' && (
               <span className="block mt-1 text-yellow-600">
                 {t?.t('submission.premiumDescription') || 'This submission includes personalized manual review from certified accountants.'}
@@ -350,18 +350,18 @@ export default function SubmissionDetails() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div className="text-center p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold text-white">{state.submission.submissionType === "pl_average_weighted" && "Average Weighted P&L"}</div>
-                        <p className="text-sm text-muted-foreground">Submission Type</p>
-                      </div>
-                      <div className="text-center p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold text-white">{state.submission.year}</div>
-                        <p className="text-sm text-muted-foreground">Year</p>
-                      </div>
-                      <div className="text-center p-4 bg-muted/50 rounded-lg">
-                        <div className="text-2xl font-bold text-white">{state.submission.fiscalNumber}</div>
-                        <p className="text-sm text-muted-foreground">Fiscal Number</p>
-                      </div>
+                    <div className="text-center p-4 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{state.submission.submissionType === "pl_average_weighted" && "Average Weighted P&L"}</div>
+                      <p className="text-sm text-muted-foreground">{t?.t('submission.submissionType') || 'Submission Type'}</p>
+                    </div>
+                    <div className="text-center p-4 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{state.submission.year}</div>
+                      <p className="text-sm text-muted-foreground">{t?.t('submission.year') || 'Year'}</p>
+                    </div>
+                    <div className="text-center p-4 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold text-white">{state.submission.fiscalNumber}</div>
+                      <p className="text-sm text-muted-foreground">{t?.t('submission.fiscalNumber') || 'Fiscal Number'}</p>
+                    </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -378,12 +378,12 @@ export default function SubmissionDetails() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {!state.submission.platforms || state.submission.platforms.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>No broker files uploaded</p>
-                      </div>
-                    ) : (
+                  {!state.submission.platforms || state.submission.platforms.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>{t?.t('submission.noBrokerFilesUploaded') || 'No broker files uploaded'}</p>
+                    </div>
+                  ) : (
                       <div className="space-y-4">
                         {state.submission.platforms.map((platform: Platform) => (
                           <div key={platform.id} className="border rounded-lg p-4">
@@ -418,10 +418,10 @@ export default function SubmissionDetails() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Upload className="w-5 h-5 text-blue-600" />
-                        Base IRS File
+                        {t?.t('submission.baseIrsFile') || 'Base IRS File'}
                       </CardTitle>
                       <CardDescription>
-                        Optional base IRS tax document
+                        {t?.t('submission.optionalBaseIrsDocument') || 'Optional base IRS tax document'}
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -430,7 +430,7 @@ export default function SubmissionDetails() {
                           <CheckCircle className="w-4 h-4 text-green-600" />
                           <span className="font-medium">{state.submission.baseIrsPath.split('/').pop()}</span>
                         </div>
-                        <span className="text-muted-foreground">Uploaded</span>
+                        <span className="text-muted-foreground">{t?.t('submission.uploaded') || 'Uploaded'}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -577,7 +577,7 @@ export default function SubmissionDetails() {
                                               <div className={`text-lg font-bold ${stockGroup.totalPL >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                                 {formatCurrency(stockGroup.totalPL)}
                                               </div>
-                                              <div className="text-sm text-gray-500">Total P&L</div>
+                                              <div className="text-sm text-gray-500">{t?.t('submission.totalPL') || 'Total P&L'}</div>
                                             </div>
                                           </div>
 
@@ -588,13 +588,13 @@ export default function SubmissionDetails() {
                                                 <table className="w-full">
                                                   <thead className="bg-gray-50 border-t">
                                                     <tr>
-                                                      <th className="text-left p-3 text-sm font-medium text-gray-700">Buy Date</th>
-                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">Buy Amount</th>
-                                                      <th className="text-left p-3 text-sm font-medium text-gray-700">Sell Date</th>
-                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">Sell Amount</th>
-                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">Expenses</th>
+                                                      <th className="text-left p-3 text-sm font-medium text-gray-700">{t?.t('submission.buyDate') || 'Buy Date'}</th>
+                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">{t?.t('submission.buyAmount') || 'Buy Amount'}</th>
+                                                      <th className="text-left p-3 text-sm font-medium text-gray-700">{t?.t('submission.sellDate') || 'Sell Date'}</th>
+                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">{t?.t('submission.sellAmount') || 'Sell Amount'}</th>
+                                                      <th className="text-right p-3 text-sm font-medium text-gray-700">{t?.t('submission.expenses') || 'Expenses'}</th>
                                                       <th className="text-right p-3 text-sm font-medium text-gray-700">P&L</th>
-                                                      <th className="text-center p-3 text-sm font-medium text-gray-700">Country</th>
+                                                      <th className="text-center p-3 text-sm font-medium text-gray-700">{t?.t('submission.country') || 'Country'}</th>
                                                     </tr>
                                                   </thead>
                                                   <tbody>
@@ -657,7 +657,7 @@ export default function SubmissionDetails() {
                               return totalPages > 1 ? (
                                 <div className="flex items-center justify-between">
                                   <div className="text-sm text-gray-700">
-                                    Page {stockSummaryPage} of {totalPages}
+                                    {(t?.t('submission.pageOf') || 'Page {{current}} of {{total}}').replace('{{current}}', String(stockSummaryPage)).replace('{{total}}', String(totalPages))}
                                   </div>
                                   <div className="flex gap-2">
                                     <Button
@@ -666,7 +666,7 @@ export default function SubmissionDetails() {
                                       onClick={() => setStockSummaryPage(prev => Math.max(1, prev - 1))}
                                       disabled={stockSummaryPage === 1}
                                     >
-                                      Previous
+                                      {t?.t('submission.previous') || 'Previous'}
                                     </Button>
                                     <Button
                                       variant="outline"
@@ -674,7 +674,7 @@ export default function SubmissionDetails() {
                                       onClick={() => setStockSummaryPage(prev => Math.min(totalPages, prev + 1))}
                                       disabled={stockSummaryPage === totalPages}
                                     >
-                                      Next
+                                      {t?.t('submission.next') || 'Next'}
                                     </Button>
                                   </div>
                                 </div>
@@ -683,7 +683,7 @@ export default function SubmissionDetails() {
                           </div>
                         ) : (
                           <div className="text-center py-8 text-muted-foreground">
-                            <p>No stock transactions found</p>
+                            <p>{t?.t('submission.noStockTransactions') || 'No stock transactions found'}</p>
                           </div>
                         )}
                       </CardContent>
@@ -755,7 +755,7 @@ export default function SubmissionDetails() {
                                   return (
                                     <div className="flex items-center justify-between">
                                       <div className="text-sm text-gray-700">
-                                        Page {dividendsPage} of {totalPages}
+                                        {(t?.t('submission.pageOf') || 'Page {{current}} of {{total}}').replace('{{current}}', String(dividendsPage)).replace('{{total}}', String(totalPages))}
                                       </div>
                                       <div className="flex gap-2">
                                         <Button
@@ -764,7 +764,7 @@ export default function SubmissionDetails() {
                                           onClick={() => setDividendsPage(prev => Math.max(1, prev - 1))}
                                           disabled={dividendsPage === 1}
                                         >
-                                          Previous
+                                          {t?.t('submission.previous') || 'Previous'}
                                         </Button>
                                         <Button
                                           variant="outline"
@@ -772,7 +772,7 @@ export default function SubmissionDetails() {
                                           onClick={() => setDividendsPage(prev => Math.min(totalPages, prev + 1))}
                                           disabled={dividendsPage === totalPages}
                                         >
-                                          Next
+                                          {t?.t('submission.next') || 'Next'}
                                         </Button>
                                       </div>
                                     </div>
@@ -783,7 +783,7 @@ export default function SubmissionDetails() {
                             </div>
                           ) : (
                             <div className="text-center py-8 text-muted-foreground">
-                              <p>No dividend data found</p>
+                              <p>{t?.t('submission.noDividendData') || 'No dividend data found'}</p>
                             </div>
                           )}
                         </CardContent>
@@ -806,7 +806,7 @@ export default function SubmissionDetails() {
                               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                                 <div className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-blue-600" />
-                                  <span className="font-medium">IRS Tax Report (Annex J)</span>
+                                  <span className="font-medium">{t?.t('submission.irsTaxReportAnnexJ') || 'IRS Tax Report (Annex J)'}</span>
                                 </div>
                                 <a 
                                   href={state.results.irs_tax_report_annex_j_url} 
@@ -815,7 +815,7 @@ export default function SubmissionDetails() {
                                 >
                                   <Button variant="outline" size="sm">
                                     <ExternalLink className="w-4 h-4 mr-2" />
-                                    Download
+                                    {t?.t('common.download') || 'Download'}
                                   </Button>
                                 </a>
                               </div>
@@ -824,25 +824,43 @@ export default function SubmissionDetails() {
                               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                                 <div className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-blue-600" />
-                                  <span className="font-medium">Full Tax Report</span>
+                                  <span className="font-medium">{t?.t('submission.fullTaxReport') || 'Full Tax Report (XML)'}</span>
+                                  {state.submission?.tier === 'STANDARD' && (
+                                    <Badge variant="outline" className="ml-2 bg-amber-50 text-amber-700 border-amber-300">
+                                      <Crown className="w-3 h-3 mr-1" />
+                                      {t?.t('submission.premiumOnly') || 'Premium Only'}
+                                    </Badge>
+                                  )}
                                 </div>
-                                <a 
-                                  href={state.results.irs_tax_report_full_report_url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                >
-                                  <Button variant="outline" size="sm">
-                                    <ExternalLink className="w-4 h-4 mr-2" />
-                                    Download
+                                {state.submission?.tier === 'PREMIUM' ? (
+                                  <a 
+                                    href={state.results.irs_tax_report_full_report_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                  >
+                                    <Button variant="outline" size="sm">
+                                      <ExternalLink className="w-4 h-4 mr-2" />
+                                      {t?.t('common.download') || 'Download'}
+                                    </Button>
+                                  </a>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    disabled
+                                    className="opacity-50 cursor-not-allowed"
+                                  >
+                                    <Crown className="w-4 h-4 mr-2" />
+                                    {t?.t('submission.upgradeToPremium') || 'Upgrade to Premium'}
                                   </Button>
-                                </a>
+                                )}
                               </div>
                             )}
                             {state.results.stocks_pl_file_details_url && (
                               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                                 <div className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-green-600" />
-                                  <span className="font-medium">Stocks P&L Details</span>
+                                  <span className="font-medium">{t?.t('submission.stocksPLDetails') || 'Stocks P&L Details'}</span>
                                 </div>
                                 <a 
                                   href={state.results.stocks_pl_file_details_url} 
@@ -851,7 +869,7 @@ export default function SubmissionDetails() {
                                 >
                                   <Button variant="outline" size="sm">
                                     <ExternalLink className="w-4 h-4 mr-2" />
-                                    Download
+                                    {t?.t('common.download') || 'Download'}
                                   </Button>
                                 </a>
                               </div>
@@ -860,7 +878,7 @@ export default function SubmissionDetails() {
                               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                                 <div className="flex items-center gap-2">
                                   <FileText className="w-4 h-4 text-purple-600" />
-                                  <span className="font-medium">Dividends Details</span>
+                                  <span className="font-medium">{t?.t('submission.dividendsDetails') || 'Dividends Details'}</span>
                                 </div>
                                 <a 
                                   href={state.results.dividends_file_details_url} 
@@ -869,7 +887,7 @@ export default function SubmissionDetails() {
                                 >
                                   <Button variant="outline" size="sm">
                                     <ExternalLink className="w-4 h-4 mr-2" />
-                                    Download
+                                    {t?.t('common.download') || 'Download'}
                                   </Button>
                                 </a>
                               </div>
@@ -887,16 +905,16 @@ export default function SubmissionDetails() {
 
           {/* Processing Status */}
           {state.submission.status === SubmissionStatus.PROCESSING && (
-            <Card className="shadow-sm border-yellow-200 bg-yellow-50/50">
+            <Card className="shadow-sm border-2 border-yellow-400 bg-white">
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600 mx-auto mb-4"></div>
-                  <h3 className="text-lg font-semibold mb-2 text-yellow-700">Processing Your Submission</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-yellow-700">{t?.t('submission.processingTitle') || 'Processing Your Submission'}</h3>
                   <p className="text-muted-foreground mb-4">
-                    Your tax calculation is currently being processed. This may take a few minutes.
+                    {t?.t('submission.processingDescription') || 'Your tax calculation is currently being processed. This may take a few minutes.'}
                   </p>
                   <Button onClick={fetchSubmissionDetails} variant="outline">
-                    Refresh Status
+                    {t?.t('submission.refreshStatus') || 'Refresh Status'}
                   </Button>
                 </div>
               </CardContent>
@@ -909,12 +927,12 @@ export default function SubmissionDetails() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2 text-red-700">Processing Failed</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-red-700">{t?.t('submission.processingFailedTitle') || 'Processing Failed'}</h3>
                   <p className="text-muted-foreground mb-4">
-                    There was an issue processing your submission. Our team has been notified and will review it manually.
+                    {t?.t('submission.processingFailedDescription') || 'There was an issue processing your submission. Our team has been notified and will review it manually.'}
                   </p>
                   <Button onClick={fetchSubmissionDetails} variant="outline">
-                    Check for Updates
+                    {t?.t('submission.checkForUpdates') || 'Check for Updates'}
                   </Button>
                 </div>
               </CardContent>

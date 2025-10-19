@@ -184,6 +184,7 @@
     "paymentError": "An error occurred while processing your payment. Please try again."
   },
   "success": {
+    "general": "Success",
     "title": "Payment Successful!",
     "subtitle": "Thank you for your purchase. Your submission pack is now active.",
     "paymentDetails": "Payment Details",
@@ -222,7 +223,8 @@
     "loading": "Loading...",
     "redirecting": "Redirecting...",
     "retry": "Retry",
-    "back": "Back"
+    "back": "Back",
+    "download": "Download"
   },
   "auth": {
     "login": {
@@ -234,7 +236,8 @@
       "emailPlaceholder": "Enter your email",
       "password": "Password",
       "passwordPlaceholder": "Enter your password",
-      "signIn": "Sign In"
+      "signIn": "Sign In",
+      "forgotPassword": "Forgot password?"
     },
     "register": {
       "title": "Create Account",
@@ -244,6 +247,30 @@
       "password": "Password",
       "passwordPlaceholder": "Enter your password",
       "signUp": "Sign Up"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email address and we'll send you a link to reset your password",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendResetLink": "Send Reset Link",
+      "backToLogin": "Back to Login",
+      "successMessage": "If an account exists with this email, a password reset link will be sent.",
+      "submitting": "Sending..."
+    },
+    "resetPassword": {
+      "title": "Reset Your Password",
+      "description": "Enter your new password below",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "resetPassword": "Reset Password",
+      "successMessage": "Your password has been reset successfully! Redirecting to login...",
+      "errorMessage": "Failed to reset password. The link may have expired.",
+      "passwordsDontMatch": "Passwords don't match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "submitting": "Resetting..."
     }
   },
   "dashboard": {
@@ -280,6 +307,12 @@
   "submission": {
     "details": "Submission Details",
     "calculationCompleted": "Tax calculation completed successfully",
+    "calculationInProgress": "Tax calculation in progress",
+    "draftMode": "Submission in draft mode",
+    "calculationFailed": "Tax calculation failed - under manual review",
+    "processingTitle": "Processing Your Submission",
+    "processingDescription": "Your tax calculation is currently being processed. This may take some time.",
+    "refreshStatus": "Refresh Status",
     "premiumDescription": "This submission includes personalized manual review from certified accountants.",
     "summary": "Summary",
     "results": "Results",
@@ -305,7 +338,36 @@
     "hideDetails": "Hide Details",
     "backToDashboard": "Back to Dashboard",
     "downloadReports": "Download Reports",
-    "generatedReports": "Generated tax reports and documents"
+    "generatedReports": "Generated tax reports and documents",
+    "fullTaxReport": "Full Tax Report (XML)",
+    "premiumOnly": "Premium Only",
+    "upgradeToPremium": "Upgrade to Premium",
+    "loadingSubmissionDetails": "Loading submission details...",
+    "errorLoadingSubmissionTitle": "Error Loading Submission",
+    "noBrokerFilesUploaded": "No broker files uploaded",
+    "baseIrsFile": "Base IRS File",
+    "optionalBaseIrsDocument": "Optional base IRS tax document",
+    "uploaded": "Uploaded",
+    "buyDate": "Buy Date",
+    "buyAmount": "Buy Amount",
+    "sellDate": "Sell Date",
+    "sellAmount": "Sell Amount",
+    "expenses": "Expenses",
+    "totalPL": "Total P&L",
+    "pageOf": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "noStockTransactions": "No stock transactions found",
+    "noDividendData": "No dividend data found",
+    "irsTaxReportAnnexJ": "IRS Tax Report (Annex J)",
+    "stocksPLDetails": "Stocks P&L Details",
+    "dividendsDetails": "Dividends Details",
+    "processingFailedTitle": "Processing Failed",
+    "processingFailedDescription": "There was an issue processing your submission. Our team has been notified and will review it manually.",
+    "checkForUpdates": "Check for Updates",
+    "submissionType": "Submission Type",
+    "year": "Year",
+    "fiscalNumber": "Fiscal Number"
   },
   "disclaimer": {
     "title": "Important Disclaimer",
@@ -314,7 +376,8 @@
     "text2": "By using this website, you acknowledge and agree that you are solely responsible for the accuracy, completeness, and compliance of any information submitted and for the consequences of any decisions made based on the outputs provided. The website owners and developers accept no liability for any loss, damage, or penalties resulting from the use of these reports.",
     "acknowledge": "I understand and acknowledge the disclaimer",
     "accept": "Accept and Continue",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "processing": "Processing..."
   },
   "newSubmission": {
     "step1": "Step 1: Submission Details",
@@ -461,10 +524,13 @@
     "errorLoadingSubmission": "Error loading submission",
     "missingSubmissionId": "Missing submission ID",
     "errorUploadingFiles": "Error uploading broker files",
+    "invalidFileForBroker": "Invalid file for this broker",
+    "fileNotValidOrNoTransactions": "File is not valid for this broker or has no stock and dividend transactions",
     "errorDeletingFile": "Error deleting file",
     "errorDownloadingTemplate": "Error downloading template",
     "errorCalculatingTaxes": "Error calculating taxes",
     "failedToSubmit": "Failed to submit. Please try again.",
+    "submissionProcessing": "Submission is processing, please wait for it to be completed",
     "errorLoadingSubmissions": "Error loading submissions",
     "authenticationFailed2": "Authentication failed",
     "invalidSubmissionId": "Invalid submission ID",
@@ -553,6 +619,7 @@
       "messagePlaceholder": "Please provide details about your question or issue...",
       "attachments": "Attachments",
       "attachmentsHelper": "You can attach files such as reports or screenshots (max 10MB per file)",
+      "chooseFiles": "Choose Files",
       "submit": "Send Message",
       "submitting": "Sending...",
       "categories": {

@@ -335,14 +335,22 @@ export default function Step1SubmissionName() {
               <CardContent>
                 <div className="space-y-2">
                   <Label htmlFor="submissionYear">{t?.t('newSubmission.year') || 'Year'}</Label>
-                  <Input
-                    id="submissionYear"
+                  <Select
                     name="submissionYear"
-                    type="number"
-                    placeholder="e.g., 2024"
                     value={submissionYear.toString()}
-                    onChange={(e) => setSubmissionYear(Number(e.target.value))}
-                  />
+                    onValueChange={(value) => setSubmissionYear(Number(value))}
+                  >
+                    <SelectTrigger id="submissionYear">
+                      <SelectValue placeholder={t?.t('newSubmission.selectTaxYear') || 'Select tax year'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <p className="text-sm text-muted-foreground">
                     {t?.t('newSubmission.referenceYear') || 'The reference year for the submission'}
                   </p>

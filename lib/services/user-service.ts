@@ -8,7 +8,9 @@ import {
   SetPasswordRequest,
   ChangePasswordRequest,
   UpdateUserRequest,
-  AuthResponse 
+  AuthResponse,
+  ForgotPasswordRequest,
+  ResetPasswordRequest 
 } from '../types/user';
 import { jwtService } from '../utils/jwt';
 import {
@@ -31,6 +33,8 @@ export interface UserService {
   // Password management
   setPassword(userId: string, request: SetPasswordRequest): Promise<MessageResponse>;
   changePassword(userId: string, request: ChangePasswordRequest): Promise<MessageResponse>;
+  forgotPassword(request: ForgotPasswordRequest): Promise<MessageResponse>;
+  resetPassword(request: ResetPasswordRequest): Promise<MessageResponse>;
 
   // User management
   getUser(userId: string): Promise<UserResponse>;
@@ -78,6 +82,24 @@ export class UserServiceImpl implements UserService {
     } catch (error) {
       console.error('Invalid verification URL generated:', url, error);
       throw new Error('Failed to generate valid verification URL');
+    }
+  }
+
+  private createPasswordResetUrl(token: string, locale?: string): string {
+    // Use provided locale or default to 'pt' (Portuguese)
+    const userLocale = locale || 'pt';
+    const url = `${this.baseUrl}/${userLocale}/reset-password?token=${token}`;
+    
+    // Log the URL for debugging (remove in production)
+    console.log('Generated password reset URL:', url);
+    
+    // Basic URL validation
+    try {
+      new URL(url);
+      return url;
+    } catch (error) {
+      console.error('Invalid password reset URL generated:', url, error);
+      throw new Error('Failed to generate valid password reset URL');
     }
   }
 
@@ -269,6 +291,67 @@ export class UserServiceImpl implements UserService {
     await userRepository.setPassword(userId, hashedPassword);
 
     return { message: 'Password changed successfully' };
+  }
+
+  async forgotPassword(request: ForgotPasswordRequest): Promise<MessageResponse> {
+    console.log('userService.forgotPassword', { email: request.email });
+
+    // Find user by email - but don't reveal if user exists or not for security
+    const user = await userRepository.getByEmail(request.email);
+    
+    // Always return the same message regardless of whether the user exists
+    // This prevents email enumeration attacks
+    if (!user) {
+      console.log('User not found for password reset request', { email: request.email });
+      return { message: 'If an account exists with this email, a password reset link will be sent.' };
+    }
+
+    // Generate password reset token
+    const resetToken = await generateSecureToken();
+    
+    // Set token expiry to 1 hour from now
+    const tokenExpiry = new Date();
+    tokenExpiry.setHours(tokenExpiry.getHours() + 1);
+
+    // Save reset token to database
+    await userRepository.setResetToken(user.id, resetToken, tokenExpiry);
+
+    // Create password reset URL
+    const resetUrl = this.createPasswordResetUrl(resetToken, request.locale || 'pt');
+
+    // Send password reset email
+    try {
+      await this.emailService.sendPasswordResetEmail(user.email, resetUrl, request.locale || 'pt');
+      console.log('Password reset email sent successfully', { email: user.email });
+    } catch (error) {
+      console.error('Error sending password reset email', error);
+      // Don't throw error - we don't want to reveal if user exists
+    }
+
+    return { message: 'If an account exists with this email, a password reset link will be sent.' };
+  }
+
+  async resetPassword(request: ResetPasswordRequest): Promise<MessageResponse> {
+    console.log('userService.resetPassword', { token: request.token });
+
+    // Find user by reset token (this also checks if token is not expired)
+    const user = await userRepository.getByResetToken(request.token);
+    if (!user) {
+      throw new InvalidVerificationTokenError();
+    }
+
+    // Hash the new password
+    const hashedPassword = await hashPassword(request.newPassword);
+
+    // Update user password
+    await userRepository.setPassword(user.id, hashedPassword);
+
+    // Clear the reset token
+    await userRepository.clearResetToken(user.id);
+
+    console.log('Password reset successfully', { userId: user.id, email: user.email });
+
+    return { message: 'Password reset successfully' };
   }
 
   async getUser(userId: string): Promise<UserResponse> {

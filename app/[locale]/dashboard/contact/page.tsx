@@ -231,16 +231,25 @@ export default function ContactPage({ params }: ContactPageProps) {
                   
                   {/* File Input */}
                   <div className="flex items-center gap-2">
-                    <Input
+                    <input
                       id="files"
                       type="file"
                       multiple
                       onChange={handleFileChange}
                       disabled={isSubmitting}
-                      className="cursor-pointer"
+                      className="hidden"
                       accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.csv"
                     />
-                    <Upload className="w-5 h-5 text-muted-foreground" />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('files')?.click()}
+                      disabled={isSubmitting}
+                      className="w-full"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {t.t('contact.form.chooseFiles')}
+                    </Button>
                   </div>
 
                   {/* File List */}

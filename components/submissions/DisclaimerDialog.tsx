@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
-import { AlertTriangle } from "lucide-react"
+import { AlertTriangle, Loader2 } from "lucide-react"
 import { TranslationHelper } from "@/lib/utils/get-translations"
 
 interface DisclaimerDialogProps {
@@ -16,17 +16,28 @@ interface DisclaimerDialogProps {
 
 export default function DisclaimerDialog({ isOpen, onClose, onAccept, t }: DisclaimerDialogProps) {
   const [acknowledged, setAcknowledged] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleAccept = () => {
-    if (acknowledged) {
-      onAccept()
-      setAcknowledged(false) // Reset for next time
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      setAcknowledged(false)
+      setIsLoading(false)
+    }
+  }, [isOpen])
+
+  const handleAccept = async () => {
+    if (acknowledged && !isLoading) {
+      setIsLoading(true)
+      await onAccept()
+      // Don't reset here - let the parent close the dialog
     }
   }
 
   const handleClose = () => {
-    onClose()
-    setAcknowledged(false) // Reset for next time
+    if (!isLoading) {
+      onClose()
+    }
   }
 
   return (
@@ -65,10 +76,11 @@ export default function DisclaimerDialog({ isOpen, onClose, onAccept, t }: Discl
                 id="disclaimer-acknowledgment"
                 checked={acknowledged}
                 onCheckedChange={(checked) => setAcknowledged(checked === true)}
+                disabled={isLoading}
               />
               <label 
                 htmlFor="disclaimer-acknowledgment" 
-                className="text-sm font-medium cursor-pointer text-white select-none"
+                className={`text-sm font-medium text-white select-none ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
               >
                 {t?.t('disclaimer.acknowledge') || 'I understand and acknowledge the disclaimer'}
               </label>
@@ -77,15 +89,22 @@ export default function DisclaimerDialog({ isOpen, onClose, onAccept, t }: Discl
         </div>
 
         <DialogFooter className="flex gap-2">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
             {t?.t('disclaimer.cancel') || 'Cancel'}
           </Button>
           <Button 
             onClick={handleAccept}
-            disabled={!acknowledged}
+            disabled={!acknowledged || isLoading}
             className="bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
           >
-            {t?.t('disclaimer.accept') || 'Accept and Continue'}
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {t?.t('disclaimer.processing') || 'Processing...'}
+              </>
+            ) : (
+              t?.t('disclaimer.accept') || 'Accept and Continue'
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -220,7 +220,8 @@ export default function Step2PlatformsAndIRS() {
       }
     } catch (error) {
       console.error('Error uploading broker files', error)
-      toast.error(t?.t('errors.errorUploadingFiles') || "Error uploading broker files", t?.t('errors.authenticationFailed') || "Please try again")
+      const errorMessage = error instanceof Error ? error.message : (t?.t('errors.authenticationFailed') || "Please try again")
+      toast.error(t?.t('errors.errorUploadingFiles') || "Error uploading broker files", errorMessage)
     } finally {
       // Clear loading state
       setState(prev => ({
