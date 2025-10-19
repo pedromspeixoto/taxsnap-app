@@ -11,7 +11,7 @@ import { resetPasswordAction } from "@/app/actions/auth-actions"
 import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
 import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
 
-export default function ResetPasswordPage({ params }: { params: { locale: string } }) {
+export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
