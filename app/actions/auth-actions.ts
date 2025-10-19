@@ -1,7 +1,7 @@
 'use server'
 
 import { apiClient } from '@/lib/api/client'
-import { AuthResponse, LoginRequest, RegisterRequest } from '@/lib/types/user'
+import { AuthResponse, LoginRequest, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest } from '@/lib/types/user'
 
 // Action state types
 export interface AuthActionState {
@@ -112,6 +112,54 @@ export async function registerAction(
     console.error('[ACTION] registerAction:', error)
     return { 
       error: error instanceof Error ? error.message : 'Registration failed' // Keep English for server actions 
+    }
+  }
+}
+
+// Forgot password
+export async function forgotPasswordAction(
+  request: ForgotPasswordRequest
+): Promise<AuthActionState> {
+  try {
+    if (!request.email) {
+      return { error: 'Email is required' } // Keep English for server actions
+    }
+
+    await apiClient.forgotPassword(request)
+
+    return { 
+      success: true,
+      message: 'If an account exists with this email, a password reset link will be sent.' // Keep English for server actions
+    }
+
+  } catch (error) {
+    console.error('[ACTION] forgotPasswordAction:', error)
+    return { 
+      error: error instanceof Error ? error.message : 'Failed to process password reset request' // Keep English for server actions 
+    }
+  }
+}
+
+// Reset password
+export async function resetPasswordAction(
+  request: ResetPasswordRequest
+): Promise<AuthActionState> {
+  try {
+    if (!request.token || !request.newPassword) {
+      return { error: 'Token and new password are required' } // Keep English for server actions
+    }
+
+    await apiClient.resetPassword(request)
+
+    return { 
+      success: true,
+      message: 'Password reset successfully' // Keep English for server actions
+    }
+
+  } catch (error) {
+    console.error('[ACTION] resetPasswordAction:', error)
+    return { 
+      error: error instanceof Error ? error.message : 'Failed to reset password' // Keep English for server actions 
     }
   }
 } 

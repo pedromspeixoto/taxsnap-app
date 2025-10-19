@@ -84,6 +84,8 @@ const publicApiRoutes = [
   'GET /api/health',
   'POST /api/auth/login',
   'POST /api/auth/refresh',
+  'POST /api/auth/forgot-password',
+  'POST /api/auth/reset-password',
   'POST /api/users',
   'POST /api/users/verify',
   'GET /api/packs',

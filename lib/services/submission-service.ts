@@ -74,6 +74,7 @@ export class SubmissionServiceImpl implements SubmissionService {
         fileType: string;
         filePath: string;
       }[] = [];
+      const errors: string[] = [];
 
       // Loop response (there might be files that were skipped)
       response.forEach(file => {
@@ -84,13 +85,24 @@ export class SubmissionServiceImpl implements SubmissionService {
             fileType: file.document_type,
             filePath: file.filepath,
           });
+        } else {
+          // Collect error messages from skipped files
+          errors.push(`${file.document_name}: ${file.error_message}`);
         }
       });
 
+      // If there are errors, throw them
+      if (errors.length > 0) {
+        const errorMessage = errors.join('\n');
+        throw new Error(errorMessage);
+      }
+
       // Only if the processor API call succeeds, save file metadata to our database
-      await prisma.submissionFile.createMany({
-        data: fileRecords,
-      });
+      if (fileRecords.length > 0) {
+        await prisma.submissionFile.createMany({
+          data: fileRecords,
+        });
+      }
 
     } catch (error) {
       console.error('[SERVICE] submissionService.uploadBrokerFiles', error);

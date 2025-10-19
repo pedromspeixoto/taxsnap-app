@@ -28,6 +28,7 @@ interface ContactFormData {
 
 export interface EmailService {
     sendVerificationEmail(email: string, verificationUrl: string): Promise<void>;
+    sendPasswordResetEmail(email: string, resetUrl: string, locale?: string): Promise<void>;
     sendContactFormEmail(data: ContactFormData): Promise<void>;
 }
 
@@ -91,6 +92,50 @@ export class EmailServiceImpl implements EmailService {
             await this.sendSingleEmail(email, 'IRSimples - Verificar o seu email', TEMPLATE_VERIFICATION_ID, personalization, htmlTemplate);
         } else {
             await this.sendSingleEmail(email, 'IRSimples - Verify your email', TEMPLATE_VERIFICATION_ID, personalization, htmlTemplate);
+        }
+    }
+
+    async sendPasswordResetEmail(email: string, resetUrl: string, locale: string = 'pt'): Promise<void> {
+        // Validate the URL before sending
+        try {
+            new URL(resetUrl);
+        } catch {
+            console.error('Invalid reset URL provided:', resetUrl);
+            throw new Error('Invalid reset URL');
+        }
+
+        const personalization: Personalization = {
+            email: email,
+            data: {
+                resetUrl: resetUrl,
+            }
+        };
+
+        // Load HTML template from local file
+        let templatePath = '';
+        if (locale === 'pt') {
+            templatePath = join(process.cwd(), 'lib', 'services', 'emails', 'password-reset-pt.html');
+        } else {
+            templatePath = join(process.cwd(), 'lib', 'services', 'emails', 'password-reset-en.html');
+        }
+        let htmlTemplate = readFileSync(templatePath, 'utf-8');
+
+        // Replace template variables with actual values
+        htmlTemplate = htmlTemplate.replace(/{{ email }}/g, email);
+        htmlTemplate = htmlTemplate.replace(/{{ resetUrl }}/g, resetUrl);
+
+        // Log the final HTML for debugging (remove in production)
+        console.log('Password reset email template after replacement:', {
+            email,
+            resetUrl,
+            containsResetUrl: htmlTemplate.includes(resetUrl),
+            containsPlaceholder: htmlTemplate.includes('{{ resetUrl }}')
+        });
+
+        if (locale === 'pt') {
+            await this.sendSingleEmail(email, 'IRSimples - Redefinir a sua palavra-passe', 'password-reset', personalization, htmlTemplate);
+        } else {
+            await this.sendSingleEmail(email, 'IRSimples - Reset your password', 'password-reset', personalization, htmlTemplate);
         }
     }
 

@@ -8,6 +8,8 @@ export interface User {
   verified: boolean;
   verificationToken?: string;
   verificationUrl?: string;
+  resetToken?: string;
+  resetTokenExpiry?: Date;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
@@ -51,6 +53,16 @@ export interface RegisterRequest {
   email: string;
   password: string;
   locale?: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+  locale?: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
 }
 
 // Client-side user interface (with string dates for localStorage)

@@ -82,7 +82,11 @@ export default function Step3ReviewSubmission() {
       const result = await calculateTaxesAction({}, pendingSubmissionData)
       
       if (result.error) {
-        toast.error(t?.t('errors.errorCalculatingTaxes') || "Error calculating taxes", result.error)
+        // Show warning toast instead of error
+        toast.warning(t?.t('errors.submissionProcessing') || "Submission is processing, please wait for it to be completed")
+        // Redirect to dashboard
+        router.push(createPath('dashboard'))
+        return
       }
 
       if (result.submissionId) {
@@ -101,8 +105,9 @@ export default function Step3ReviewSubmission() {
         return
       }
       
-      // For other errors, show a generic error message
-      toast.error(t?.t('errors.errorCalculatingTaxes') || "Error", t?.t('errors.failedToSubmit') || "Failed to submit. Please try again.")
+      // For other errors, show warning and redirect to dashboard
+      toast.warning(t?.t('errors.submissionProcessing') || "Submission is processing, please wait for it to be completed")
+      router.push(createPath('dashboard'))
     } finally {
       setShowDisclaimer(false)
       setPendingSubmissionData(null)

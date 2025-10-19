@@ -8,8 +8,11 @@ export interface UserRepository {
   getById(id: string): Promise<User | null>;
   getByEmail(email: string): Promise<User | null>;
   getByVerificationToken(token: string): Promise<User | null>;
+  getByResetToken(token: string): Promise<User | null>;
   verifyUser(id: string): Promise<void>;
   updateVerificationToken(id: string, token: string, url: string): Promise<void>;
+  setResetToken(id: string, token: string, expiry: Date): Promise<void>;
+  clearResetToken(id: string): Promise<void>;
   setPassword(id: string, hashedPassword: string): Promise<void>;
   delete(id: string): Promise<void>;
 }
@@ -23,6 +26,8 @@ function mapPrismaUserToUser(prismaUser: PrismaUser): User {
     verified: prismaUser.verified,
     verificationToken: prismaUser.verificationToken || undefined,
     verificationUrl: prismaUser.verificationUrl || undefined,
+    resetToken: prismaUser.resetToken || undefined,
+    resetTokenExpiry: prismaUser.resetTokenExpiry || undefined,
     createdAt: prismaUser.createdAt,
     updatedAt: prismaUser.updatedAt,
     deletedAt: prismaUser.deletedAt || undefined,
@@ -85,6 +90,39 @@ class PrismaUserRepository implements UserRepository {
       data: {
         verificationToken: token,
         verificationUrl: url,
+      }
+    });
+  }
+
+  async getByResetToken(token: string): Promise<User | null> {
+    const user = await prisma.user.findFirst({
+      where: { 
+        resetToken: token,
+        resetTokenExpiry: {
+          gte: new Date(), // Token must not be expired
+        }
+      }
+    });
+    
+    return user ? mapPrismaUserToUser(user) : null;
+  }
+
+  async setResetToken(id: string, token: string, expiry: Date): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: {
+        resetToken: token,
+        resetTokenExpiry: expiry,
+      }
+    });
+  }
+
+  async clearResetToken(id: string): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: {
+        resetToken: null,
+        resetTokenExpiry: null,
       }
     });
   }

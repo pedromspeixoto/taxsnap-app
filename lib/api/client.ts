@@ -10,7 +10,9 @@ import {
   AuthResponse,
   LoginRequest,
   RegisterRequest,
-  ClientUser
+  ClientUser,
+  ForgotPasswordRequest,
+  ResetPasswordRequest
 } from '../types/user';
 import type { 
   Pack, 
@@ -151,6 +153,20 @@ export class ApiClient {
       method: 'PUT',
       body: JSON.stringify(data),
     }, accessToken);
+  }
+
+  async forgotPassword(data: ForgotPasswordRequest): Promise<MessageResponse> {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async resetPassword(data: ResetPasswordRequest): Promise<MessageResponse> {
+    return this.request('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   // Broker methods
