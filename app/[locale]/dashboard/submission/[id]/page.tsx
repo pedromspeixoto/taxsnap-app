@@ -351,7 +351,11 @@ export default function SubmissionDetails() {
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="text-center p-4 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold text-white">{state.submission.submissionType === "pl_average_weighted" && "Average Weighted P&L"}</div>
+                      <div className="text-2xl font-bold text-white">
+                        {state.submission.submissionType === "pl_average_weighted" 
+                          ? (t?.t('newSubmission.averageWeighted') || 'Average Weighted')
+                          : (t?.t('newSubmission.detailed') || 'Detailed')}
+                      </div>
                       <p className="text-sm text-muted-foreground">{t?.t('submission.submissionType') || 'Submission Type'}</p>
                     </div>
                     <div className="text-center p-4 bg-muted/50 rounded-lg">
