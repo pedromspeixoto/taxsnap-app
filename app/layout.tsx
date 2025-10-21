@@ -10,8 +10,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "IRSimples - Fotografe as suas transações. Declare os seus impostos.",
-  description: "Fotografe as suas transações. Declare os seus impostos. IRSimples.",
+  title: "IRSimples",
 }
 
 export default function RootLayout({
