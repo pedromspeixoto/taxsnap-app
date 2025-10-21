@@ -11,9 +11,9 @@ export function Logo({
   className 
 }: LogoProps) {
   const sizeMap = {
-    sm: { width: 80, height: 28 },
-    md: { width: 100, height: 32 },
-    lg: { width: 120, height: 38 }
+    sm: { width: 100, height: 32 },
+    md: { width: 120, height: 38 },
+    lg: { width: 140, height: 44 }
   }
 
   const dimensions = sizeMap[size]
@@ -27,20 +27,17 @@ export function Logo({
         height={dimensions.height}
         className="transition-all"
       >
-        {/* Background */}
-        <rect width="100" height="32" rx="6" fill="#22c55e"/>
-        
         {/* "IRSimples" text */}
         <text 
           x="50" 
-          y="23" 
+          y="24" 
           fontFamily="Arial, sans-serif" 
           fontWeight="bold" 
-          fill="#000000" 
+          fill="#22c55e" 
           textAnchor="middle"
         >
-          <tspan fontSize="18">IRS</tspan>
-          <tspan fontSize="14" fontWeight="normal">imples</tspan>
+          <tspan fontSize="24">IRS</tspan>
+          <tspan fontSize="20" fontWeight="normal">imples</tspan>
         </text>
       </svg>
     </div>
