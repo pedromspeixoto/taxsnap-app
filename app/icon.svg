@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#22c55e"/>
+  
+  <!-- "IRSimples" text -->
+  <text x="16" y="20" 
+        font-family="Arial, sans-serif" 
+        font-weight="bold" 
+        fill="#000000" 
+        text-anchor="middle">
+    <tspan font-size="8">IRS</tspan><tspan font-size="5" font-weight="normal">imples</tspan>
+  </text>
+</svg>
+

@@ -8,48 +8,41 @@ interface LogoProps {
 
 export function Logo({ 
   size = "md", 
-  showText = true, 
   className 
 }: LogoProps) {
-  const sizeClasses = {
-    sm: "w-6 h-6",
-    md: "w-8 h-8", 
-    lg: "w-12 h-12"
+  const sizeMap = {
+    sm: { width: 80, height: 28 },
+    md: { width: 100, height: 32 },
+    lg: { width: 120, height: 38 }
   }
 
-  const textSizeClasses = {
-    sm: "text-lg",
-    md: "text-xl",
-    lg: "text-2xl"
-  }
-
-  const iconTextSizeClasses = {
-    sm: "text-xs",
-    md: "text-sm",
-    lg: "text-lg"
-  }
+  const dimensions = sizeMap[size]
 
   return (
-    <div className={cn("flex items-center space-x-2", className)}>
-      <div className={cn(
-        "bg-primary rounded-full flex items-center justify-center",
-        sizeClasses[size]
-      )}>
-        <span className={cn(
-          "text-primary-foreground font-bold",
-          iconTextSizeClasses[size]
-        )}>
-          I
-        </span>
-      </div>
-      {showText && (
-        <span className={cn(
-          "font-bold",
-          textSizeClasses[size]
-        )}>
-          IRSimples
-        </span>
-      )}
+    <div className={cn("flex items-center", className)}>
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        viewBox="0 0 100 32" 
+        width={dimensions.width}
+        height={dimensions.height}
+        className="transition-all"
+      >
+        {/* Background */}
+        <rect width="100" height="32" rx="6" fill="#22c55e"/>
+        
+        {/* "IRSimples" text */}
+        <text 
+          x="50" 
+          y="23" 
+          fontFamily="Arial, sans-serif" 
+          fontWeight="bold" 
+          fill="#000000" 
+          textAnchor="middle"
+        >
+          <tspan fontSize="18">IRS</tspan>
+          <tspan fontSize="14" fontWeight="normal">imples</tspan>
+        </text>
+      </svg>
     </div>
   )
 } 
