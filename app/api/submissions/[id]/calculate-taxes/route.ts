@@ -39,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
 
     notifyProductEvent({
-      event: 'submission_finalized',
+      event: 'Submission Finalized',
       userId: submission.userId,
       metadata: {
         submissionId: submission.id,

@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const authResponse = await userService.verifyUser(body.token);
 
     notifyProductEvent({
-      event: 'user_verified',
+      event: 'User Verified',
       userEmail: authResponse.user.email,
     })
 

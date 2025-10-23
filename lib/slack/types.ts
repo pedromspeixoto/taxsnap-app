@@ -21,14 +21,18 @@ export interface SlackBlock {
     type: string;
     text: string;
   }>;
-  accessory?: any;
+  elements?: Array<{
+    type: string;
+    text: string;
+  }>;
+  accessory?: unknown;
 }
 
 export interface ErrorNotification {
   error: Error | string;
   context?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProductNotification {
@@ -36,7 +40,7 @@ export interface ProductNotification {
   userId?: string;
   userEmail?: string;
   userName?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SubmissionNotification {
@@ -44,7 +48,7 @@ export interface SubmissionNotification {
   userId: string;
   userEmail?: string;
   status: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaymentNotification {
@@ -54,6 +58,6 @@ export interface PaymentNotification {
   amount: number;
   currency: string;
   status: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 

@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     await paymentService.consumeSubmissionFromSubscription(user.userId, targetSubscription.id);
 
     notifyProductEvent({
-      event: 'submission_created',
+      event: 'Submission Created',
       userId: user.userId,
       metadata: {
         submissionId: submission.id,

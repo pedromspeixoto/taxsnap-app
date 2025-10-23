@@ -94,7 +94,7 @@ export function formatErrorNotification(
   // Add timestamp
   blocks.push({
     type: 'context',
-    fields: [
+    elements: [
       {
         type: 'mrkdwn',
         text: `<!date^${Math.floor(Date.now() / 1000)}^{date_num} {time_secs}|${new Date().toISOString()}>`,
@@ -178,7 +178,7 @@ export function formatProductNotification(
   // Add timestamp
   blocks.push({
     type: 'context',
-    fields: [
+    elements: [
       {
         type: 'mrkdwn',
         text: `<!date^${Math.floor(Date.now() / 1000)}^{date_num} {time_secs}|${new Date().toISOString()}>`,
@@ -256,7 +256,7 @@ export function formatSubmissionNotification(
   // Add timestamp
   blocks.push({
     type: 'context',
-    fields: [
+    elements: [
       {
         type: 'mrkdwn',
         text: `<!date^${Math.floor(Date.now() / 1000)}^{date_num} {time_secs}|${new Date().toISOString()}>`,
@@ -338,7 +338,7 @@ export function formatPaymentNotification(
   // Add timestamp
   blocks.push({
     type: 'context',
-    fields: [
+    elements: [
       {
         type: 'mrkdwn',
         text: `<!date^${Math.floor(Date.now() / 1000)}^{date_num} {time_secs}|${new Date().toISOString()}>`,
@@ -402,7 +402,7 @@ function getPaymentStatusEmoji(status: string): string {
 /**
  * Helper: Format a value for display
  */
-function formatValue(value: any): string {
+function formatValue(value: unknown): string {
   if (value === null || value === undefined) {
     return 'N/A';
   }

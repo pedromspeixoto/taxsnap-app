@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const user = await userService.registerUser(body);
 
     notifyProductEvent({
-      event: 'user_registered',
+      event: 'User Registered',
       userEmail: user.email,
     })
 
