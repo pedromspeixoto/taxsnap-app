@@ -1,8 +1,9 @@
+import { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { UserServiceImpl } from '../services/user-service';
-import { AuthServiceImpl } from '../services/auth-service';
-import { SubmissionServiceImpl } from '../services/submission-service';
-import { EmailServiceImpl } from '../services/email-service';
+import { UserServiceImpl } from '@/lib/services/user-service';
+import { AuthServiceImpl } from '@/lib/services/auth-service';
+import { SubmissionServiceImpl } from '@/lib/services/submission-service';
+import { EmailServiceImpl } from '@/lib/services/email-service';
 import {
   ServiceError,
   UserAlreadyExistsError,
@@ -13,8 +14,8 @@ import {
   InvalidCredentialsError,
   InvalidPasswordError,
   PasswordNotSetError
-} from './errors';
-import { NextRequest } from 'next/server';
+} from '@/lib/api/errors';
+import { notifyError } from '@/lib/slack';
 
 // Services initialization
 export const userService = new UserServiceImpl();
@@ -117,5 +118,9 @@ export function handleError(error: unknown) {
 
   // Handle unknown errors
   const message = error instanceof Error ? error.message : 'Internal server error';
+  notifyError({
+    error: error instanceof Error ? error : new Error(String(error)),
+    context: 'API Error',
+  })
   return NextResponse.json({ message }, { status: 500 });
 } 

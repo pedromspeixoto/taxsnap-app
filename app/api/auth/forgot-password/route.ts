@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserServiceImpl } from '@/lib/services/user-service';
 import { ForgotPasswordRequest } from '@/lib/types/user';
+import { notifyProductEvent } from '@/lib/slack';
 
 const userService = new UserServiceImpl();
 
@@ -16,6 +17,11 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await userService.forgotPassword(body);
+
+    notifyProductEvent({
+      event: 'Password Reset Requested',
+      userEmail: body.email,
+    })
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {

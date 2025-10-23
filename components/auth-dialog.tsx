@@ -10,8 +10,10 @@ import { toast } from "@/lib/hooks/use-toast"
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { VisuallyHidden } from "@/components/ui/visually-hidden"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -120,6 +122,16 @@ export function AuthDialog({ mode, children, t }: AuthDialogProps) {
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg pt-12">
+        <VisuallyHidden>
+          <DialogTitle>
+            {showForgotPassword
+              ? (t?.t('auth.forgotPassword.title') || "Forgot Password")
+              : mode === "login" 
+                ? (t?.t('auth.login.welcomeBack') || "Welcome back") 
+                : (t?.t('auth.register.title') || "Get started")
+            }
+          </DialogTitle>
+        </VisuallyHidden>
         <Card>
           <CardHeader>
             <CardTitle className="text-xl">

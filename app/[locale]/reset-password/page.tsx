@@ -10,6 +10,7 @@ import { toast } from "@/lib/hooks/use-toast"
 import { resetPasswordAction } from "@/app/actions/auth-actions"
 import { useLocalizedNavigation } from "@/lib/utils/locale-navigation"
 import { getTranslations, TranslationHelper } from "@/lib/utils/get-translations"
+import { Logo } from "@/components/ui/logo"
 
 export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState("")
@@ -108,11 +109,8 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-foreground">IRSimples</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t?.t('auth.resetPassword.title') || "Reset Your Password"}
-          </p>
+        <div className="mb-8 text-center flex flex-col items-center">
+          <Logo size="lg" />
         </div>
 
         <Card>

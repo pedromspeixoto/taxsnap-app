@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { submissionService, handleError, ok, requireAuth, badRequest, forbidden, conflict } from '@/lib/api/utils';
 import { SubmissionStatus } from '@/lib/types/submission';
+import { notifyProductEvent } from '@/lib/slack';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -36,6 +37,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       p_l_analysis_year: submission.year,
       p_l_calculation_type: submission.submissionType as "pl_average_weighted" | "pl_detailed",
     });
+
+    notifyProductEvent({
+      event: 'Submission Finalized',
+      userId: submission.userId,
+      metadata: {
+        submissionId: submission.id,
+        status: submission.status,
+      },
+    })
 
     return ok(result);
   } catch (error) {
