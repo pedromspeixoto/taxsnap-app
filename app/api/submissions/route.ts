@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { submissionService, handleError, ok, requireAuth, badRequest, forbidden } from '@/lib/api/utils';
 import { paymentService } from '@/lib/services/payment-service';
 import { SubmissionTier } from '@/lib/types/submission';
+import { notifyProductEvent } from '@/lib/slack';
 
 export async function GET(request: NextRequest) {
   try {
@@ -82,6 +83,15 @@ export async function POST(request: NextRequest) {
 
     // Consume a submission from the appropriate subscription
     await paymentService.consumeSubmissionFromSubscription(user.userId, targetSubscription.id);
+
+    notifyProductEvent({
+      event: 'submission_created',
+      userId: user.userId,
+      metadata: {
+        submissionId: submission.id,
+        status: submission.status,
+      },
+    })
 
     return ok(submission);
   } catch (error) {

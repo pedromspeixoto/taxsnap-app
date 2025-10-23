@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { userService, validateEmail, badRequest, created, handleError } from '@/lib/api/utils';
+import { notifyProductEvent } from '@/lib/slack';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +20,12 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await userService.registerUser(body);
+
+    notifyProductEvent({
+      event: 'user_registered',
+      userEmail: user.email,
+    })
+
     return created(user);
   } catch (error) {
     return handleError(error);

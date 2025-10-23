@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { userService, badRequest, handleError, ok } from '@/lib/api/utils';
+import { notifyProductEvent } from '@/lib/slack';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,12 @@ export async function POST(request: NextRequest) {
     }
 
     const authResponse = await userService.verifyUser(body.token);
+
+    notifyProductEvent({
+      event: 'user_verified',
+      userEmail: authResponse.user.email,
+    })
+
     return ok(authResponse);
   } catch (error) {
     return handleError(error);

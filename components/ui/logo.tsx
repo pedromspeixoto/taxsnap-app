@@ -42,4 +42,4 @@ export function Logo({
       </svg>
     </div>
   )
-} 
+}
