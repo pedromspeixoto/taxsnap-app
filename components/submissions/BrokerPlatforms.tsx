@@ -108,18 +108,11 @@ export default function BrokerPlatforms({
 
   const addPlatform = () => {
     if (selectedBroker) {
-      const brokerInfo = availableBrokers.find((b) => b.name === selectedBroker)
-      if (brokerInfo && !platforms.find((p) => p.name === selectedBroker)) {
-        // Map broker name to code for use as ID
-        const brokerNameToCode: Record<string, string> = {
-          'DEGIRO': 'degiro',
-          'Trading 212': 't212',
-          'Manual Log': 'manual_log'
-        }
-        
+      const brokerInfo = availableBrokers.find((b) => b.label === selectedBroker)
+      if (brokerInfo && !platforms.find((p) => p.id === brokerInfo.id)) {     
         const newPlatform: Platform = {
-          id: brokerNameToCode[selectedBroker] || selectedBroker.toLowerCase().replace(' ', '_'),
-          name: selectedBroker,
+          id: brokerInfo.id,
+          name: brokerInfo.label,
           color: brokerInfo.color,
           files: [],
         }
@@ -136,7 +129,7 @@ export default function BrokerPlatforms({
 
   const getAvailableBrokers = () => {
     const usedBrokers = platforms.map((p) => p.name)
-    return availableBrokers.filter((broker) => !usedBrokers.includes(broker.name))
+    return availableBrokers.filter((broker) => !usedBrokers.includes(broker.label))
   }
 
   // Loading state
@@ -335,10 +328,10 @@ export default function BrokerPlatforms({
                 </SelectTrigger>
                 <SelectContent>
                   {getAvailableBrokers().map((broker) => (
-                    <SelectItem key={broker.id} value={broker.name} className="py-3">
+                    <SelectItem key={broker.id} value={broker.label} className="py-3">
                       <div className="flex items-center gap-3">
                         <div className={`w-4 h-4 rounded-full ${broker.color}`}></div>
-                        {broker.name}
+                        {broker.label}
                       </div>
                     </SelectItem>
                   ))}

@@ -65,7 +65,6 @@ export class EmailServiceImpl implements EmailService {
                 verifyUrl: verificationUrl,
             }
         };
-        
 
         // Load HTML template from local file
         let templatePath = '';

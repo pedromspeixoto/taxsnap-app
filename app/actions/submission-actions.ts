@@ -418,7 +418,7 @@ export async function getBrokersAction(
 
     return { 
       success: true, 
-      brokers: response.brokers
+      brokers: response.supported_brokers
     }
 
   } catch (error) {

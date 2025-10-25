@@ -212,9 +212,9 @@ export default function LandingPage({ params }: LandingPageProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-background p-3 rounded text-center">Degiro</div>
                 <div className="bg-background p-3 rounded text-center">Trading 212</div>
+                <div className="bg-background p-3 rounded text-center">Interactive Brokers</div>
                 <div className="bg-background p-3 rounded text-center">Manual log of trades</div>
-                <div className="bg-background p-3 rounded text-center">Interactive Brokers (upcomming)</div>
-                <div className="bg-background p-3 rounded text-center">Revolut (upcomming)</div>
+                <div className="bg-background p-3 rounded text-center">Revolut (soon)</div>
                 <div className="bg-background p-3 rounded text-center">And More...</div>
               </div>
             </div>

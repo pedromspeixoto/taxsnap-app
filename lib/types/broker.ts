@@ -1,14 +1,10 @@
 export interface Broker {
   id: string;
-  name: string;
+  label: string;
 }
 
 export interface BrokerResponse {
-  brokers: Broker[];
-}
-
-export interface SupportedBrokersResponse {
-  supported_brokers: string[];
+  supported_brokers: Broker[];
 }
 
 export interface UploadBrokerFilesRequest {
