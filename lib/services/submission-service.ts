@@ -1,5 +1,5 @@
 import { processorClient } from '../processor/client';
-import { BrokerResponse, Broker, CalculateTaxesRequest, CalculateTaxesResponse } from '../types/broker';
+import { BrokerResponse, CalculateTaxesRequest, CalculateTaxesResponse } from '../types/broker';
 import { submissionRepository } from '../repositories/submission-repository';
 import { CreateSubmissionRequest, Submission, SubmissionResponse, Platform, UploadedFile, SubmissionStatus } from '../types/submission';
 import { prisma } from '../repositories/prisma';
@@ -33,15 +33,11 @@ export class SubmissionServiceImpl implements SubmissionService {
     try {
       const response = await this.client.getBrokers();
 
-      // Filter out 'not_applicable' and transform the supported_brokers array to Broker objects
-      const brokers: Broker[] = response.supported_brokers
-        .filter((brokerCode: string) => brokerCode !== 'not_applicable')
-        .map((brokerCode: string) => ({
-          id: brokerCode,
-          name: this.formatBrokerName(brokerCode)
-        }));
+      if (!response.supported_brokers || response.supported_brokers.length === 0) {
+        throw new Error('No brokers found');
+      }
 
-      return { brokers };
+      return response;
     } catch (error) {
       console.error('[SERVICE] submissionService.getBrokers', error);
       throw error;

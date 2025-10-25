@@ -1,4 +1,4 @@
-import { SupportedBrokersResponse, UploadBrokerFilesRequest, CalculateTaxesRequest, CalculateTaxesResponse, UploadBrokerFilesResponse } from '../types/broker';
+import { UploadBrokerFilesRequest, CalculateTaxesRequest, CalculateTaxesResponse, UploadBrokerFilesResponse, BrokerResponse } from '../types/broker';
 
 const API_BASE_URL = process.env.PROCESSOR_BASE_URL || 'https://taxsnap-app-661634892388.europe-west1.run.app';
 const PROCESSOR_API_TOKEN = process.env.PROCESSOR_API_TOKEN || '';
@@ -51,7 +51,7 @@ export class ProcessorClient {
     return response.json();
   }
 
-  async getBrokers(): Promise<SupportedBrokersResponse> {
+  async getBrokers(): Promise<BrokerResponse> {
     return this.request(`/supported_brokers`, {
       method: 'GET',
     });
